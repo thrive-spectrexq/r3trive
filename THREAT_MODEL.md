@@ -78,11 +78,11 @@ Threat modeling follows STRIDE (Spoofing, Tampering, Repudiation, Information Di
 ┌─────────────────────────────────────────────────────────────────┐
 │  UNTRUSTED ZONE                                                 │
 │  ┌──────────────────────┐   ┌─────────────────────────────┐     │
-│  │  Internet / External  │   │  Monitored Host (untrusted) │    │
-│  │  - AI API endpoints   │   │  - Running processes        │    │
-│  │  - Threat feed URLs   │   │  - File system              │    │
-│  │  - TAXII servers      │   │  - Network traffic          │    │
-│  └──────────────────────┘   └─────────────────────────────┘    │
+│  │  Internet / External │   │  Monitored Host (untrusted) │     │
+│  │  - AI API endpoints  │   │  - Running processes        │     │
+│  │  - Threat feed URLs  │   │  - File system              │     │
+│  │  - TAXII servers     │   │  - Network traffic          │     │
+│  └──────────────────────┘   └─────────────────────────────┘     │
 └───────────────────────────────────────────────────────────────T1┘
                                T1 = Trust Boundary 1
 ┌─────────────────────────────────────────────────────────────────┐
