@@ -1,6 +1,6 @@
 # R3TRIVE
 
-> **Enterprise-grade endpoint detection, threat hunting, and automated defense — from a single portable binary.**
+> **Endpoint detection, threat hunting, and automated defense — from a single portable binary.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
@@ -189,7 +189,7 @@ r3trive hunt
                           ▼                      │
 ┌─────────────────────────────────────────────────────────────┐
 │                    Correlation Engine                       │
-│         (event stream → incident → ATT&CK mapping)         │
+│         (event stream → incident → ATT&CK mapping)          │
 └─────────────────────────────┬───────────────────────────────┘
                               │
                               ▼
