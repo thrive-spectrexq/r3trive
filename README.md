@@ -1,6 +1,6 @@
 # R3TRIVE
 
-> **Endpoint detection, threat hunting, and automated defense — from a single portable binary.**
+> **Enterprise-grade endpoint detection, threat hunting, and automated defense — from a single portable binary.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
@@ -134,7 +134,7 @@ curl -sSL https://get.r3trive.io/install.sh | bash
 
 **From source:**
 ```bash
-git clone https://github.com/thrive-spectrexq/r3trive
+git clone https://github.com/r3trive/r3trive
 cd r3trive
 make build
 sudo make install
@@ -142,7 +142,7 @@ sudo make install
 
 **Docker:**
 ```bash
-docker run --privileged -v /:/host:ro thrive-spectrexq/r3trive monitor
+docker run --privileged -v /:/host:ro r3trive/r3trive monitor
 ```
 
 ### First Run
@@ -189,7 +189,7 @@ r3trive hunt
                           ▼                      │
 ┌─────────────────────────────────────────────────────────────┐
 │                    Correlation Engine                       │
-│         (event stream → incident → ATT&CK mapping)          │
+│         (event stream → incident → ATT&CK mapping)         │
 └─────────────────────────────┬───────────────────────────────┘
                               │
                               ▼
@@ -215,7 +215,7 @@ Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
 |---|---|
 | Primary language | Go 1.22+ |
 | Performance-critical modules | Rust |
-| Scripting / AI tooling | Python 3.13+ |
+| Scripting / AI tooling | Python 3.11+ |
 | Local storage | SQLite |
 | Fleet/cluster storage | PostgreSQL |
 | Telemetry | OpenTelemetry |
@@ -298,6 +298,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
 
 ## Community
 
-- **GitHub Discussions**: [github.com/r3trive/r3trive/discussions](https://github.com/thrive-spectrexq/r3trive/discussions)
+- **GitHub Discussions**: [github.com/r3trive/r3trive/discussions](https://github.com/r3trive/r3trive/discussions)
 - **Security Issues**: security@r3trive.io (PGP key in SECURITY.md)
 - **Documentation**: [docs.r3trive.io](https://docs.r3trive.io)
