@@ -26,7 +26,6 @@ Where traditional security products rely on fragile signature databases and dema
 | Alert fatigue from signature noise | Behavioral correlation reduces false positives |
 | Fragmented tooling (EDR + SIEM + SOAR) | Unified detection, investigation, and response |
 | Complex deployment | Single portable binary, zero dependencies |
-| Expensive licensing | Apache 2.0 open core |
 | Analyst skill gap | AI Analyst Layer provides guided investigation |
 | Slow manual response | Automated containment in seconds |
 
