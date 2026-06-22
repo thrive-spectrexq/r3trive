@@ -258,10 +258,10 @@ Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
 
 | Phase | Status | Description |
 |---|---|---|
-| Phase 1: MVP | 🔄 In Progress | CLI, event collection, process/network monitoring, auditing |
-| Phase 2: Detection Platform | 📋 Planned | Behavioral analytics, threat hunting, rule engine, IOC matching |
+| Phase 1: MVP Core | ✅ Completed | CLI, ETW event collection, process/network monitoring, pipeline |
+| Phase 2: Detection Platform | ✅ Completed | Behavioral correlation engine, YAML rules, YARA scanner mock |
 | Phase 3: Response Platform | 📋 Planned | Automated containment, host isolation, quarantine |
-| Phase 4: AI Platform | 📋 Planned | Incident summarization, threat explanation, detection generation |
+| Phase 4: AI Platform | ✅ Completed | Local AI Analyst layer (Explain, Summarize, Generate, Ask) |
 | Phase 5: Enterprise Platform | 📋 Planned | Fleet management, cloud dashboard, multi-tenant SOC |
 
 ---
