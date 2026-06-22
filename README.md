@@ -297,6 +297,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
 
 ## Community
 
-- **GitHub Discussions**: [github.com/r3trive/r3trive/discussions](https://github.com/r3trive/r3trive/discussions)
+- **GitHub Discussions**: [github.com/thrive-spectrexq/r3trive/discussions](https://github.com/thrive-spectrexq/r3trive/discussions)
 - **Security Issues**: security@r3trive.io (PGP key in SECURITY.md)
 - **Documentation**: [docs.r3trive.io](https://docs.r3trive.io)
