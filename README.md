@@ -133,7 +133,7 @@ curl -sSL https://get.r3trive.io/install.sh | bash
 
 **From source:**
 ```bash
-git clone https://github.com/r3trive/r3trive
+git clone https://github.com/thrive-spectrexq/r3trive
 cd r3trive
 make build
 sudo make install
