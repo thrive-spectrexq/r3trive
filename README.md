@@ -189,7 +189,7 @@ r3trive hunt
                           ▼                      │
 ┌─────────────────────────────────────────────────────────────┐
 │                    Correlation Engine                       │
-│         (event stream → incident → ATT&CK mapping)         │
+│         (event stream → incident → ATT&CK mapping)          │
 └─────────────────────────────┬───────────────────────────────┘
                               │
                               ▼
