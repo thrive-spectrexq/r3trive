@@ -141,7 +141,7 @@ sudo make install
 
 **Docker:**
 ```bash
-docker run --privileged -v /:/host:ro r3trive/r3trive monitor
+docker run --privileged -v /:/host:ro thrive-spectrexq/r3trive monitor
 ```
 
 ### First Run
