@@ -1,0 +1,3 @@
+# Integration Tests
+# Tests covering interaction between multiple R3TRIVE components.
+# Run with: make test-integration

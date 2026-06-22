@@ -1,0 +1,3 @@
+# Correlation Rules
+# Multi-event correlation rules in YAML format.
+# See SYSTEM_ARCHITECTURE.md §4.4.2 for correlation rule language.

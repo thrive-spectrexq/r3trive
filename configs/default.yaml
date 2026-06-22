@@ -1,0 +1,31 @@
+# R3TRIVE Configuration
+# See documentation at https://docs.r3trive.io
+
+log_level: info
+output_format: table
+
+monitor:
+  min_severity: low
+  poll_interval_ms: 1000
+  enabled_sensors:
+    - process
+    - network
+
+storage:
+  driver: sqlite
+  batch_size: 100
+  flush_interval_ms: 1000
+  retention_days: 30
+
+ai:
+  backend: none
+  endpoint: "http://localhost:11434"
+  model: llama3
+
+telemetry:
+  enabled: false
+  endpoint: "localhost:4317"
+
+sensor:
+  mode: native
+  ring_buffer_size: 10000

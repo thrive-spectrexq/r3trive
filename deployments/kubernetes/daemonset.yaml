@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: r3trive-agent
+  namespace: r3trive
+  labels:
+    app: r3trive
+    component: agent
+spec:
+  selector:
+    matchLabels:
+      app: r3trive
+      component: agent
+  template:
+    metadata:
+      labels:
+        app: r3trive
+        component: agent
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+        - name: r3trive
+          image: thrive-spectrexq/r3trive:latest
+          command: ["r3trive", "monitor"]
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+            - name: config
+              mountPath: /etc/r3trive
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: host-root
+          hostPath:
+            path: /
+        - name: config
+          configMap:
+            name: r3trive-config

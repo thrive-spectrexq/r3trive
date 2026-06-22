@@ -1,0 +1,36 @@
+# Build artifacts
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test
+*.test
+coverage.out
+coverage.html
+
+# Database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vendor/
+
+# R3TRIVE runtime
+/rules/custom/
+/configs/local.yaml

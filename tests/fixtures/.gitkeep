@@ -1,0 +1,4 @@
+# Test Fixtures
+# Event fixture files for testing detection rules.
+# Naming: {RULE_ID}_tp_{description}.json (true positive)
+#          {RULE_ID}_fp_{description}.json (false positive)

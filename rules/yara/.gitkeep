@@ -1,0 +1,3 @@
+# YARA Rules
+# Place YARA rule files (.yar, .yara) in this directory.
+# See SYSTEM_ARCHITECTURE.md §4.6.2 for YARA integration details.

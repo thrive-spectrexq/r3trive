@@ -1,0 +1,22 @@
+[Unit]
+Description=R3TRIVE Endpoint Detection Agent
+Documentation=https://docs.r3trive.io
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/r3trive monitor --daemon
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+LimitNOFILE=65535
+LimitNPROC=4096
+ProtectSystem=strict
+ReadWritePaths=/var/lib/r3trive /var/log/r3trive
+NoNewPrivileges=false
+AmbientCapabilities=CAP_BPF CAP_PERFMON CAP_SYS_PTRACE CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target

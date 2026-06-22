@@ -1,0 +1,62 @@
+# R3TRIVE golangci-lint configuration
+# See: https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - gosimple
+    - ineffassign
+    - typecheck
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - gocritic
+    - revive
+    - nilerr
+    - errorlint
+    - bodyclose
+    - prealloc
+
+linters-settings:
+  govet:
+    enable-all: true
+  revive:
+    rules:
+      - name: exported
+        arguments:
+          - "checkPrivateReceivers"
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: increment-decrement
+      - name: var-naming
+      - name: range
+      - name: receiver-naming
+      - name: indent-error-flow
+      - name: superfluous-else
+  errorlint:
+    errorf: true
+    asserts: true
+    comparison: true
+  misspell:
+    locale: US
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gocritic
