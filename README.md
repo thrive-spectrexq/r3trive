@@ -128,7 +128,7 @@ r3trive sigma hunt --ruleset /rules/custom/
 
 **From binary (recommended):**
 ```bash
-curl -sSL https://get.r3trive.io/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/thrive-spectrexq/r3trive/main/install.sh | bash
 ```
 
 **From source:**
