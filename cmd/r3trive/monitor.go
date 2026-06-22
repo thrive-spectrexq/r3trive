@@ -11,9 +11,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/thrive-spectrexq/r3trive/internal/config"
+	"github.com/thrive-spectrexq/r3trive/internal/correlation"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/pipeline"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor/mock"
+	"github.com/thrive-spectrexq/r3trive/internal/detection/yara"
 	"github.com/thrive-spectrexq/r3trive/internal/output"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
@@ -97,14 +99,28 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
+	// Initialize YARA Scanner
+	yaraScanner := yara.NewMockScanner()
+	_ = yaraScanner.LoadRules("rules/yara")
+
 	// Build event pipeline
 	pipe := pipeline.New(pipeline.Config{
 		Sensors:        sensors,
 		Store:          store,
+		YaraScanner:    yaraScanner,
 		RingBufferSize: cfg.Sensor.RingBufferSize,
 		BatchSize:      cfg.Storage.BatchSize,
 		FlushInterval:  time.Duration(cfg.Storage.FlushIntervalMs) * time.Millisecond,
 	})
+
+	// Setup correlation engine
+	corrEngine := correlation.New()
+	rules, err := correlation.LoadRulesFromDirectory("rules/behavioral")
+	if err == nil {
+		corrEngine.LoadRules(rules)
+	} else {
+		slog.Warn("could not load correlation rules", "error", err)
+	}
 
 	// Setup output
 	outFmt, _ := output.ParseFormat(cfg.OutputFmt)
@@ -113,6 +129,13 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	// Event display callback
 	minSeverity := parseSeverity(cfg.Monitor.MinSeverity)
 	pipe.OnEvent(func(evt event.Event) {
+		// Evaluate event against rules
+		alerts := corrEngine.Evaluate(ctx, evt)
+		for _, alert := range alerts {
+			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %.2f)\n", 
+				alert.Message, alert.RuleName, alert.Severity, alert.RiskScore)
+		}
+
 		if severityRank(evt.Severity) < severityRank(minSeverity) {
 			return
 		}

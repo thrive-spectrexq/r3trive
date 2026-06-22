@@ -20,7 +20,7 @@ import (
 type Engine struct {
 	mu       sync.RWMutex
 	rules    []Rule
-	alerts   []event.Alert
+	state    map[string][]event.Event // Maps RuleID to matched events
 	alertCh  chan event.Alert
 }
 
@@ -31,6 +31,8 @@ type Rule struct {
 	Description string   `yaml:"description" json:"description"`
 	Severity    string   `yaml:"severity" json:"severity"`
 	Confidence  float64  `yaml:"confidence" json:"confidence"`
+	Timeframe   string   `yaml:"timeframe,omitempty" json:"timeframe,omitempty"` // e.g., "5m"
+	Threshold   int      `yaml:"threshold,omitempty" json:"threshold,omitempty"` // e.g., 5
 	Conditions  []Condition `yaml:"conditions" json:"conditions"`
 
 	// ATT&CK mapping
@@ -49,6 +51,7 @@ type Condition struct {
 // New creates a new correlation engine.
 func New() *Engine {
 	return &Engine{
+		state:   make(map[string][]event.Event),
 		alertCh: make(chan event.Alert, 100),
 	}
 }
@@ -63,34 +66,68 @@ func (e *Engine) LoadRules(rules []Rule) {
 
 // Evaluate checks an event against all loaded rules and returns any alerts.
 func (e *Engine) Evaluate(ctx context.Context, evt event.Event) []event.Alert {
-	e.mu.RLock()
-	defer e.mu.RUnlock()
+	e.mu.Lock()
+	defer e.mu.Unlock()
 
 	var alerts []event.Alert
 
 	for _, rule := range e.rules {
 		if matched := e.matchRule(rule, evt); matched {
-			alert := event.Alert{
-				ID:              fmt.Sprintf("alert_%d", time.Now().UnixNano()),
-				Timestamp:       time.Now().UTC(),
-				Event:           evt,
-				RuleID:          rule.ID,
-				RuleName:        rule.Name,
-				Severity:        event.Severity(rule.Severity),
-				Confidence:      rule.Confidence,
-				RiskScore:       CalculateRiskScore(event.Severity(rule.Severity), rule.Confidence),
-				Message:         rule.Description,
-				ATTACKTactic:    rule.ATTACKTactic,
-				ATTACKTechnique: rule.ATTACKTechnique,
-			}
-			alerts = append(alerts, alert)
+			trigger := false
 
-			slog.Info("rule matched",
-				"rule_id", rule.ID,
-				"rule_name", rule.Name,
-				"event_id", evt.ID,
-				"severity", rule.Severity,
-			)
+			if rule.Threshold > 1 && rule.Timeframe != "" {
+				// Temporal logic
+				duration, err := time.ParseDuration(rule.Timeframe)
+				if err != nil {
+					slog.Warn("invalid timeframe in rule", "rule", rule.ID, "timeframe", rule.Timeframe)
+					duration = 5 * time.Minute
+				}
+
+				e.state[rule.ID] = append(e.state[rule.ID], evt)
+				
+				// Prune old events
+				cutoff := evt.Timestamp.Add(-duration)
+				var valid []event.Event
+				for _, stored := range e.state[rule.ID] {
+					if stored.Timestamp.After(cutoff) || stored.Timestamp.Equal(cutoff) {
+						valid = append(valid, stored)
+					}
+				}
+				e.state[rule.ID] = valid
+
+				if len(e.state[rule.ID]) >= rule.Threshold {
+					trigger = true
+					// Reset state after triggering
+					e.state[rule.ID] = nil
+				}
+			} else {
+				// Immediate trigger
+				trigger = true
+			}
+
+			if trigger {
+				alert := event.Alert{
+					ID:              fmt.Sprintf("alert_%d", time.Now().UnixNano()),
+					Timestamp:       time.Now().UTC(),
+					Event:           evt,
+					RuleID:          rule.ID,
+					RuleName:        rule.Name,
+					Severity:        event.Severity(rule.Severity),
+					Confidence:      rule.Confidence,
+					RiskScore:       CalculateRiskScore(event.Severity(rule.Severity), rule.Confidence),
+					Message:         rule.Description,
+					ATTACKTactic:    rule.ATTACKTactic,
+					ATTACKTechnique: rule.ATTACKTechnique,
+				}
+				alerts = append(alerts, alert)
+
+				slog.Info("rule matched",
+					"rule_id", rule.ID,
+					"rule_name", rule.Name,
+					"event_id", evt.ID,
+					"severity", rule.Severity,
+				)
+			}
 		}
 	}
 

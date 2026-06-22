@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
+	"github.com/thrive-spectrexq/r3trive/internal/detection/yara"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 	"github.com/thrive-spectrexq/r3trive/pkg/utils"
@@ -18,6 +19,7 @@ import (
 type Config struct {
 	Sensors        []sensor.Sensor
 	Store          storage.Store
+	YaraScanner    yara.Scanner
 	RingBufferSize int
 	BatchSize      int
 	FlushInterval  time.Duration
@@ -101,6 +103,39 @@ func (p *Pipeline) Start(ctx context.Context) error {
 			return nil
 
 		case evt := <-eventCh:
+			// Trigger YARA on certain events
+			if p.cfg.YaraScanner != nil {
+				if evt.Type == "FileCreate" && evt.Data.File != nil {
+					path := evt.Data.File.Path
+					if path != "" {
+						go func(path string, evtID string) {
+							matches, err := p.cfg.YaraScanner.ScanFile(ctx, path)
+							if err != nil {
+								slog.Error("yara scan failed", "path", path, "error", err)
+								return
+							}
+							if len(matches) > 0 {
+								slog.Warn("yara matched on file creation", "path", path, "matches", len(matches))
+							}
+						}(path, evt.ID)
+					}
+				} else if evt.Type == "ProcessCreate" && evt.Data.Process != nil {
+					path := evt.Data.Process.Name // Or ImagePath if available in your struct
+					if path != "" {
+						go func(path string, evtID string) {
+							matches, err := p.cfg.YaraScanner.ScanFile(ctx, path)
+							if err != nil {
+								slog.Error("yara scan failed", "path", path, "error", err)
+								return
+							}
+							if len(matches) > 0 {
+								slog.Warn("yara matched on process creation", "path", path, "matches", len(matches))
+							}
+						}(path, evt.ID)
+					}
+				}
+			}
+
 			// Add to ring buffer
 			p.ring.Push(evt)
 

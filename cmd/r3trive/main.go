@@ -36,6 +36,10 @@ func main() {
 		newMonitorCmd(),
 		newAuditCmd(),
 		newConfigCmd(),
+		newAskCmd(),
+		newGenerateRuleCmd(),
+		newExplainCmd(),
+		newSummarizeCmd(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {

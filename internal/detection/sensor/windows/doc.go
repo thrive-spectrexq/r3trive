@@ -1,6 +1,5 @@
-// Package process implements the Windows process sensor using the
-// Windows API (CreateToolhelp32Snapshot) for process enumeration.
-package process
+// Package windows implements the Windows sensors using ETW.
+package windows
 
 // TODO: Implement Windows process sensor using CreateToolhelp32Snapshot or ETW.
 // For MVP, the mock sensor is used. This package will contain the native
