@@ -1,3 +1,5 @@
+﻿//go:build windows
+
 package windows
 
 import (
@@ -189,3 +191,5 @@ func (s *NetworkSensor) Stop() error {
 	s.mu.Unlock()
 	return nil
 }
+
+

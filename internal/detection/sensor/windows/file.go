@@ -1,3 +1,5 @@
+﻿//go:build windows
+
 package windows
 
 import (
@@ -191,3 +193,5 @@ func (s *FileSensor) Stop() error {
 	s.mu.Unlock()
 	return nil
 }
+
+

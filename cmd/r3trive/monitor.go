@@ -132,7 +132,7 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 		// Evaluate event against rules
 		alerts := corrEngine.Evaluate(ctx, evt)
 		for _, alert := range alerts {
-			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %.2f)\n", 
+			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %d)\n", 
 				alert.Message, alert.RuleName, alert.Severity, alert.RiskScore)
 		}
 
