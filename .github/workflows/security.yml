@@ -17,5 +17,7 @@ jobs:
         uses: actions/checkout@v7
       - name: Run Gosec
         uses: securego/gosec@master
+        env:
+          CGO_ENABLED: '0'
         with:
           args: ./...
