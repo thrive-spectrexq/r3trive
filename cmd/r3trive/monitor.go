@@ -99,8 +99,8 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 		}()
 	}
 
-	// Initialize YARA Scanner
-	yaraScanner := yara.NewMockScanner()
+	// 3. Setup YARA Scanner
+	yaraScanner := yara.NewScanner()
 	_ = yaraScanner.LoadRules("rules/yara")
 
 	// Build event pipeline
@@ -132,7 +132,7 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 		// Evaluate event against rules
 		alerts := corrEngine.Evaluate(ctx, evt)
 		for _, alert := range alerts {
-			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %d)\n", 
+			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %d)\n",
 				alert.Message, alert.RuleName, alert.Severity, alert.RiskScore)
 		}
 

@@ -22,11 +22,11 @@ const (
 
 // CheckResult holds the result of a single audit check.
 type CheckResult struct {
-	Name     string      `json:"name"`
-	Category string      `json:"category"`
-	Status   CheckStatus `json:"status"`
-	Detail   string      `json:"detail,omitempty"`
-	Remediation string   `json:"remediation,omitempty"`
+	Name        string      `json:"name"`
+	Category    string      `json:"category"`
+	Status      CheckStatus `json:"status"`
+	Detail      string      `json:"detail,omitempty"`
+	Remediation string      `json:"remediation,omitempty"`
 }
 
 // Results holds the aggregate results of an audit run.

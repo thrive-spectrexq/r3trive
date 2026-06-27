@@ -32,8 +32,23 @@ type MockScanner struct {
 	rulesLoaded int
 }
 
-// NewMockScanner initializes a new mock scanner.
-func NewMockScanner() *MockScanner {
+// NewScanner initializes a YARA scanner.
+// It attempts to use the native CGO scanner first.
+// If unavailable (e.g. CGO disabled), it falls back to the CLI scanner.
+// If the 'yara' binary is not found, it falls back to the MockScanner.
+func NewScanner() Scanner {
+	if s := newNativeScanner(); s != nil {
+		slog.Info("Using Native YARA scanner (CGO)")
+		return s
+	}
+
+	cliScanner := NewCliScanner()
+	if cliScanner.executablePath != "" {
+		slog.Info("Using CLI YARA scanner", "path", cliScanner.executablePath)
+		return cliScanner
+	}
+
+	slog.Warn("yara executable not found in PATH, falling back to MockScanner")
 	return &MockScanner{}
 }
 
@@ -84,7 +99,7 @@ func (s *MockScanner) ScanFile(ctx context.Context, path string) ([]Match, error
 func (s *MockScanner) ScanProcessMemory(ctx context.Context, pid int) ([]Match, error) {
 	// Simulate scan latency
 	time.Sleep(100 * time.Millisecond)
-	
+
 	// Mock: no matches
 	return nil, nil
 }

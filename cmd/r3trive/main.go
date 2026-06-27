@@ -38,6 +38,7 @@ func main() {
 		newConfigCmd(),
 		newAskCmd(),
 		newGenerateRuleCmd(),
+		newDefendCmd(),
 		newExplainCmd(),
 		newSummarizeCmd(),
 	)
@@ -51,7 +52,15 @@ func newRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "r3trive",
 		Short: "Enterprise endpoint detection, threat hunting, and automated defense",
-		Long: `R3TRIVE is a cross-platform cybersecurity platform built for defensive
+		Long: `
+  _____  ____ _______ _____  _______      ________ 
+ |  __ \|___ \__   __|  __ \|_   _\ \    / /  ____|
+ | |__) | __) | | |  | |__) | | |  \ \  / /| |__   
+ |  _  / |__ <  | |  |  _  /  | |   \ \/ / |  __|  
+ | | \ \ ___) | | |  | | \ \ _| |_   \  /  | |____ 
+ |_|  \_\____/  |_|  |_|  \_\_____|   \/   |______|
+
+R3TRIVE is a cross-platform cybersecurity platform built for defensive
 security operations at scale. It combines behavioral endpoint detection,
 AI-assisted investigation, automated response, and threat hunting into
 a single terminal-first tool.

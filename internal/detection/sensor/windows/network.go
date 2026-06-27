@@ -1,4 +1,4 @@
-﻿//go:build windows
+//go:build windows
 
 package windows
 
@@ -100,7 +100,7 @@ func (s *NetworkSensor) Start(ctx context.Context, ch chan<- event.Event) error 
 		if pid == nil {
 			pid, _ = e.GetProperty("ProcessID")
 		}
-		
+
 		daddr, _ := e.GetProperty("daddr")
 		saddr, _ := e.GetProperty("saddr")
 		dport, _ := e.GetProperty("dport")
@@ -191,5 +191,3 @@ func (s *NetworkSensor) Stop() error {
 	s.mu.Unlock()
 	return nil
 }
-
-

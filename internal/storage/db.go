@@ -32,6 +32,9 @@ type Store interface {
 	// SaveEvent persists a single event.
 	SaveEvent(ctx context.Context, evt event.Event) error
 
+	// GetEvent retrieves a specific event by ID.
+	GetEvent(ctx context.Context, id string) (event.Event, error)
+
 	// SaveEvents persists a batch of events atomically.
 	SaveEvents(ctx context.Context, events []event.Event) error
 
@@ -43,6 +46,15 @@ type Store interface {
 
 	// SaveIncident persists an incident record.
 	SaveIncident(ctx context.Context, incident event.Incident) error
+
+	// GetIncident retrieves a specific incident by ID.
+	GetIncident(ctx context.Context, id string) (event.Incident, error)
+
+	// QueryIncidents retrieves incidents matching the given statuses.
+	QueryIncidents(ctx context.Context, statuses []event.IncidentStatus) ([]event.Incident, error)
+
+	// UpdateIncidentStatus updates the status of an existing incident.
+	UpdateIncidentStatus(ctx context.Context, id string, status event.IncidentStatus) error
 
 	// Close releases all resources held by the store.
 	Close() error

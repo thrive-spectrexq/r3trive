@@ -1,4 +1,4 @@
-﻿//go:build windows
+//go:build windows
 
 package windows
 
@@ -230,5 +230,3 @@ func getHostname() string {
 	}
 	return name
 }
-
-

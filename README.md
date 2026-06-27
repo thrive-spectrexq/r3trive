@@ -1,6 +1,6 @@
 # R3TRIVE
 
-> **Enterprise-grade endpoint detection, threat hunting, and automated defense.**
+> **Endpoint detection, threat hunting, and automated defense.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()

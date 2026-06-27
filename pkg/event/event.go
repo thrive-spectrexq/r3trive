@@ -175,15 +175,15 @@ type EventData struct {
 // Event is the core data structure produced by all sensors.
 // It represents a single observable action on a host.
 type Event struct {
-	ID          string    `json:"id"`
-	Timestamp   time.Time `json:"timestamp"`
-	Host        HostInfo  `json:"host"`
-	Type        EventType `json:"type"`
-	Severity    Severity  `json:"severity"`
-	Sensor      string    `json:"sensor"`
-	Data        EventData `json:"data"`
+	ID          string         `json:"id"`
+	Timestamp   time.Time      `json:"timestamp"`
+	Host        HostInfo       `json:"host"`
+	Type        EventType      `json:"type"`
+	Severity    Severity       `json:"severity"`
+	Sensor      string         `json:"sensor"`
+	Data        EventData      `json:"data"`
 	Enrichments map[string]any `json:"enrichments,omitempty"`
-	ChainHash   string    `json:"chain_hash,omitempty"`
+	ChainHash   string         `json:"chain_hash,omitempty"`
 }
 
 // String returns a human-readable summary of the event.

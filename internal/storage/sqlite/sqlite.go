@@ -177,10 +177,10 @@ func (s *Store) QueryEvents(ctx context.Context, q storage.EventQuery) ([]event.
 	var events []event.Event
 	for rows.Next() {
 		var (
-			evt         event.Event
-			dataJSON    string
-			enrichJSON  sql.NullString
-			chainHash   sql.NullString
+			evt        event.Event
+			dataJSON   string
+			enrichJSON sql.NullString
+			chainHash  sql.NullString
 		)
 
 		err := rows.Scan(
@@ -267,6 +267,211 @@ func (s *Store) SaveIncident(ctx context.Context, incident event.Incident) error
 	)
 	if err != nil {
 		return fmt.Errorf("sqlite: saving incident: %w", err)
+	}
+	return nil
+}
+
+// GetEvent retrieves a specific event by ID.
+func (s *Store) GetEvent(ctx context.Context, id string) (event.Event, error) {
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, timestamp, host_id, hostname, type, severity, sensor, data, enrichments, chain_hash 
+		 FROM events WHERE id = ?`, id)
+
+	var (
+		evt        event.Event
+		dataJSON   string
+		enrichJSON sql.NullString
+		chainHash  sql.NullString
+	)
+
+	err := row.Scan(
+		&evt.ID,
+		&evt.Timestamp,
+		&evt.Host.ID,
+		&evt.Host.Hostname,
+		&evt.Type,
+		&evt.Severity,
+		&evt.Sensor,
+		&dataJSON,
+		&enrichJSON,
+		&chainHash,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return event.Event{}, fmt.Errorf("event not found: %s", id)
+		}
+		return event.Event{}, fmt.Errorf("sqlite: scanning event: %w", err)
+	}
+
+	if err := json.Unmarshal([]byte(dataJSON), &evt.Data); err != nil {
+		slog.Warn("sqlite: unmarshaling event data", "event_id", evt.ID, "error", err)
+	}
+	if enrichJSON.Valid {
+		json.Unmarshal([]byte(enrichJSON.String), &evt.Enrichments) //nolint:errcheck
+	}
+	if chainHash.Valid {
+		evt.ChainHash = chainHash.String
+	}
+
+	return evt, nil
+}
+
+// GetIncident retrieves a specific incident by ID, including its associated alerts.
+func (s *Store) GetIncident(ctx context.Context, id string) (event.Incident, error) {
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, created_at, updated_at, status, severity, risk_score, title, description, host_ids, attack_map, artifact_paths, response_actions, assigned_to, notes 
+		 FROM incidents WHERE id = ?`, id)
+
+	var inc event.Incident
+	var (
+		hostIDsJSON, attackMapJSON, artifactJSON, actionsJSON string
+		description, assignedTo, notes                        sql.NullString
+	)
+
+	err := row.Scan(
+		&inc.ID, &inc.CreatedAt, &inc.UpdatedAt, &inc.Status, &inc.Severity, &inc.RiskScore, &inc.Title,
+		&description, &hostIDsJSON, &attackMapJSON, &artifactJSON, &actionsJSON, &assignedTo, &notes,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return event.Incident{}, fmt.Errorf("incident not found: %s", id)
+		}
+		return event.Incident{}, fmt.Errorf("sqlite: scanning incident: %w", err)
+	}
+
+	if description.Valid {
+		inc.Description = description.String
+	}
+	if assignedTo.Valid {
+		inc.AssignedTo = assignedTo.String
+	}
+	if notes.Valid {
+		inc.Notes = notes.String
+	}
+
+	json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) //nolint:errcheck
+	json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) //nolint:errcheck
+	json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) //nolint:errcheck
+	json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) //nolint:errcheck
+
+	// Load alerts
+	alertRows, err := s.db.QueryContext(ctx, `SELECT id, timestamp, event_id, rule_id, rule_name, severity, confidence, risk_score, message, attack_tactic, attack_technique, acknowledged FROM alerts WHERE incident_id = ?`, inc.ID)
+	if err == nil {
+		for alertRows.Next() {
+			var alert event.Alert
+			alert.IncidentID = inc.ID
+			var (
+				tactic, technique sql.NullString
+			)
+			err := alertRows.Scan(&alert.ID, &alert.Timestamp, &alert.Event.ID, &alert.RuleID, &alert.RuleName, &alert.Severity, &alert.Confidence, &alert.RiskScore, &alert.Message, &tactic, &technique, &alert.Acknowledged)
+			if err == nil {
+				if tactic.Valid {
+					alert.ATTACKTactic = tactic.String
+				}
+				if technique.Valid {
+					alert.ATTACKTechnique = technique.String
+				}
+				inc.Alerts = append(inc.Alerts, alert)
+			}
+		}
+		alertRows.Close()
+	}
+
+	return inc, nil
+}
+
+// QueryIncidents retrieves incidents matching the given statuses.
+func (s *Store) QueryIncidents(ctx context.Context, statuses []event.IncidentStatus) ([]event.Incident, error) {
+	if len(statuses) == 0 {
+		return nil, nil
+	}
+
+	query := `SELECT id, created_at, updated_at, status, severity, risk_score, title, description, host_ids, attack_map, artifact_paths, response_actions, assigned_to, notes FROM incidents WHERE status IN (`
+	args := make([]any, len(statuses))
+	for i, status := range statuses {
+		if i > 0 {
+			query += ", "
+		}
+		query += "?"
+		args[i] = string(status)
+	}
+	query += `) ORDER BY created_at ASC`
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("sqlite: query incidents: %w", err)
+	}
+	defer rows.Close()
+
+	var incidents []event.Incident
+	for rows.Next() {
+		var inc event.Incident
+		var (
+			hostIDsJSON, attackMapJSON, artifactJSON, actionsJSON string
+			description, assignedTo, notes                        sql.NullString
+		)
+
+		err := rows.Scan(
+			&inc.ID, &inc.CreatedAt, &inc.UpdatedAt, &inc.Status, &inc.Severity, &inc.RiskScore, &inc.Title,
+			&description, &hostIDsJSON, &attackMapJSON, &artifactJSON, &actionsJSON, &assignedTo, &notes,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("sqlite: scanning incident: %w", err)
+		}
+
+		if description.Valid {
+			inc.Description = description.String
+		}
+		if assignedTo.Valid {
+			inc.AssignedTo = assignedTo.String
+		}
+		if notes.Valid {
+			inc.Notes = notes.String
+		}
+
+		json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) //nolint:errcheck
+		json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) //nolint:errcheck
+		json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) //nolint:errcheck
+		json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) //nolint:errcheck
+
+		// Need to load alerts separately for the incident
+		alertRows, err := s.db.QueryContext(ctx, `SELECT id, timestamp, event_id, rule_id, rule_name, severity, confidence, risk_score, message, attack_tactic, attack_technique, acknowledged FROM alerts WHERE incident_id = ?`, inc.ID)
+		if err == nil {
+			for alertRows.Next() {
+				var alert event.Alert
+				alert.IncidentID = inc.ID
+				var (
+					tactic, technique sql.NullString
+				)
+				err := alertRows.Scan(&alert.ID, &alert.Timestamp, &alert.Event.ID, &alert.RuleID, &alert.RuleName, &alert.Severity, &alert.Confidence, &alert.RiskScore, &alert.Message, &tactic, &technique, &alert.Acknowledged)
+				if err == nil {
+					if tactic.Valid {
+						alert.ATTACKTactic = tactic.String
+					}
+					if technique.Valid {
+						alert.ATTACKTechnique = technique.String
+					}
+					inc.Alerts = append(inc.Alerts, alert)
+				}
+			}
+			alertRows.Close()
+		}
+
+		incidents = append(incidents, inc)
+	}
+
+	return incidents, rows.Err()
+}
+
+// UpdateIncidentStatus updates the status of an existing incident.
+func (s *Store) UpdateIncidentStatus(ctx context.Context, id string, status event.IncidentStatus) error {
+	res, err := s.db.ExecContext(ctx, `UPDATE incidents SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, string(status), id)
+	if err != nil {
+		return fmt.Errorf("sqlite: updating incident status: %w", err)
+	}
+	affected, _ := res.RowsAffected()
+	if affected == 0 {
+		return fmt.Errorf("sqlite: incident not found: %s", id)
 	}
 	return nil
 }

@@ -24,7 +24,7 @@ func getPlatformChecks() []Check {
 type firewallCheck struct{}
 
 func (c *firewallCheck) Name() string     { return "Windows Firewall Status" }
-func (c *firewallCheck) Category() string  { return "Firewall" }
+func (c *firewallCheck) Category() string { return "Firewall" }
 
 func (c *firewallCheck) Run() CheckResult {
 	out, err := runPowerShell("Get-NetFirewallProfile | Select-Object -Property Name,Enabled | ConvertTo-Json")
@@ -40,8 +40,8 @@ func (c *firewallCheck) Run() CheckResult {
 	if strings.Contains(out, `"Enabled":  false`) || strings.Contains(out, `"Enabled": false`) {
 		return CheckResult{
 			Name: c.Name(), Category: c.Category(),
-			Status: StatusFail,
-			Detail: "One or more firewall profiles are disabled",
+			Status:      StatusFail,
+			Detail:      "One or more firewall profiles are disabled",
 			Remediation: "Enable all firewall profiles: Set-NetFirewallProfile -All -Enabled True",
 		}
 	}
@@ -57,7 +57,7 @@ func (c *firewallCheck) Run() CheckResult {
 type defenderCheck struct{}
 
 func (c *defenderCheck) Name() string     { return "Windows Defender Real-Time Protection" }
-func (c *defenderCheck) Category() string  { return "Antivirus" }
+func (c *defenderCheck) Category() string { return "Antivirus" }
 
 func (c *defenderCheck) Run() CheckResult {
 	out, err := runPowerShell("(Get-MpComputerStatus).RealTimeProtectionEnabled")
@@ -79,8 +79,8 @@ func (c *defenderCheck) Run() CheckResult {
 
 	return CheckResult{
 		Name: c.Name(), Category: c.Category(),
-		Status: StatusFail,
-		Detail: "Real-time protection is disabled",
+		Status:      StatusFail,
+		Detail:      "Real-time protection is disabled",
 		Remediation: "Enable Defender: Set-MpPreference -DisableRealtimeMonitoring $false",
 	}
 }
@@ -89,7 +89,7 @@ func (c *defenderCheck) Run() CheckResult {
 type guestAccountCheck struct{}
 
 func (c *guestAccountCheck) Name() string     { return "Guest Account Disabled" }
-func (c *guestAccountCheck) Category() string  { return "Users" }
+func (c *guestAccountCheck) Category() string { return "Users" }
 
 func (c *guestAccountCheck) Run() CheckResult {
 	out, err := runPowerShell("(Get-LocalUser -Name Guest).Enabled")
@@ -111,8 +111,8 @@ func (c *guestAccountCheck) Run() CheckResult {
 
 	return CheckResult{
 		Name: c.Name(), Category: c.Category(),
-		Status: StatusFail,
-		Detail: "Guest account is enabled",
+		Status:      StatusFail,
+		Detail:      "Guest account is enabled",
 		Remediation: "Disable Guest: Disable-LocalUser -Name Guest",
 	}
 }
@@ -121,7 +121,7 @@ func (c *guestAccountCheck) Run() CheckResult {
 type rdpCheck struct{}
 
 func (c *rdpCheck) Name() string     { return "Remote Desktop Configuration" }
-func (c *rdpCheck) Category() string  { return "Remote Access" }
+func (c *rdpCheck) Category() string { return "Remote Access" }
 
 func (c *rdpCheck) Run() CheckResult {
 	out, err := runPowerShell(`(Get-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Terminal Server" -Name "fDenyTSConnections").fDenyTSConnections`)
@@ -143,8 +143,8 @@ func (c *rdpCheck) Run() CheckResult {
 
 	return CheckResult{
 		Name: c.Name(), Category: c.Category(),
-		Status: StatusWarn,
-		Detail: "Remote Desktop is enabled — ensure NLA is required",
+		Status:      StatusWarn,
+		Detail:      "Remote Desktop is enabled — ensure NLA is required",
 		Remediation: "Require NLA for RDP connections via Group Policy",
 	}
 }
@@ -153,7 +153,7 @@ func (c *rdpCheck) Run() CheckResult {
 type autoUpdatesCheck struct{}
 
 func (c *autoUpdatesCheck) Name() string     { return "Windows Auto-Updates" }
-func (c *autoUpdatesCheck) Category() string  { return "Updates" }
+func (c *autoUpdatesCheck) Category() string { return "Updates" }
 
 func (c *autoUpdatesCheck) Run() CheckResult {
 	out, err := runPowerShell(`(New-Object -ComObject Microsoft.Update.AutoUpdate).EnableService()
@@ -172,8 +172,8 @@ $au.EnableService()
 	if strings.TrimSpace(out) == "1" {
 		return CheckResult{
 			Name: c.Name(), Category: c.Category(),
-			Status: StatusFail,
-			Detail: "Auto-updates are disabled via Group Policy",
+			Status:      StatusFail,
+			Detail:      "Auto-updates are disabled via Group Policy",
 			Remediation: "Enable auto-updates in Group Policy or WSUS",
 		}
 	}
@@ -189,7 +189,7 @@ $au.EnableService()
 type uacCheck struct{}
 
 func (c *uacCheck) Name() string     { return "User Account Control (UAC)" }
-func (c *uacCheck) Category() string  { return "Access Control" }
+func (c *uacCheck) Category() string { return "Access Control" }
 
 func (c *uacCheck) Run() CheckResult {
 	out, err := runPowerShell(`(Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA").EnableLUA`)
@@ -211,8 +211,8 @@ func (c *uacCheck) Run() CheckResult {
 
 	return CheckResult{
 		Name: c.Name(), Category: c.Category(),
-		Status: StatusFail,
-		Detail: "UAC is disabled",
+		Status:      StatusFail,
+		Detail:      "UAC is disabled",
 		Remediation: `Enable UAC: Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" -Name "EnableLUA" -Value 1`,
 	}
 }
@@ -221,7 +221,7 @@ func (c *uacCheck) Run() CheckResult {
 type passwordPolicyCheck struct{}
 
 func (c *passwordPolicyCheck) Name() string     { return "Password Policy" }
-func (c *passwordPolicyCheck) Category() string  { return "Users" }
+func (c *passwordPolicyCheck) Category() string { return "Users" }
 
 func (c *passwordPolicyCheck) Run() CheckResult {
 	out, err := runPowerShell("net accounts")
@@ -253,8 +253,8 @@ func (c *passwordPolicyCheck) Run() CheckResult {
 	if len(issues) > 0 {
 		return CheckResult{
 			Name: c.Name(), Category: c.Category(),
-			Status: StatusWarn,
-			Detail: strings.Join(issues, "; "),
+			Status:      StatusWarn,
+			Detail:      strings.Join(issues, "; "),
 			Remediation: "Set minimum password length: net accounts /minpwlen:12",
 		}
 	}

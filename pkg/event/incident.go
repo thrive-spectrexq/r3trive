@@ -7,10 +7,10 @@ type IncidentStatus string
 
 // Incident lifecycle states.
 const (
-	IncidentStatusOpen         IncidentStatus = "open"
+	IncidentStatusOpen          IncidentStatus = "open"
 	IncidentStatusInvestigating IncidentStatus = "investigating"
-	IncidentStatusContained    IncidentStatus = "contained"
-	IncidentStatusResolved     IncidentStatus = "resolved"
+	IncidentStatusContained     IncidentStatus = "contained"
+	IncidentStatusResolved      IncidentStatus = "resolved"
 	IncidentStatusFalsePositive IncidentStatus = "false_positive"
 )
 
@@ -34,10 +34,10 @@ type Incident struct {
 	Description string         `json:"description,omitempty"`
 
 	// Related data
-	Alerts       []Alert         `json:"alerts"`
-	HostIDs      []string        `json:"host_ids"`
-	ATTACKMap    []ATTACKMapping `json:"attack_map,omitempty"`
-	ArtifactPaths []string       `json:"artifact_paths,omitempty"`
+	Alerts        []Alert         `json:"alerts"`
+	HostIDs       []string        `json:"host_ids"`
+	ATTACKMap     []ATTACKMapping `json:"attack_map,omitempty"`
+	ArtifactPaths []string        `json:"artifact_paths,omitempty"`
 
 	// Response tracking
 	ResponseActions []string `json:"response_actions,omitempty"`

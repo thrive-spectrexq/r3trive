@@ -9,7 +9,8 @@ import (
 // CalculateRiskScore computes a risk score (0-100) from severity and confidence.
 //
 // Formula from SYSTEM_ARCHITECTURE.md §4.4.3:
-//   Risk = finding_weight × confidence × campaign_multiplier × recency_decay
+//
+//	Risk = finding_weight × confidence × campaign_multiplier × recency_decay
 //
 // For MVP, campaign_multiplier and recency_decay default to 1.0.
 func CalculateRiskScore(severity event.Severity, confidence float64) int {

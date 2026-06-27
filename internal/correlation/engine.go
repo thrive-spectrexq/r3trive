@@ -18,21 +18,21 @@ import (
 // Engine is the correlation engine that evaluates events against rules
 // and produces alerts and incidents.
 type Engine struct {
-	mu       sync.RWMutex
-	rules    []Rule
-	state    map[string][]event.Event // Maps RuleID to matched events
-	alertCh  chan event.Alert
+	mu      sync.RWMutex
+	rules   []Rule
+	state   map[string][]event.Event // Maps RuleID to matched events
+	alertCh chan event.Alert
 }
 
 // Rule represents a behavioral detection rule.
 type Rule struct {
-	ID          string   `yaml:"id" json:"id"`
-	Name        string   `yaml:"name" json:"name"`
-	Description string   `yaml:"description" json:"description"`
-	Severity    string   `yaml:"severity" json:"severity"`
-	Confidence  float64  `yaml:"confidence" json:"confidence"`
-	Timeframe   string   `yaml:"timeframe,omitempty" json:"timeframe,omitempty"` // e.g., "5m"
-	Threshold   int      `yaml:"threshold,omitempty" json:"threshold,omitempty"` // e.g., 5
+	ID          string      `yaml:"id" json:"id"`
+	Name        string      `yaml:"name" json:"name"`
+	Description string      `yaml:"description" json:"description"`
+	Severity    string      `yaml:"severity" json:"severity"`
+	Confidence  float64     `yaml:"confidence" json:"confidence"`
+	Timeframe   string      `yaml:"timeframe,omitempty" json:"timeframe,omitempty"` // e.g., "5m"
+	Threshold   int         `yaml:"threshold,omitempty" json:"threshold,omitempty"` // e.g., 5
 	Conditions  []Condition `yaml:"conditions" json:"conditions"`
 
 	// ATT&CK mapping
@@ -42,9 +42,9 @@ type Rule struct {
 
 // Condition represents a single match condition within a rule.
 type Condition struct {
-	Field    string `yaml:"field" json:"field"`
-	Operator string `yaml:"operator" json:"operator"` // eq, contains, regex, oneOf
-	Value    string `yaml:"value" json:"value"`
+	Field    string   `yaml:"field" json:"field"`
+	Operator string   `yaml:"operator" json:"operator"` // eq, contains, regex, oneOf
+	Value    string   `yaml:"value" json:"value"`
 	Values   []string `yaml:"values,omitempty" json:"values,omitempty"` // for oneOf
 }
 
@@ -84,7 +84,7 @@ func (e *Engine) Evaluate(ctx context.Context, evt event.Event) []event.Alert {
 				}
 
 				e.state[rule.ID] = append(e.state[rule.ID], evt)
-				
+
 				// Prune old events
 				cutoff := evt.Timestamp.Add(-duration)
 				var valid []event.Event

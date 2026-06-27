@@ -1,4 +1,4 @@
-﻿//go:build windows
+//go:build windows
 
 // Package windows implements the Windows sensors using ETW.
 package windows
@@ -12,5 +12,3 @@ package windows
 // - Command line capture
 // - Parent process resolution
 // - User/SID resolution
-
-

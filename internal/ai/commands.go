@@ -3,6 +3,7 @@ package ai
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/thrive-spectrexq/r3trive/internal/config"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
@@ -38,6 +39,12 @@ func (c *Commands) ExplainAlert(ctx context.Context, alert event.Alert) (string,
 	return c.client.Chat(ctx, prompt)
 }
 
+// ExplainIncident uses the AI backend to explain a correlated incident.
+func (c *Commands) ExplainIncident(ctx context.Context, incident event.Incident) (string, error) {
+	prompt := c.builder.BuildIncidentContext(incident)
+	return c.client.Chat(ctx, prompt)
+}
+
 // GenerateRule asks the AI to generate a YAML rule based on a description.
 func (c *Commands) GenerateRule(ctx context.Context, description string) (string, error) {
 	prompt := fmt.Sprintf(`You are an expert security engineer creating a behavioral detection rule for R3TRIVE.
@@ -67,13 +74,31 @@ Output ONLY the YAML rule. Do not include markdown code blocks or explanations.`
 
 // Summarize asks the AI to summarize an incident or a series of events.
 func (c *Commands) Summarize(ctx context.Context, events []event.Event) (string, error) {
-	prompt := "You are an expert security analyst. Please summarize the following sequence of events and identify any potential attack chain:\n\n"
-	for _, evt := range events {
-		prompt += fmt.Sprintf("- [%s] %s (Sensor: %s)\n", evt.Timestamp.Format("15:04:05"), evt.Type, evt.Sensor)
+	if len(events) == 0 {
+		return "No events found in the specified timeframe to summarize.", nil
 	}
-	prompt += "\nProvide a concise executive summary and technical details."
 
-	return c.client.Chat(ctx, prompt)
+	var sb strings.Builder
+	sb.WriteString("You are an expert security analyst. Please summarize the following sequence of events and identify any potential attack chain:\n\n")
+	
+	// Limit to last 50 events to avoid token limits
+	limit := len(events)
+	if limit > 50 {
+		limit = 50
+	}
+	
+	for i := 0; i < limit; i++ {
+		evt := events[i]
+		sb.WriteString(fmt.Sprintf("- [%s] %s (Host: %s, Sensor: %s)\n", evt.Timestamp.Format("15:04:05"), evt.Type, evt.Host.Hostname, evt.Sensor))
+	}
+
+	if len(events) > 50 {
+		sb.WriteString(fmt.Sprintf("\n... and %d more events omitted for brevity.\n", len(events)-50))
+	}
+
+	sb.WriteString("\nProvide a concise executive summary and technical details.")
+
+	return c.client.Chat(ctx, sb.String())
 }
 
 // Ask sends a generic question to the AI security assistant.

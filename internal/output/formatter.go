@@ -16,11 +16,11 @@ type Format string
 
 // Supported output formats.
 const (
-	FormatTable Format = "table"
-	FormatJSON  Format = "json"
+	FormatTable  Format = "table"
+	FormatJSON   Format = "json"
 	FormatNDJSON Format = "ndjson"
-	FormatCSV   Format = "csv"
-	FormatQuiet Format = "quiet"
+	FormatCSV    Format = "csv"
+	FormatQuiet  Format = "quiet"
 )
 
 // ParseFormat parses a format string into a Format type.

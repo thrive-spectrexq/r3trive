@@ -3,8 +3,8 @@
 package main
 
 import (
-	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
 	"github.com/thrive-spectrexq/r3trive/internal/config"
+	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
 )
 
 // initNativeSensors initializes platform-specific sensors for non-Windows platforms.
