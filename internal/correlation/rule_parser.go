@@ -28,7 +28,7 @@ func LoadRulesFromDirectory(dir string) ([]Rule, error) {
 			return nil
 		}
 
-		content, err := os.ReadFile(path) // #nosec G304
+		content, err := os.ReadFile(path) // #nosec G122 G304
 		if err != nil {
 			return fmt.Errorf("failed to read rule file %s: %w", path, err)
 		}
