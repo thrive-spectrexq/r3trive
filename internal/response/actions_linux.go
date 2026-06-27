@@ -13,7 +13,7 @@ import (
 
 func sysKillProcess(ctx context.Context, pid int) error {
 	slog.Info("executing POSIX kill", "pid", pid)
-	cmd := exec.CommandContext(ctx, "kill", "-9", fmt.Sprintf("%d", pid))
+	cmd := exec.CommandContext(ctx, "kill", "-9", fmt.Sprintf("%d", pid)) // #nosec G204
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("kill failed: %v, output: %s", err, string(output))
@@ -23,7 +23,7 @@ func sysKillProcess(ctx context.Context, pid int) error {
 
 func sysBlockIP(ctx context.Context, ip string) error {
 	slog.Info("executing iptables block", "ip", ip)
-	cmd := exec.CommandContext(ctx, "iptables", "-A", "INPUT", "-s", ip, "-j", "DROP")
+	cmd := exec.CommandContext(ctx, "iptables", "-A", "INPUT", "-s", ip, "-j", "DROP") // #nosec G204
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("iptables block failed: %v, output: %s", err, string(out))
 	}
@@ -45,7 +45,7 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 		return fmt.Errorf("failed to move file to quarantine: %w", err)
 	}
 
-	cmd := exec.CommandContext(ctx, "chmod", "000", destPath)
+	cmd := exec.CommandContext(ctx, "chmod", "000", destPath) // #nosec G204
 	if out, err := cmd.CombinedOutput(); err != nil {
 		slog.Warn("failed to secure quarantined file permissions", "error", err, "output", string(out))
 	}

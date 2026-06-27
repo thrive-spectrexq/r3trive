@@ -124,7 +124,7 @@ func Default() *Config {
 func LoadFromFile(path string) (*Config, error) {
 	cfg := Default()
 
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("config: reading %s: %w", path, err)
 	}
@@ -187,7 +187,7 @@ func (c *Config) SaveToFile(path string) error {
 	header := []byte("# R3TRIVE Configuration\n# See documentation at https://docs.r3trive.io\n\n")
 	data = append(header, data...)
 
-	if err := os.WriteFile(path, data, 0o640); err != nil {
+	if err := os.WriteFile(path, data, 0o600); err != nil {
 		return fmt.Errorf("config: writing %s: %w", path, err)
 	}
 

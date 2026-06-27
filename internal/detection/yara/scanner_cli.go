@@ -60,7 +60,7 @@ func (s *CliScanner) LoadRules(dir string) error {
 		ext := strings.ToLower(filepath.Ext(e.Name()))
 		if ext == ".yar" || ext == ".yara" {
 			path := filepath.Join(dir, e.Name())
-			content, err := os.ReadFile(path)
+			content, err := os.ReadFile(path) // #nosec G304
 			if err != nil {
 				slog.Error("Failed to read YARA rule", "file", path, "err", err)
 				continue
@@ -114,7 +114,7 @@ func (s *CliScanner) runYara(ctx context.Context, ruleFile, target string) ([]Ma
 	// yara [OPTION]... [NAMESPACE:]RULES_FILE... FILE | DIR | PID
 	// -m: print metadata
 	// -g: print tags
-	cmd := exec.CommandContext(ctx, s.executablePath, "-m", "-g", ruleFile, target)
+	cmd := exec.CommandContext(ctx, s.executablePath, "-m", "-g", ruleFile, target) // #nosec G204
 	
 	output, err := cmd.CombinedOutput()
 	if err != nil {

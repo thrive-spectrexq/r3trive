@@ -42,7 +42,7 @@ func New(dsn string) (*Store, error) {
 
 	// Enable WAL mode for concurrent reads
 	if _, err := db.Exec("PRAGMA journal_mode=WAL"); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("sqlite: enabling WAL: %w", err)
 	}
 
@@ -61,7 +61,7 @@ func New(dsn string) (*Store, error) {
 
 	// Run migrations
 	if _, err := db.Exec(migrationSQL); err != nil {
-		db.Close()
+		_ = db.Close()
 		return nil, fmt.Errorf("sqlite: running migrations: %w", err)
 	}
 
@@ -203,7 +203,7 @@ func (s *Store) QueryEvents(ctx context.Context, q storage.EventQuery) ([]event.
 			slog.Warn("sqlite: unmarshaling event data", "event_id", evt.ID, "error", err)
 		}
 		if enrichJSON.Valid {
-			json.Unmarshal([]byte(enrichJSON.String), &evt.Enrichments) //nolint:errcheck
+			_ = json.Unmarshal([]byte(enrichJSON.String), &evt.Enrichments) // #nosec G104
 		}
 		if chainHash.Valid {
 			evt.ChainHash = chainHash.String
@@ -307,7 +307,7 @@ func (s *Store) GetEvent(ctx context.Context, id string) (event.Event, error) {
 		slog.Warn("sqlite: unmarshaling event data", "event_id", evt.ID, "error", err)
 	}
 	if enrichJSON.Valid {
-		json.Unmarshal([]byte(enrichJSON.String), &evt.Enrichments) //nolint:errcheck
+		_ = json.Unmarshal([]byte(enrichJSON.String), &evt.Enrichments) // #nosec G104
 	}
 	if chainHash.Valid {
 		evt.ChainHash = chainHash.String
@@ -349,10 +349,10 @@ func (s *Store) GetIncident(ctx context.Context, id string) (event.Incident, err
 		inc.Notes = notes.String
 	}
 
-	json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) //nolint:errcheck
-	json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) //nolint:errcheck
-	json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) //nolint:errcheck
-	json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) //nolint:errcheck
+	_ = json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) // #nosec G104
+	_ = json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) // #nosec G104
+	_ = json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) // #nosec G104
+	_ = json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) // #nosec G104
 
 	// Load alerts
 	alertRows, err := s.db.QueryContext(ctx, `SELECT id, timestamp, event_id, rule_id, rule_name, severity, confidence, risk_score, message, attack_tactic, attack_technique, acknowledged FROM alerts WHERE incident_id = ?`, inc.ID)
@@ -374,7 +374,7 @@ func (s *Store) GetIncident(ctx context.Context, id string) (event.Incident, err
 				inc.Alerts = append(inc.Alerts, alert)
 			}
 		}
-		alertRows.Close()
+		_ = alertRows.Close() // #nosec G104
 	}
 
 	return inc, nil
@@ -429,10 +429,10 @@ func (s *Store) QueryIncidents(ctx context.Context, statuses []event.IncidentSta
 			inc.Notes = notes.String
 		}
 
-		json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) //nolint:errcheck
-		json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) //nolint:errcheck
-		json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) //nolint:errcheck
-		json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) //nolint:errcheck
+		_ = json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) // #nosec G104
+		_ = json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) // #nosec G104
+		_ = json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) // #nosec G104
+		_ = json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) // #nosec G104
 
 		// Need to load alerts separately for the incident
 		alertRows, err := s.db.QueryContext(ctx, `SELECT id, timestamp, event_id, rule_id, rule_name, severity, confidence, risk_score, message, attack_tactic, attack_technique, acknowledged FROM alerts WHERE incident_id = ?`, inc.ID)
@@ -454,7 +454,7 @@ func (s *Store) QueryIncidents(ctx context.Context, statuses []event.IncidentSta
 					inc.Alerts = append(inc.Alerts, alert)
 				}
 			}
-			alertRows.Close()
+			_ = alertRows.Close() // #nosec G104
 		}
 
 		incidents = append(incidents, inc)

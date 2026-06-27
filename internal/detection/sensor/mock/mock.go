@@ -75,7 +75,7 @@ func (s *processSensor) Health() sensor.SensorHealth {
 }
 
 func (s *processSensor) generateEvent() event.Event {
-	proc := mockProcesses[rand.Intn(len(mockProcesses))]
+	proc := mockProcesses[rand.Intn(len(mockProcesses))] // #nosec G404
 	hostname, _ := os.Hostname()
 
 	return event.Event{
@@ -93,7 +93,7 @@ func (s *processSensor) generateEvent() event.Event {
 		Sensor:   "MockProcessSensor",
 		Data: event.EventData{
 			Process: &event.ProcessData{
-				PID:     rand.Intn(65535) + 100,
+				PID:     rand.Intn(65535) + 100, // #nosec G404
 				PPID:    proc.ppid,
 				Name:    proc.name,
 				Path:    proc.path,
@@ -229,7 +229,7 @@ func (s *networkSensor) Health() sensor.SensorHealth {
 }
 
 func (s *networkSensor) generateEvent() event.Event {
-	conn := mockConnections[rand.Intn(len(mockConnections))]
+	conn := mockConnections[rand.Intn(len(mockConnections))] // #nosec G404
 	hostname, _ := os.Hostname()
 
 	return event.Event{
@@ -249,11 +249,11 @@ func (s *networkSensor) generateEvent() event.Event {
 			Network: &event.NetworkData{
 				Protocol:    conn.protocol,
 				SrcIP:       "192.168.1.100",
-				SrcPort:     rand.Intn(64000) + 1024,
+				SrcPort:     rand.Intn(64000) + 1024, // #nosec G404
 				DstIP:       conn.dstIP,
 				DstPort:     conn.dstPort,
 				ProcessName: conn.processName,
-				ProcessPID:  rand.Intn(65535) + 100,
+				ProcessPID:  rand.Intn(65535) + 100, // #nosec G404
 			},
 		},
 	}

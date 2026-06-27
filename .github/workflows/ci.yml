@@ -40,7 +40,13 @@ jobs:
     - name: Test
       env:
         CGO_ENABLED: ${{ matrix.os == 'windows-latest' && '0' || '1' }}
-      run: go test -v -race ./...
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          go test -v ./...
+        else
+          go test -v -race ./...
+        fi
 
   lint:
     name: Lint

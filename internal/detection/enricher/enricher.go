@@ -57,7 +57,7 @@ func (e *Enricher) Enrich(evt event.Event) event.Event {
 
 // hashFile computes SHA256 of a file. Returns nil if the file can't be read.
 func hashFile(path string) map[string]string {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304
 	if err != nil {
 		slog.Debug("enricher: could not hash file", "path", path, "error", err)
 		return nil
