@@ -58,9 +58,11 @@ jobs:
         go-version: '1.25.x'
         cache: true
     - name: Install libyara-dev
-      run: sudo apt-get update && sudo apt-get install -y libyara-dev
+      run: sudo apt-get update && sudo apt-get install -y libyara-dev pkg-config
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v9
+      env:
+        CGO_ENABLED: 1
       with:
         version: latest
         args: --timeout=5m
