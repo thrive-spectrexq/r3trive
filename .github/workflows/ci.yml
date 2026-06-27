@@ -60,7 +60,7 @@ jobs:
     - name: Install libyara-dev
       run: sudo apt-get update && sudo apt-get install -y libyara-dev pkg-config
     - name: Install golangci-lint
-      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.3
+      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     - name: Run golangci-lint
       env:
         CGO_ENABLED: "1"
