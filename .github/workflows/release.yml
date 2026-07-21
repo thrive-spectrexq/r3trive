@@ -1,0 +1,135 @@
+name: Release Binaries & Source Code
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name for release (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-binaries:
+    name: Build Binary (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            ext: ""
+            archive_ext: "tar.gz"
+          - goos: linux
+            goarch: arm64
+            ext: ""
+            archive_ext: "tar.gz"
+          - goos: windows
+            goarch: amd64
+            ext: ".exe"
+            archive_ext: "zip"
+          - goos: windows
+            goarch: arm64
+            ext: ".exe"
+            archive_ext: "zip"
+          - goos: darwin
+            goarch: amd64
+            ext: ""
+            archive_ext: "tar.gz"
+          - goos: darwin
+            goarch: arm64
+            ext: ""
+            archive_ext: "tar.gz"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Set release version
+        id: vars
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.tag_name }}"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          BUILD_NAME="r3trive${{ matrix.ext }}"
+          go build -ldflags "-s -w -X github.com/thrive-spectrexq/r3trive/internal/version.Version=${{ steps.vars.outputs.VERSION }}" -o "dist/${BUILD_NAME}" ./cmd/r3trive
+
+      - name: Package archive
+        run: |
+          ARCHIVE_NAME="r3trive_${{ steps.vars.outputs.VERSION }}_${{ matrix.goos }}_${{ matrix.goarch }}"
+          mkdir -p release_assets
+          cd dist
+          if [ "${{ matrix.archive_ext }}" = "zip" ]; then
+            zip "../release_assets/${ARCHIVE_NAME}.zip" "r3trive${{ matrix.ext }}"
+          else
+            tar -czvf "../release_assets/${ARCHIVE_NAME}.tar.gz" "r3trive${{ matrix.ext }}"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: release_assets/*
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files and generate checksums
+        id: prep
+        run: |
+          mkdir -p dist_release
+          find artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} dist_release/ \;
+          cd dist_release
+          sha256sum * > checksums.txt
+          echo "DIST_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist_release/*.zip
+            dist_release/*.tar.gz
+            dist_release/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
