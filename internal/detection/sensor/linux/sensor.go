@@ -17,7 +17,8 @@ import (
 
 // ProcessSensor implements the Linux process monitoring sensor via /proc polling.
 type ProcessSensor struct {
-	knownPIDs map[int]bool
+	knownPIDs       map[int]bool
+	eventsCollected int64
 }
 
 // NewProcessSensor creates a new Linux process sensor.
@@ -31,8 +32,20 @@ func (s *ProcessSensor) Name() string {
 	return "linux_process_sensor"
 }
 
+func (s *ProcessSensor) Platform() []sensor.Platform {
+	return []sensor.Platform{sensor.PlatformLinux}
+}
+
 func (s *ProcessSensor) Type() string {
 	return "process"
+}
+
+func (s *ProcessSensor) Health() sensor.SensorHealth {
+	return sensor.SensorHealth{
+		Healthy:         true,
+		Status:          "operational",
+		EventsCollected: s.eventsCollected,
+	}
 }
 
 func (s *ProcessSensor) Start(ctx context.Context, out chan<- event.Event) error {
@@ -74,6 +87,7 @@ func (s *ProcessSensor) pollProcFS(ctx context.Context, out chan<- event.Event) 
 		if !s.knownPIDs[pid] {
 			// New process detected
 			s.knownPIDs[pid] = true
+			s.eventsCollected++
 
 			cmdlineBytes, _ := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", pid))
 			cmdline := strings.ReplaceAll(string(cmdlineBytes), "\x00", " ")
