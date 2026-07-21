@@ -1,0 +1,25 @@
+id: PB-001
+name: Ransomware Containment Workflow
+description: Automates isolation and process termination when ransomware activity is detected
+trigger:
+  incident_type: ransomware
+  risk_score_gte: 80
+  severity_gte: critical
+steps:
+  - name: Kill malicious process
+    action: kill_process
+    params:
+      pid: "$.incident.primary_pid"
+    on_failure: continue
+
+  - name: Isolate host network
+    action: isolate_host
+    params:
+      host_id: "$.incident.host_id"
+    on_failure: alert_admin
+
+  - name: Quarantine dropped artifacts
+    action: quarantine_file
+    params:
+      path: "$.incident.primary_path"
+    on_failure: continue

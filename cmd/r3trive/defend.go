@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/thrive-spectrexq/r3trive/internal/response"
+	"github.com/thrive-spectrexq/r3trive/internal/response/playbook"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
@@ -20,6 +21,7 @@ var (
 	defendMode      string
 	defendThreshold int
 	defendDaemon    bool
+	playbooksDir    string
 )
 
 func newDefendCmd() *cobra.Command {
@@ -28,13 +30,14 @@ func newDefendCmd() *cobra.Command {
 		Short: "Start automated response and containment",
 		Long: `The defend command evaluates open incidents and automatically executes
 containment actions such as process termination, network blocking, and
-host isolation based on the configured mode and threshold.`,
+host isolation based on configured playbooks and incident thresholds.`,
 		RunE: runDefend,
 	}
 
 	cmd.Flags().StringVar(&defendMode, "mode", "active", "response mode: active, passive (dry-run)")
 	cmd.Flags().IntVar(&defendThreshold, "threshold", 80, "minimum risk score to trigger response")
 	cmd.Flags().BoolVar(&defendDaemon, "daemon", false, "run continuously to poll for new incidents")
+	cmd.Flags().StringVar(&playbooksDir, "playbooks-dir", "rules/playbooks", "directory containing automated response playbooks")
 
 	return cmd
 }
@@ -75,9 +78,18 @@ func runDefend(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("unsupported storage driver: %s", cfg.Storage.Driver)
 	}
 
-	// Initialize response engine
+	// Initialize response engine & playbook engine
 	dryRun := defendMode != "active"
 	engine := response.New(dryRun)
+	pbEngine := playbook.NewEngine(dryRun)
+
+	if playbooksDir != "" {
+		if err := pbEngine.LoadDir(playbooksDir); err != nil {
+			slog.Warn("could not load playbooks directory", "dir", playbooksDir, "error", err)
+		} else {
+			slog.Info("loaded playbooks", "count", len(pbEngine.ListPlaybooks()))
+		}
+	}
 
 	// Single execution or daemon loop
 	if defendDaemon {
@@ -90,14 +102,14 @@ func runDefend(cmd *cobra.Command, args []string) error {
 			case <-ctx.Done():
 				return nil
 			case <-ticker.C:
-				if err := processIncidents(ctx, store, engine, defendThreshold); err != nil {
+				if err := processIncidents(ctx, store, engine, pbEngine, defendThreshold); err != nil {
 					slog.Error("error processing incidents", "error", err)
 				}
 			}
 		}
 	} else {
 		// Run once
-		if err := processIncidents(ctx, store, engine, defendThreshold); err != nil {
+		if err := processIncidents(ctx, store, engine, pbEngine, defendThreshold); err != nil {
 			return fmt.Errorf("processing incidents: %w", err)
 		}
 		fmt.Println("\nDefense evaluation complete.")
@@ -106,7 +118,7 @@ func runDefend(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func processIncidents(ctx context.Context, store storage.Store, engine *response.Engine, threshold int) error {
+func processIncidents(ctx context.Context, store storage.Store, engine *response.Engine, pbEngine *playbook.Engine, threshold int) error {
 	incidents, err := store.QueryIncidents(ctx, []event.IncidentStatus{event.IncidentStatusOpen, event.IncidentStatusInvestigating})
 	if err != nil {
 		return fmt.Errorf("querying incidents: %w", err)
@@ -119,16 +131,33 @@ func processIncidents(ctx context.Context, store storage.Store, engine *response
 
 		slog.Info("evaluating incident for automated response", "incident_id", inc.ID, "risk_score", inc.RiskScore)
 
+		// 1. Evaluate playbooks
+		pbResults, pbErr := pbEngine.EvaluateAndExecute(ctx, inc, engine)
+		if pbErr != nil {
+			slog.Error("failed to execute playbooks for incident", "incident_id", inc.ID, "error", pbErr)
+		}
+
+		// 2. Direct response rules fallback/supplement
 		results, err := engine.RespondToIncident(ctx, inc, threshold)
 		if err != nil {
 			slog.Error("failed to respond to incident", "incident_id", inc.ID, "error", err)
 			continue
 		}
 
-		if len(results) > 0 {
+		totalActions := len(results)
+		for _, pbRes := range pbResults {
+			totalActions += len(pbRes.StepResults)
+		}
+
+		if totalActions > 0 {
 			allSuccess := true
 			for _, r := range results {
 				if !r.Success {
+					allSuccess = false
+				}
+			}
+			for _, pbRes := range pbResults {
+				if !pbRes.Success {
 					allSuccess = false
 				}
 			}
