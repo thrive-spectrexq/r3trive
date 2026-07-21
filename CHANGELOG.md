@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2026-07-21
+## [0.1.1] - 2026-07-21
 
 ### Added
 - **Threat Hunting Engine (`r3trive hunt`)**: Added proactive threat hunting across host processes, disk artifacts, YARA rules, and Sigma rules with MITRE ATT&CK technique filtering (`--technique T1003`).
@@ -31,4 +31,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[1.0.0]: https://github.com/thrive-spectrexq/r3trive/releases/tag/v1.0.0
+[0.1.1]: https://github.com/thrive-spectrexq/r3trive/releases/tag/v0.1.1
