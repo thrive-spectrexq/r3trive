@@ -1,6 +1,6 @@
 # R3TRIVE
 
-> **Endpoint detection, threat hunting, and automated defense.**
+> **Endpoint detection, threat hunting and automated defense.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
@@ -250,17 +250,6 @@ Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
 | [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) | Full schema reference |
 | [SOC_WORKFLOW.md](docs/SOC_WORKFLOW.md) | SOC integration and triage playbooks |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
-
----
-
-## Security & Trust
-
-R3TRIVE is built on zero-trust architecture principles:
-
-- **Least privilege**: Every component operates with minimum required permissions
-- **Continuous verification**: No implicit trust between subsystems
-- **Immutable audit logs**: Tamper-evident event records
-- **Signed releases**: All binaries are signed and verifiable
 
 ---
 
