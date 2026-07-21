@@ -168,11 +168,10 @@ func newSummarizeCmd() *cobra.Command {
 
 			fmt.Printf("📊 Fetching activity for the last %s...\n", args[0])
 			since := time.Now().Add(-duration)
-			
-			// Needs to import github.com/thrive-spectrexq/r3trive/internal/storage
+
 			events, err := store.QueryEvents(ctx, storage.EventQuery{
 				Since: since,
-				Limit: 200, // Fetch up to 200 to give the AI a good sample
+				Limit: 200,
 			})
 			if err != nil {
 				return fmt.Errorf("failed to query events: %w", err)
@@ -188,6 +187,71 @@ func newSummarizeCmd() *cobra.Command {
 			fmt.Println("--------------------------------------------------")
 			fmt.Println(resp)
 			fmt.Println("--------------------------------------------------")
+			return nil
+		},
+	}
+}
+
+func newAttackChainCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "attack-chain [incident_id]",
+		Short: "Reconstruct multi-stage attack chain for an incident",
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			incidentID := args[0]
+
+			store, err := sqlite.New(cfg.Storage.DSN)
+			if err != nil {
+				return fmt.Errorf("failed to init storage: %w", err)
+			}
+			defer store.Close()
+
+			inc, err := store.GetIncident(ctx, incidentID)
+			if err != nil {
+				return fmt.Errorf("failed to fetch incident %s: %w", incidentID, err)
+			}
+
+			fmt.Println("═══════════════════════════════════════════")
+			fmt.Println(" R3TRIVE Attack Chain Reconstruction")
+			fmt.Printf(" Incident ID: %s | Severity: %s\n", inc.ID, inc.Severity)
+			fmt.Println("═══════════════════════════════════════════")
+			fmt.Println()
+
+			if len(inc.Alerts) == 0 {
+				fmt.Println("No correlated alerts attached to this incident.")
+				return nil
+			}
+
+			fmt.Println("Attack Execution Flow:")
+			for i, alert := range inc.Alerts {
+				stage := "Initial Access"
+				if alert.ATTACKTactic != "" {
+					stage = alert.ATTACKTactic
+				}
+				tech := alert.ATTACKTechnique
+				if tech == "" {
+					tech = "T1059"
+				}
+
+				fmt.Printf("  Step %d: [%s] %s\n", i+1, stage, alert.RuleName)
+				fmt.Printf("          Technique: %s | Risk Score: %d\n", tech, alert.RiskScore)
+				fmt.Printf("          Timestamp: %s\n\n", alert.Timestamp.Format("15:04:05"))
+			}
+
+			if cfg.AI.Backend != "none" && cfg.AI.Backend != "" {
+				aiCmds, err := ai.NewCommands(cfg.AI)
+				if err == nil {
+					resp, err := aiCmds.ExplainIncident(ctx, inc)
+					if err == nil {
+						fmt.Println("🤖 AI Analyst Reconstruction:")
+						fmt.Println("--------------------------------------------------")
+						fmt.Println(resp)
+						fmt.Println("--------------------------------------------------")
+					}
+				}
+			}
+
 			return nil
 		},
 	}

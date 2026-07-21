@@ -41,6 +41,11 @@ func main() {
 		newDefendCmd(),
 		newExplainCmd(),
 		newSummarizeCmd(),
+		newHuntCmd(),
+		newInvestigateCmd(),
+		newYaraCmd(),
+		newSigmaCmd(),
+		newAttackChainCmd(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {

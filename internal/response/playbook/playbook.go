@@ -66,7 +66,7 @@ func (p *Playbook) Matches(incident event.Incident) bool {
 	if trigger.IncidentType != "" {
 		// match against incident description, title, or alerts
 		typeMatched := false
-		if strings.EqualFold(incident.Title, trigger.IncidentType) ||
+		if strings.Contains(strings.ToLower(incident.Title), strings.ToLower(trigger.IncidentType)) ||
 			strings.Contains(strings.ToLower(incident.Description), strings.ToLower(trigger.IncidentType)) {
 			typeMatched = true
 		} else {
