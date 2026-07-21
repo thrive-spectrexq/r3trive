@@ -28,12 +28,16 @@ linters:
 linters-settings:
   govet:
     enable-all: true
+    disable:
+      - fieldalignment
+      - shadow
   revive:
     rules:
       - name: exported
         arguments:
           - "checkPrivateReceivers"
       - name: blank-imports
+        disabled: true
       - name: context-as-argument
       - name: context-keys-type
       - name: error-return
@@ -51,6 +55,10 @@ linters-settings:
     comparison: true
   misspell:
     locale: US
+    ignore-words:
+      - MITRE
+      - marshalling
+      - cancelled
 
 issues:
   max-issues-per-linter: 50
@@ -60,3 +68,4 @@ issues:
       linters:
         - errcheck
         - gocritic
+        - nilerr

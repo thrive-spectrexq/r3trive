@@ -41,9 +41,9 @@ func runInvestigate(cmd *cobra.Command, args []string) error {
 
 	var store storage.Store
 	if cfg != nil && cfg.Storage.Driver == "sqlite" {
-		var err error
-		store, err = sqlite.New(cfg.Storage.DSN)
-		if err == nil && store != nil {
+		sqliteStore, err := sqlite.New(cfg.Storage.DSN)
+		if err == nil {
+			store = sqliteStore
 			defer store.Close()
 		}
 	}

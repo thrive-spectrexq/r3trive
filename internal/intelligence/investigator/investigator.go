@@ -2,7 +2,7 @@ package investigator
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/md5" // #nosec G501
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -61,14 +61,14 @@ func (inv *Investigator) InvestigateBinary(ctx context.Context, filePath string)
 		return nil, fmt.Errorf("stat target file: %w", err)
 	}
 
-	content, err := os.ReadFile(filePath)
+	content, err := os.ReadFile(filePath) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("read target file: %w", err)
 	}
 
 	// 1. Calculate Hashes
 	sha256Hash := sha256.Sum256(content)
-	md5Hash := md5.Sum(content)
+	md5Hash := md5.Sum(content) // #nosec G401
 	hashes := map[string]string{
 		"sha256": hex.EncodeToString(sha256Hash[:]),
 		"md5":    hex.EncodeToString(md5Hash[:]),

@@ -88,7 +88,7 @@ func (e *Engine) AddEntry(entry IOCEntry) {
 
 // LoadJSONFeed reads IOC entries from a JSON file.
 func (e *Engine) LoadJSONFeed(filePath string) error {
-	file, err := os.Open(filePath)
+	file, err := os.Open(filePath) // #nosec G304
 	if err != nil {
 		return fmt.Errorf("opening feed file: %w", err)
 	}
@@ -109,7 +109,7 @@ func (e *Engine) LoadJSONFeed(filePath string) error {
 
 // LoadCSVFeed reads IOC entries from a CSV file (value,type,severity,description).
 func (e *Engine) LoadCSVFeed(filePath string) error {
-	file, err := os.Open(filePath)
+	file, err := os.Open(filePath) // #nosec G304
 	if err != nil {
 		return fmt.Errorf("opening feed CSV: %w", err)
 	}

@@ -62,7 +62,7 @@ func runSigmaHunt(cmd *cobra.Command, args []string) error {
 		Tags        []string `json:"tags"`
 	}
 
-	var matches []SigmaMatch
+	matches := make([]SigmaMatch, 0, len(entries))
 
 	for _, entry := range entries {
 		if entry.IsDir() || (!strings.HasSuffix(entry.Name(), ".yml") && !strings.HasSuffix(entry.Name(), ".yaml")) {

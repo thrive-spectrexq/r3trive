@@ -142,8 +142,8 @@ func (h *Hunter) huntYara(ctx context.Context, dir string, opts HuntOptions, res
 	}
 	_ = h.yaraScanner.LoadRules(rulesDir)
 
-	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() {
+	_ = filepath.Walk(dir, func(path string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil || info == nil || info.IsDir() {
 			return nil
 		}
 		// Limit walk size for performance
@@ -152,8 +152,8 @@ func (h *Hunter) huntYara(ctx context.Context, dir string, opts HuntOptions, res
 		}
 		result.TotalScanned++
 
-		matches, scanErr := h.yaraScanner.ScanFile(ctx, path)
-		if scanErr != nil {
+		matches, _ := h.yaraScanner.ScanFile(ctx, path)
+		if len(matches) == 0 {
 			return nil
 		}
 

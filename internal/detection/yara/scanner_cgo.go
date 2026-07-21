@@ -55,11 +55,9 @@ func (s *CgoScanner) LoadRules(dir string) error {
 		
 		ext := strings.ToLower(filepath.Ext(e.Name()))
 		if ext == ".yar" || ext == ".yara" {
-			path := filepath.Join(dir, e.Name())
-			
-			f, err := os.Open(path)
-			if err != nil {
-				slog.Error("Failed to open YARA rule", "file", path, "err", err)
+			f, fileErr := os.Open(path)
+			if fileErr != nil {
+				slog.Error("Failed to open YARA rule", "file", path, "err", fileErr)
 				continue
 			}
 			
@@ -133,7 +131,7 @@ func (s *CgoScanner) ScanProcessMemory(ctx context.Context, pid int) ([]Match, e
 }
 
 func (s *CgoScanner) convertMatches(m yara.MatchRules) []Match {
-	var results []Match
+	results := make([]Match, 0, len(m))
 	for _, match := range m {
 		tags := make([]string, len(match.Tags))
 		copy(tags, match.Tags)

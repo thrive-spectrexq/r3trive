@@ -60,9 +60,9 @@ func (s *CliScanner) LoadRules(dir string) error {
 		ext := strings.ToLower(filepath.Ext(e.Name()))
 		if ext == ".yar" || ext == ".yara" {
 			path := filepath.Join(dir, e.Name())
-			content, err := os.ReadFile(path) // #nosec G304
-			if err != nil {
-				slog.Error("Failed to read YARA rule", "file", path, "err", err)
+			content, readErr := os.ReadFile(path) // #nosec G304
+			if readErr != nil {
+				slog.Error("Failed to read YARA rule", "file", path, "err", readErr)
 				continue
 			}
 			combinedRules.Write(content)

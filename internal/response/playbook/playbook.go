@@ -26,7 +26,7 @@ func ParseYAML(data []byte) (*Playbook, error) {
 
 // LoadFromFile reads a playbook file from disk and parses it.
 func LoadFromFile(filePath string) (*Playbook, error) {
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("failed to read playbook file %s: %w", filePath, err)
 	}

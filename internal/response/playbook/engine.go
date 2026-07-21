@@ -85,7 +85,7 @@ func (e *Engine) ListPlaybooks() []*Playbook {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 
-	var list []*Playbook
+	list := make([]*Playbook, 0, len(e.playbooks))
 	for _, pb := range e.playbooks {
 		list = append(list, pb)
 	}

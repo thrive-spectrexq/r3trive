@@ -66,18 +66,18 @@ rule TestRule {
 }
 `
 	rulePath := filepath.Join(tmpDir, "test.yar")
-	if err := os.WriteFile(rulePath, []byte(ruleContent), 0644); err != nil {
-		t.Fatalf("failed to write rule file: %v", err)
+	if wErr := os.WriteFile(rulePath, []byte(ruleContent), 0644); wErr != nil {
+		t.Fatalf("failed to write rule file: %v", wErr)
 	}
 
-	if err := scanner.LoadRules(tmpDir); err != nil {
-		t.Fatalf("LoadRules failed: %v", err)
+	if lErr := scanner.LoadRules(tmpDir); lErr != nil {
+		t.Fatalf("LoadRules failed: %v", lErr)
 	}
 
 	// Create test file
 	testFile := filepath.Join(tmpDir, "target.txt")
-	if err := os.WriteFile(testFile, []byte("Some random text. Hello YARA! End of file."), 0644); err != nil {
-		t.Fatalf("failed to write target file: %v", err)
+	if fErr := os.WriteFile(testFile, []byte("Some random text. Hello YARA! End of file."), 0644); fErr != nil {
+		t.Fatalf("failed to write target file: %v", fErr)
 	}
 
 	// Scan
