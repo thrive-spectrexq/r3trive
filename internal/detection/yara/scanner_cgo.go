@@ -55,6 +55,7 @@ func (s *CgoScanner) LoadRules(dir string) error {
 		
 		ext := strings.ToLower(filepath.Ext(e.Name()))
 		if ext == ".yar" || ext == ".yara" {
+			path := filepath.Join(dir, e.Name())
 			f, fileErr := os.Open(path)
 			if fileErr != nil {
 				slog.Error("Failed to open YARA rule", "file", path, "err", fileErr)
