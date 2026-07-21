@@ -16,7 +16,7 @@ func sysKillProcess(ctx context.Context, pid int) error {
 	cmd := exec.CommandContext(ctx, "kill", "-9", fmt.Sprintf("%d", pid)) // #nosec G204
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("kill failed: %v, output: %s", err, string(output))
+		return fmt.Errorf("kill failed: %w, output: %s", err, string(output))
 	}
 	return nil
 }
@@ -25,14 +25,14 @@ func sysBlockIP(ctx context.Context, ip string) error {
 	slog.Info("executing iptables block", "ip", ip)
 	cmd := exec.CommandContext(ctx, "iptables", "-A", "INPUT", "-s", ip, "-j", "DROP") // #nosec G204
 	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("iptables block failed: %v, output: %s", err, string(out))
+		return fmt.Errorf("iptables block failed: %w, output: %s", err, string(out))
 	}
 	return nil
 }
 
 func sysQuarantineFile(ctx context.Context, path string) error {
 	slog.Info("quarantining file", "path", path)
-	
+
 	quarantineDir := "/var/opt/r3trive/quarantine"
 	if err := os.MkdirAll(quarantineDir, 0700); err != nil {
 		return fmt.Errorf("failed to create quarantine directory: %w", err)
@@ -40,7 +40,7 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 
 	fileName := filepath.Base(path)
 	destPath := filepath.Join(quarantineDir, fileName+".quarantined")
-	
+
 	if err := os.Rename(path, destPath); err != nil {
 		return fmt.Errorf("failed to move file to quarantine: %w", err)
 	}
@@ -55,5 +55,5 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 
 func sysIsolateHost(ctx context.Context) error {
 	slog.Warn("Host isolation requested but disabled for safety")
-	return fmt.Errorf("Host isolation is disabled by default for safety. Must be explicitly enabled with allowed management ports.")
+	return fmt.Errorf("host isolation is disabled by default for safety")
 }

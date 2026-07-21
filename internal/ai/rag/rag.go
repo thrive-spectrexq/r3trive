@@ -9,12 +9,12 @@ import (
 
 // Document represents a knowledge base record (ATT&CK technique, CVE, or Playbook).
 type Document struct {
-	ID          string   `json:"id"`
-	Title       string   `json:"title"`
-	Category    string   `json:"category"`
-	Content     string   `json:"content"`
-	Tags        []string `json:"tags"`
-	Relevance   float64  `json:"relevance,omitempty"`
+	ID        string   `json:"id"`
+	Title     string   `json:"title"`
+	Category  string   `json:"category"`
+	Content   string   `json:"content"`
+	Tags      []string `json:"tags"`
+	Relevance float64  `json:"relevance,omitempty"`
 }
 
 // KnowledgeBase manages vector-like or keyword-based document retrieval for AI context.
@@ -57,7 +57,7 @@ func (kb *KnowledgeBase) RetrieveRelevant(ctx context.Context, query string, max
 	for _, doc := range kb.docs {
 		score := 0.0
 		contentLower := strings.ToLower(doc.Title + " " + doc.Content + " " + strings.Join(doc.Tags, " "))
-		
+
 		for _, kw := range keywords {
 			if len(kw) < 3 {
 				continue

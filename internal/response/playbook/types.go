@@ -26,10 +26,10 @@ type PlaybookTrigger struct {
 
 // Step represents a single response action within a playbook sequence.
 type Step struct {
-	Name      string            `yaml:"name" json:"name"`
+	Name      string              `yaml:"name" json:"name"`
 	Action    response.ActionType `yaml:"action" json:"action"`
-	Params    map[string]any    `yaml:"params,omitempty" json:"params,omitempty"`
-	OnFailure OnFailureStrategy `yaml:"on_failure,omitempty" json:"on_failure,omitempty"`
+	Params    map[string]any      `yaml:"params,omitempty" json:"params,omitempty"`
+	OnFailure OnFailureStrategy   `yaml:"on_failure,omitempty" json:"on_failure,omitempty"`
 }
 
 // Playbook represents an automated response workflow.

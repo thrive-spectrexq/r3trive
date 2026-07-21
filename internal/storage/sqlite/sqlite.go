@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -333,7 +334,7 @@ func (s *Store) GetIncident(ctx context.Context, id string) (event.Incident, err
 		&description, &hostIDsJSON, &attackMapJSON, &artifactJSON, &actionsJSON, &assignedTo, &notes,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return event.Incident{}, fmt.Errorf("incident not found: %s", id)
 		}
 		return event.Incident{}, fmt.Errorf("sqlite: scanning incident: %w", err)
@@ -349,9 +350,9 @@ func (s *Store) GetIncident(ctx context.Context, id string) (event.Incident, err
 		inc.Notes = notes.String
 	}
 
-	_ = json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) // #nosec G104
-	_ = json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) // #nosec G104
-	_ = json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) // #nosec G104
+	_ = json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs)         // #nosec G104
+	_ = json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap)     // #nosec G104
+	_ = json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths)  // #nosec G104
 	_ = json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) // #nosec G104
 
 	// Load alerts
@@ -429,9 +430,9 @@ func (s *Store) QueryIncidents(ctx context.Context, statuses []event.IncidentSta
 			inc.Notes = notes.String
 		}
 
-		_ = json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs) // #nosec G104
-		_ = json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap) // #nosec G104
-		_ = json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths) // #nosec G104
+		_ = json.Unmarshal([]byte(hostIDsJSON), &inc.HostIDs)         // #nosec G104
+		_ = json.Unmarshal([]byte(attackMapJSON), &inc.ATTACKMap)     // #nosec G104
+		_ = json.Unmarshal([]byte(artifactJSON), &inc.ArtifactPaths)  // #nosec G104
 		_ = json.Unmarshal([]byte(actionsJSON), &inc.ResponseActions) // #nosec G104
 
 		// Need to load alerts separately for the incident

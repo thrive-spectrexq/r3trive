@@ -11,16 +11,16 @@ import (
 type Permission string
 
 const (
-	PermissionNetwork   Permission = "network"
+	PermissionNetwork    Permission = "network"
 	PermissionFileSystem Permission = "filesystem"
-	PermissionProcess   Permission = "process"
+	PermissionProcess    Permission = "process"
 )
 
 // Config holds sandbox execution limits and permissions.
 type Config struct {
-	MaxMemoryMB int          `json:"max_memory_mb"`
+	MaxMemoryMB int           `json:"max_memory_mb"`
 	Timeout     time.Duration `json:"timeout"`
-	Permissions []Permission `json:"permissions"`
+	Permissions []Permission  `json:"permissions"`
 }
 
 // Sandbox isolates plugin execution within configured security boundaries.

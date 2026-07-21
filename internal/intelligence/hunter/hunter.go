@@ -17,11 +17,11 @@ import (
 
 // HuntOptions specifies configuration options for a threat hunt.
 type HuntOptions struct {
-	Technique  string
-	Ruleset    string
-	TargetDir  string
-	OutputFmt  string
-	MaxDepth   int
+	Technique string
+	Ruleset   string
+	TargetDir string
+	OutputFmt string
+	MaxDepth  int
 }
 
 // Finding represents a single detection or artifact hit during a threat hunt.
@@ -143,7 +143,7 @@ func (h *Hunter) huntYara(ctx context.Context, dir string, opts HuntOptions, res
 	_ = h.yaraScanner.LoadRules(rulesDir)
 
 	_ = filepath.Walk(dir, func(path string, info os.FileInfo, walkErr error) error {
-		if walkErr != nil || info == nil || info.IsDir() {
+		if walkErr != nil || info == nil || info.IsDir() { //nolint:nilerr
 			return nil
 		}
 		// Limit walk size for performance

@@ -56,7 +56,7 @@ func (s *CliScanner) LoadRules(dir string) error {
 		if e.IsDir() {
 			continue
 		}
-		
+
 		ext := strings.ToLower(filepath.Ext(e.Name()))
 		if ext == ".yar" || ext == ".yara" {
 			path := filepath.Join(dir, e.Name())
@@ -109,13 +109,13 @@ func (s *CliScanner) ScanProcessMemory(ctx context.Context, pid int) ([]Match, e
 	return s.runYara(ctx, s.rulesFilePath, strconv.Itoa(pid))
 }
 
-	// runYara executes the yara CLI and parses its standard output.
+// runYara executes the yara CLI and parses its standard output.
 func (s *CliScanner) runYara(ctx context.Context, ruleFile, target string) ([]Match, error) {
 	// yara [OPTION]... [NAMESPACE:]RULES_FILE... FILE | DIR | PID
 	// -m: print metadata
 	// -g: print tags
 	cmd := exec.CommandContext(ctx, s.executablePath, "-m", "-g", ruleFile, target) // #nosec G204
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		slog.Error("yara command returned error", "target", target, "err", err, "output", string(output))

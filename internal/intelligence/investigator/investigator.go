@@ -18,16 +18,16 @@ import (
 
 // InvestigationReport represents the complete output of an investigation.
 type InvestigationReport struct {
-	Target            string               `json:"target"`
-	TargetType        string               `json:"target_type"` // binary, process, incident
-	Timestamp         time.Time            `json:"timestamp"`
-	RiskScore         int                  `json:"risk_score"`
-	Severity          event.Severity       `json:"severity"`
-	FileHashes        map[string]string    `json:"file_hashes,omitempty"`
-	Entropy           float64              `json:"entropy,omitempty"`
-	Findings          []Finding            `json:"findings"`
+	Target            string                `json:"target"`
+	TargetType        string                `json:"target_type"` // binary, process, incident
+	Timestamp         time.Time             `json:"timestamp"`
+	RiskScore         int                   `json:"risk_score"`
+	Severity          event.Severity        `json:"severity"`
+	FileHashes        map[string]string     `json:"file_hashes,omitempty"`
+	Entropy           float64               `json:"entropy,omitempty"`
+	Findings          []Finding             `json:"findings"`
 	ATTACKTechniques  []event.ATTACKMapping `json:"attack_techniques"`
-	RecommendedAction string               `json:"recommended_action"`
+	RecommendedAction string                `json:"recommended_action"`
 }
 
 // Finding represents a single finding within an investigation.

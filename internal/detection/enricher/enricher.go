@@ -12,10 +12,7 @@ import (
 )
 
 // Enricher adds context to events passing through the pipeline.
-type Enricher struct {
-	// geoIPPath is the path to a GeoIP database (Phase 2).
-	geoIPPath string
-}
+type Enricher struct{}
 
 // New creates a new Enricher.
 func New() *Enricher {

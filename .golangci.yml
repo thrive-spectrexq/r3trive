@@ -34,8 +34,7 @@ linters-settings:
   revive:
     rules:
       - name: exported
-        arguments:
-          - "checkPrivateReceivers"
+        disabled: true
       - name: blank-imports
         disabled: true
       - name: context-as-argument

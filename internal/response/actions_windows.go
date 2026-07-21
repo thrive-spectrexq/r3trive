@@ -24,16 +24,16 @@ func sysKillProcess(ctx context.Context, pid int) error {
 func sysBlockIP(ctx context.Context, ip string) error {
 	slog.Info("executing Windows Firewall block", "ip", ip)
 	ruleName := fmt.Sprintf("R3TRIVE-BLOCK-%s", ip)
-	
+
 	// Block inbound
-	cmdIn := exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule", 
+	cmdIn := exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule",
 		"name="+ruleName+"-IN", "dir=in", "action=block", "remoteip="+ip)
 	if out, err := cmdIn.CombinedOutput(); err != nil {
 		return fmt.Errorf("firewall block inbound failed: %v, output: %s", err, string(out))
 	}
 
 	// Block outbound
-	cmdOut := exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule", 
+	cmdOut := exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule",
 		"name="+ruleName+"-OUT", "dir=out", "action=block", "remoteip="+ip)
 	if out, err := cmdOut.CombinedOutput(); err != nil {
 		return fmt.Errorf("firewall block outbound failed: %v, output: %s", err, string(out))
@@ -44,7 +44,7 @@ func sysBlockIP(ctx context.Context, ip string) error {
 
 func sysQuarantineFile(ctx context.Context, path string) error {
 	slog.Info("quarantining file", "path", path)
-	
+
 	// Ensure quarantine dir exists
 	quarantineDir := `C:\ProgramData\R3trive\Quarantine`
 	if err := os.MkdirAll(quarantineDir, 0700); err != nil {
@@ -54,7 +54,7 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 	// Move file
 	fileName := filepath.Base(path)
 	destPath := filepath.Join(quarantineDir, fileName+".quarantined")
-	
+
 	if err := os.Rename(path, destPath); err != nil {
 		// Fallback: try to copy and delete if cross-device rename fails,
 		// but simple rename usually works if not locked.

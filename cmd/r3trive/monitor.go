@@ -18,6 +18,7 @@ import (
 	"github.com/thrive-spectrexq/r3trive/internal/detection/yara"
 	"github.com/thrive-spectrexq/r3trive/internal/output"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
+	"github.com/thrive-spectrexq/r3trive/internal/storage/postgres"
 	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
@@ -87,17 +88,24 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	// Initialize storage
 	var store storage.Store
 	switch cfg.Storage.Driver {
-	case "sqlite":
+	case "postgres":
+		store, err = postgres.New(cfg.Storage.DSN)
+		if err != nil {
+			return fmt.Errorf("initializing postgres storage: %w", err)
+		}
+	default:
 		store, err = sqlite.New(cfg.Storage.DSN)
 		if err != nil {
 			return fmt.Errorf("initializing storage: %w", err)
 		}
-		defer func() {
+	}
+	defer func() {
+		if store != nil {
 			if closeErr := store.Close(); closeErr != nil {
 				slog.Error("closing storage", "error", closeErr)
 			}
-		}()
-	}
+		}
+	}()
 
 	// 3. Setup YARA Scanner
 	yaraScanner := yara.NewScanner()
@@ -208,7 +216,7 @@ func printEventLine(evt event.Event) {
 		detail = fmt.Sprintf("%s %s:%d → %s:%d (%s)",
 			n.Protocol, n.SrcIP, n.SrcPort, n.DstIP, n.DstPort, n.ProcessName)
 	case evt.Data.File != nil:
-		detail = fmt.Sprintf("%s", evt.Data.File.Path)
+		detail = evt.Data.File.Path
 	default:
 		detail = string(evt.Type)
 	}

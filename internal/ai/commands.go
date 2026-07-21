@@ -80,13 +80,13 @@ func (c *Commands) Summarize(ctx context.Context, events []event.Event) (string,
 
 	var sb strings.Builder
 	sb.WriteString("You are an expert security analyst. Please summarize the following sequence of events and identify any potential attack chain:\n\n")
-	
+
 	// Limit to last 50 events to avoid token limits
 	limit := len(events)
 	if limit > 50 {
 		limit = 50
 	}
-	
+
 	for i := 0; i < limit; i++ {
 		evt := events[i]
 		sb.WriteString(fmt.Sprintf("- [%s] %s (Host: %s, Sensor: %s)\n", evt.Timestamp.Format("15:04:05"), evt.Type, evt.Host.Hostname, evt.Sensor))

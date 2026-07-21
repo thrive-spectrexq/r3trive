@@ -36,7 +36,10 @@ func (t *Transpiler) Transpile(sigRule *sigma.Rule) (*correlation.Rule, error) {
 		if strings.HasPrefix(tagVal, "attack.t") {
 			corrRule.ATTACKTechnique = strings.ToUpper(strings.TrimPrefix(tagVal, "attack."))
 		} else if strings.HasPrefix(tagVal, "attack.") {
-			corrRule.ATTACKTactic = strings.Title(strings.TrimPrefix(tagVal, "attack."))
+			tactic := strings.TrimPrefix(tagVal, "attack.")
+			if len(tactic) > 0 {
+				corrRule.ATTACKTactic = strings.ToUpper(tactic[:1]) + tactic[1:]
+			}
 		}
 	}
 

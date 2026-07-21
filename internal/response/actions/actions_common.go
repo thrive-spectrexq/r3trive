@@ -12,20 +12,20 @@ import (
 type ActionType string
 
 const (
-	ActionKillProcess   ActionType = "kill_process"
-	ActionBlockIP       ActionType = "block_ip"
-	ActionQuarantine    ActionType = "quarantine_file"
-	ActionIsolateHost   ActionType = "isolate_host"
+	ActionKillProcess    ActionType = "kill_process"
+	ActionBlockIP        ActionType = "block_ip"
+	ActionQuarantine     ActionType = "quarantine_file"
+	ActionIsolateHost    ActionType = "isolate_host"
 	ActionDisableAccount ActionType = "disable_account"
 )
 
 // Result holds the status of an executed containment action.
 type Result struct {
-	Type      ActionType `json:"type"`
-	Target    string     `json:"target"`
-	Success   bool       `json:"success"`
-	Detail    string     `json:"detail,omitempty"`
-	Error     string     `json:"error,omitempty"`
+	Type    ActionType `json:"type"`
+	Target  string     `json:"target"`
+	Success bool       `json:"success"`
+	Detail  string     `json:"detail,omitempty"`
+	Error   string     `json:"error,omitempty"`
 }
 
 // QuarantineFile safely relocates a suspicious file to a restricted quarantine directory.
