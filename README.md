@@ -213,7 +213,6 @@ Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
 | Layer | Technology |
 |---|---|
 | Primary language | Go 1.22+ |
-| Performance-critical modules | Rust |
 | Scripting / AI tooling | Python 3.11+ |
 | Local storage | SQLite |
 | Fleet/cluster storage | PostgreSQL |
@@ -254,18 +253,6 @@ Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
 
 ---
 
-## Roadmap
-
-| Phase | Status | Description |
-|---|---|---|
-| Phase 1: MVP Core | ✅ Completed | CLI, ETW event collection, process/network monitoring, pipeline |
-| Phase 2: Detection Platform | ✅ Completed | Behavioral correlation engine, YAML rules, YARA scanner mock |
-| Phase 3: Response Platform | ✅ Completed | Automated containment, host isolation, quarantine |
-| Phase 4: AI Platform | ✅ Completed | Local AI Analyst layer (Explain, Summarize, Generate, Ask) |
-| Phase 5: Enterprise Platform | 📋 Planned | Fleet management, cloud dashboard, multi-tenant SOC |
-
----
-
 ## Security & Trust
 
 R3TRIVE is built on zero-trust architecture principles:
@@ -283,20 +270,12 @@ R3TRIVE is intended exclusively for **defensive cybersecurity operations**, inci
 
 ---
 
-## License
-
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
-
----
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
 
 ---
 
-## Community
+## License
 
-- **GitHub Discussions**: [github.com/thrive-spectrexq/r3trive/discussions](https://github.com/thrive-spectrexq/r3trive/discussions)
-- **Security Issues**: security@r3trive.io (PGP key in SECURITY.md)
-- **Documentation**: [docs.r3trive.io](https://docs.r3trive.io)
+Apache License 2.0 — see [LICENSE](LICENSE) for details.
