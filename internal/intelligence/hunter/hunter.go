@@ -143,8 +143,8 @@ func (h *Hunter) huntYara(ctx context.Context, dir string, opts HuntOptions, res
 	_ = h.yaraScanner.LoadRules(rulesDir)
 
 	_ = filepath.Walk(dir, func(path string, info os.FileInfo, walkErr error) error {
-		if walkErr != nil || info == nil || info.IsDir() { //nolint:nilerr
-			return nil
+		if walkErr != nil || info == nil || info.IsDir() {
+			return nil //nolint:nilerr
 		}
 		// Limit walk size for performance
 		if info.Size() > 50*1024*1024 {

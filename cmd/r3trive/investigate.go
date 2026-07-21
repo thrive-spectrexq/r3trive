@@ -54,14 +54,15 @@ func runInvestigate(cmd *cobra.Command, args []string) error {
 	var report *investigator.InvestigationReport
 	var err error
 
-	if len(args) > 0 && args[0] != "" {
+	switch {
+	case len(args) > 0 && args[0] != "":
 		filePath := args[0]
 		report, err = inv.InvestigateBinary(ctx, filePath)
-	} else if investigatePID > 0 {
+	case investigatePID > 0:
 		report, err = inv.InvestigateProcess(ctx, investigatePID)
-	} else if investigateIncident != "" {
+	case investigateIncident != "":
 		report, err = inv.InvestigateIncident(ctx, investigateIncident)
-	} else {
+	default:
 		return fmt.Errorf("must specify target binary path, --pid, or --incident")
 	}
 
