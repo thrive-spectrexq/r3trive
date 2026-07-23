@@ -2,7 +2,10 @@
 
 **R3TRIVE Detection Engine Specification**
 Version: 1.0.0
-Status: Draft
+Status: Draft / Architectural Specification
+
+> [!NOTE]
+> **Implementation Status**: Windows ETW, Linux `/proc` polling, macOS process sensor, YARA scanning, Sigma transpiler, and IOC matching are implemented. eBPF kernel probes (Linux) and Endpoint Security Framework (macOS) are currently `[PLANNED]` / `[NOT YET IMPLEMENTED]`.
 
 ---
 

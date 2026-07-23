@@ -2,7 +2,10 @@
 
 **R3TRIVE AI Analyst Layer Specification**
 Version: 1.0.0
-Status: Draft
+Status: Draft / Architectural Specification
+
+> [!NOTE]
+> **Implementation Status**: Direct HTTP client integration (`OllamaClient`, `OpenAIClient`) and basic context building are implemented in `internal/ai`. Advanced features described in this specification (Vector RAG, standalone prompt engine, complex multi-tier router) are currently `[PLANNED]` / `[NOT YET IMPLEMENTED]`.
 
 ---
 

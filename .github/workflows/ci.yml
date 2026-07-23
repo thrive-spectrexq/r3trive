@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         go-version: ['1.25.x']
 
     steps:
@@ -31,6 +31,10 @@ jobs:
     - name: Install libyara-dev (Ubuntu)
       if: runner.os == 'Linux'
       run: sudo apt-get update && sudo apt-get install -y libyara-dev
+
+    - name: Install yara (macOS)
+      if: runner.os == 'macOS'
+      run: brew install yara
 
     - name: Build
       env:

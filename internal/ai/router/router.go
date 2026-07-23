@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/thrive-spectrexq/r3trive/internal/ai"
 	"github.com/thrive-spectrexq/r3trive/internal/config"
 )
 
@@ -66,10 +67,32 @@ func (m *MockClient) Name() string {
 	return fmt.Sprintf("MockClient(%s)", m.ModelName)
 }
 
+// AIClientAdapter wraps an ai.Client to satisfy the router.Client interface.
+type AIClientAdapter struct {
+	client ai.Client
+	name   string
+}
+
+func (a *AIClientAdapter) Chat(ctx context.Context, prompt string) (string, error) {
+	return a.client.Chat(ctx, prompt)
+}
+
+func (a *AIClientAdapter) Name() string {
+	return a.name
+}
+
 // SelectClient builds a client matching the given configuration.
 func SelectClient(cfg config.AIConfig) Client {
 	if cfg.Backend == "mock" || cfg.Backend == "" {
 		return &MockClient{ModelName: cfg.Model}
 	}
-	return &MockClient{ModelName: cfg.Model}
+	realClient, err := ai.NewClient(cfg)
+	if err != nil {
+		slog.Warn("failed to initialize AI client, falling back to mock client", "backend", cfg.Backend, "error", err)
+		return &MockClient{ModelName: cfg.Model}
+	}
+	return &AIClientAdapter{
+		client: realClient,
+		name:   fmt.Sprintf("%s(%s)", cfg.Backend, cfg.Model),
+	}
 }

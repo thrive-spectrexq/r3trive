@@ -1,4 +1,4 @@
-//go:build !windows
+//go:build !windows && !linux && !darwin
 
 package main
 
@@ -7,8 +7,7 @@ import (
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
 )
 
-// initNativeSensors initializes platform-specific sensors for non-Windows platforms.
+// initNativeSensors initializes platform-specific sensors for unsupported platforms.
 func initNativeSensors(cfg *config.Config) ([]sensor.Sensor, error) {
-	// TODO: Implement eBPF (Linux) and ESF (macOS) sensors.
 	return nil, nil
 }

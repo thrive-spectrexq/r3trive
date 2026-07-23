@@ -2,10 +2,7 @@
 // detection rules into native R3TRIVE correlation rules.
 package sigma
 
-// TODO: Implement Sigma transpiler:
-// - Parse Sigma YAML rule format
-// - Convert Sigma detection logic to R3TRIVE conditions
-// - Handle Sigma modifiers (contains, startswith, endswith, re, etc.)
-// - Platform-specific field mapping
-// - Compatibility report for lossy conversions
-// - Auto-sync from SigmaHQ repository
+// The Sigma transpiler parses Sigma YAML rules, converts selection logic
+// and modifiers (contains, startswith, endswith, re) into R3TRIVE condition schemas,
+// and maps platform fields.
+

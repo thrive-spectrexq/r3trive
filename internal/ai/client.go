@@ -31,6 +31,7 @@ func NewClient(cfg config.AIConfig) (Client, error) {
 		return &OpenAIClient{
 			Endpoint: cfg.Endpoint,
 			Model:    cfg.Model,
+			APIKey:   cfg.APIKey,
 			client:   &http.Client{Timeout: 60 * time.Second},
 		}, nil
 	case "none", "":
@@ -94,6 +95,7 @@ func (c *OllamaClient) Chat(ctx context.Context, prompt string) (string, error) 
 type OpenAIClient struct {
 	Endpoint string
 	Model    string
+	APIKey   string
 	client   *http.Client
 }
 
@@ -119,8 +121,9 @@ func (c *OpenAIClient) Chat(ctx context.Context, prompt string) (string, error) 
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	// If authorization is needed, it could be loaded from env or config.
-	// req.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_API_KEY"))
+	if c.APIKey != "" {
+		req.Header.Set("Authorization", "Bearer "+c.APIKey)
+	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {

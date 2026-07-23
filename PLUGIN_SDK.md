@@ -2,7 +2,10 @@
 
 **R3TRIVE Plugin SDK Reference**
 Version: 1.0.0
-Status: Draft
+Status: Draft / Architectural Specification
+
+> [!NOTE]
+> **Implementation Status**: In-process timeout bounded sandbox execution and output export plugins are implemented in `internal/plugins`. Multi-process gRPC plugin loader and namespace container isolation are currently `[PLANNED]` / `[NOT YET IMPLEMENTED]`.
 
 ---
 

@@ -65,6 +65,8 @@ type AIConfig struct {
 	Endpoint string `yaml:"endpoint" json:"endpoint"`
 	// Model is the model name to use.
 	Model string `yaml:"model" json:"model"`
+	// APIKey is the API key for authenticated backends like OpenAI.
+	APIKey string `yaml:"api_key" json:"api_key"`
 }
 
 // TelemetryConfig holds OpenTelemetry configuration.
@@ -108,6 +110,7 @@ func Default() *Config {
 			Backend:  "none",
 			Endpoint: "http://localhost:11434",
 			Model:    "llama3",
+			APIKey:   os.Getenv("OPENAI_API_KEY"),
 		},
 		Telemetry: TelemetryConfig{
 			Enabled:  false,
