@@ -12,11 +12,11 @@ import (
 
 type testSensor struct{}
 
-func (s *testSensor) Name() string                     { return "TestSensor" }
-func (s *testSensor) Platform() []sensor.Platform     { return nil }
-func (s *testSensor) Type() string                     { return "test" }
-func (s *testSensor) Health() sensor.SensorHealth      { return sensor.SensorHealth{Healthy: true} }
-func (s *testSensor) Stop() error                      { return nil }
+func (s *testSensor) Name() string                { return "TestSensor" }
+func (s *testSensor) Platform() []sensor.Platform { return nil }
+func (s *testSensor) Type() string                { return "test" }
+func (s *testSensor) Health() sensor.SensorHealth { return sensor.SensorHealth{Healthy: true} }
+func (s *testSensor) Stop() error                 { return nil }
 func (s *testSensor) Start(ctx context.Context, out chan<- event.Event) error {
 	evt := event.Event{
 		ID:        "test-evt-1",

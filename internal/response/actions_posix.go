@@ -49,7 +49,7 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 	if err := os.Rename(path, destPath); err != nil {
 		// Fallback for cross-device move (EXDEV) or rename failure: copy and remove original
 		if copyErr := moveFileByCopy(path, destPath); copyErr != nil {
-			return fmt.Errorf("failed to move file to quarantine (rename: %v, copy: %w)", err, copyErr)
+			return fmt.Errorf("failed to move file to quarantine (rename: %w, copy: %w)", err, copyErr)
 		}
 	}
 
@@ -62,26 +62,29 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 }
 
 func moveFileByCopy(src, dst string) error {
-	in, err := os.Open(src)
+	cleanSrc := filepath.Clean(src)
+	cleanDst := filepath.Clean(dst)
+
+	in, err := os.Open(cleanSrc) // #nosec G304
 	if err != nil {
 		return err
 	}
 	defer in.Close()
 
-	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	out, err := os.OpenFile(cleanDst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600) // #nosec G304
 	if err != nil {
 		return err
 	}
 
 	if _, err := io.Copy(out, in); err != nil {
-		out.Close()
+		_ = out.Close()
 		return err
 	}
 	if err := out.Close(); err != nil {
 		return err
 	}
 
-	return os.Remove(src)
+	return os.Remove(cleanSrc)
 }
 
 func sysIsolateHost(ctx context.Context) error {

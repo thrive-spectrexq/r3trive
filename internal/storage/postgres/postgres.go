@@ -57,6 +57,10 @@ func (s *Store) UpdateIncidentStatus(ctx context.Context, id string, status even
 	return fmt.Errorf("postgres storage driver not supported")
 }
 
+func (s *Store) DSN() string {
+	return s.dsn
+}
+
 func (s *Store) Close() error {
 	return nil
 }
