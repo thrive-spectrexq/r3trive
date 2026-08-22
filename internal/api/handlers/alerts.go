@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -15,7 +16,9 @@ func ListAlerts(store storage.Store) http.HandlerFunc {
 		// Placeholder since store doesn't have QueryAlerts yet
 		alerts := []event.Alert{}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(alerts)
+		if err := json.NewEncoder(w).Encode(alerts); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -26,6 +29,8 @@ func AcknowledgeAlert(store storage.Store) http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"status": "acknowledged", "id": id})
+		if err := json.NewEncoder(w).Encode(map[string]string{"status": "acknowledged", "id": id}); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }

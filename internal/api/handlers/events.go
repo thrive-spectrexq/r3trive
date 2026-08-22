@@ -46,7 +46,9 @@ func QueryEvents(store storage.Store) http.HandlerFunc {
 			slog.Error("Failed to query events", "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
 			return
 		}
 
@@ -55,7 +57,9 @@ func QueryEvents(store storage.Store) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(events)
+		if err := json.NewEncoder(w).Encode(events); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -69,11 +73,15 @@ func GetEvent(store storage.Store) http.HandlerFunc {
 			slog.Error("Failed to get event", "id", id, "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]string{"error": "event not found"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "event not found"}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(evt)
+		if err := json.NewEncoder(w).Encode(evt); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }

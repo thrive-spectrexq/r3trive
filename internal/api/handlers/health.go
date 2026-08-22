@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -21,6 +22,8 @@ func GetHealth(store storage.Store) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(health)
+		if err := json.NewEncoder(w).Encode(health); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }

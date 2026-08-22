@@ -24,7 +24,9 @@ func ListIncidents(store storage.Store) http.HandlerFunc {
 			slog.Error("Failed to query incidents", "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
 			return
 		}
 
@@ -33,7 +35,9 @@ func ListIncidents(store storage.Store) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(incidents)
+		if err := json.NewEncoder(w).Encode(incidents); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -47,12 +51,16 @@ func GetIncident(store storage.Store) http.HandlerFunc {
 			slog.Error("Failed to get incident", "id", id, "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(map[string]string{"error": "incident not found"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "incident not found"}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(inc)
+		if err := json.NewEncoder(w).Encode(inc); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -69,7 +77,9 @@ func UpdateIncidentStatus(store storage.Store) http.HandlerFunc {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": "invalid request body"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "invalid request body"}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
 			return
 		}
 
@@ -77,12 +87,16 @@ func UpdateIncidentStatus(store storage.Store) http.HandlerFunc {
 			slog.Error("Failed to update incident status", "id", id, "error", err)
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"})
+			if err := json.NewEncoder(w).Encode(map[string]string{"error": "internal server error"}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"status": "updated", "id": id})
+		if err := json.NewEncoder(w).Encode(map[string]string{"status": "updated", "id": id}); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }

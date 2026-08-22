@@ -91,8 +91,17 @@ func TestSQLiteSaveAlert(t *testing.T) {
 
 	ctx := context.Background()
 
+	evt := event.Event{
+		ID:        "evt-123",
+		Timestamp: time.Now().UTC(),
+	}
+	if err := store.SaveEvent(ctx, evt); err != nil {
+		t.Fatalf("Failed to save event: %v", err)
+	}
+
 	alert := event.Alert{
 		ID:              "alert-001",
+		Event:           evt,
 		Timestamp:       time.Now().UTC(),
 		RuleID:          "rule-001",
 		RuleName:        "Suspicious Process",
