@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.1.3] - 2026-08-22
+
 ### Added
 - **Linux Sensors**: Added `inotify` based file sensor and `/proc/net` based network sensor for Linux hosts.
 - **Windows Sensors**: Added ETW-based registry sensor (`Microsoft-Windows-Kernel-Registry`).
