@@ -52,6 +52,24 @@ jobs:
           go test -v -race ./...
         fi
 
+    - name: Test Integration
+      env:
+        CGO_ENABLED: ${{ matrix.os == 'windows-latest' && '0' || '1' }}
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          make test-integration
+        fi
+
+    - name: Test E2E
+      env:
+        CGO_ENABLED: ${{ matrix.os == 'windows-latest' && '0' || '1' }}
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          sudo make test-e2e
+        fi
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

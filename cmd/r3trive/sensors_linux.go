@@ -12,5 +12,7 @@ import (
 func initNativeSensors(cfg *config.Config) ([]sensor.Sensor, error) {
 	var sensors []sensor.Sensor
 	sensors = append(sensors, linux.NewProcessSensor())
+	sensors = append(sensors, linux.NewFileSensor())
+	sensors = append(sensors, linux.NewNetworkSensor())
 	return sensors, nil
 }

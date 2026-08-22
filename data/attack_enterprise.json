@@ -1,0 +1,62 @@
+[
+  {
+    "id": "T1003.001",
+    "name": "OS Credential Dumping: LSASS Memory",
+    "tactic": "Credential Access",
+    "description": "Adversaries may attempt to access credential material stored in the Process Memory of the Local Security Authority Subsystem Service (LSASS). Tools: Mimikatz, ProcDump, Sekurlsa."
+  },
+  {
+    "id": "T1059.001",
+    "name": "Command and Scripting Interpreter: PowerShell",
+    "tactic": "Execution",
+    "description": "Adversaries may use PowerShell to execute commands and scripts. PowerShell is often abused with Base64 encoding (-enc, -EncodedCommand) to hide malicious payloads."
+  },
+  {
+    "id": "T1071.001",
+    "name": "Application Layer Protocol: Web Protocols",
+    "tactic": "Command and Control",
+    "description": "Adversaries may communicate using application layer protocols to bypass network filtering (HTTP/HTTPS beacons, Tor exit nodes, C2 channels)."
+  },
+  {
+    "id": "T1547.001",
+    "name": "Boot or Logon Autostart: Registry Run Keys",
+    "tactic": "Persistence",
+    "description": "Adversaries may achieve persistence by adding an entry to the Windows Registry Run keys (HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run)."
+  },
+  {
+    "id": "T1055",
+    "name": "Process Injection",
+    "tactic": "Defense Evasion",
+    "description": "Adversaries may inject code into processes in order to evade process-based defenses as well as possibly elevate privileges. Techniques include DLL injection, Process Hollowing, and Thread Execution Hijacking."
+  },
+  {
+    "id": "T1021.001",
+    "name": "Remote Services: Remote Desktop Protocol",
+    "tactic": "Lateral Movement",
+    "description": "Adversaries may use Valid Accounts to log into Remote Desktop Protocol (RDP) services to move laterally across a network."
+  },
+  {
+    "id": "T1036.005",
+    "name": "Masquerading: Match Legitimate Name or Location",
+    "tactic": "Defense Evasion",
+    "description": "Adversaries may match or approximate the name or location of legitimate files or resources when naming/placing them."
+  },
+  {
+    "id": "T1105",
+    "name": "Ingress Tool Transfer",
+    "tactic": "Command and Control",
+    "description": "Adversaries may transfer tools or other files from an external system into a compromised environment."
+  },
+  {
+    "id": "T1562.001",
+    "name": "Impair Defenses: Disable or Modify Tools",
+    "tactic": "Defense Evasion",
+    "description": "Adversaries may modify and/or disable security tools to avoid possible detection of their malware/tools and activities."
+  },
+  {
+    "id": "T1046",
+    "name": "Network Service Discovery",
+    "tactic": "Discovery",
+    "description": "Adversaries may attempt to get a listing of services listening on remote hosts and local network infrastructure devices."
+  }
+]

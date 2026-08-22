@@ -8,8 +8,9 @@ import (
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
-func TestRAGKnowledgeBase(t *testing.T) {
-	kb := NewKnowledgeBase()
+func TestKnowledgeBaseAddRetrieve(t *testing.T) {
+	embedder := NewMockEmbedder()
+	kb := NewKnowledgeBase(embedder)
 	ctx := context.Background()
 
 	results := kb.RetrieveRelevant(ctx, "powershell encoded command", 2)

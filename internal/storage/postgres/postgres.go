@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
@@ -80,7 +81,7 @@ func New(dsn string) (*Store, error) {
 		return nil, fmt.Errorf("empty PostgreSQL connection DSN")
 	}
 
-	driverName := "postgres"
+	driverName := "pgx"
 	db, err := sql.Open(driverName, dsn)
 	if err != nil {
 		slog.Warn("postgres driver open warning", "dsn", dsn, "error", err)

@@ -31,6 +31,21 @@ type Config struct {
 
 	// Sensor settings
 	Sensor SensorConfig `yaml:"sensor" json:"sensor"`
+
+	// API settings
+	API APIConfig `yaml:"api" json:"api"`
+}
+
+// APIConfig holds API server configuration.
+type APIConfig struct {
+	// Addr is the bind address (e.g., ":8080").
+	Addr string `yaml:"addr" json:"addr"`
+	// APIKey is the static key for authentication.
+	APIKey string `yaml:"api_key" json:"api_key"`
+	// TLSCert is the path to the TLS certificate file.
+	TLSCert string `yaml:"tls_cert" json:"tls_cert"`
+	// TLSKey is the path to the TLS key file.
+	TLSKey string `yaml:"tls_key" json:"tls_key"`
 }
 
 // MonitorConfig holds monitoring-specific configuration.
@@ -119,6 +134,12 @@ func Default() *Config {
 		Sensor: SensorConfig{
 			Mode:           "native",
 			RingBufferSize: 10000,
+		},
+		API: APIConfig{
+			Addr:    ":8080",
+			APIKey:  "",
+			TLSCert: "",
+			TLSKey:  "",
 		},
 	}
 }

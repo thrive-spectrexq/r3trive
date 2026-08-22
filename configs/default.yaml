@@ -29,3 +29,9 @@ telemetry:
 sensor:
   mode: native
   ring_buffer_size: 10000
+
+api:
+  addr: ":8080"
+  api_key: "" # Leave empty to disable auth for local development
+  tls_cert: ""
+  tls_key: ""

@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Linux Sensors**: Added `inotify` based file sensor and `/proc/net` based network sensor for Linux hosts.
+- **Windows Sensors**: Added ETW-based registry sensor (`Microsoft-Windows-Kernel-Registry`).
+- **REST API Server (`internal/api`)**: Built full REST API supporting incident queries, event fetching, and health checks with API key authentication.
+- **Enhanced AI RAG**: Added vector embedding support with cosine similarity and MITRE ATT&CK enterprise dataset loading to power the AI Analyst.
+- **Storage**: Fixed PostgreSQL driver missing dependency (`jackc/pgx/v5`).
+- **E2E Tests**: Added comprehensive integration and E2E test suites for API and sensor pipelines.
+- **Docker**: Added multi-stage CGO-enabled build for standard deployments.
+
 ---
 
 ## [0.1.1] - 2026-07-21

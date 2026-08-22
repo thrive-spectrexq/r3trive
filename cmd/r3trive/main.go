@@ -46,6 +46,7 @@ func main() {
 		newYaraCmd(),
 		newSigmaCmd(),
 		newAttackChainCmd(),
+		newServeCmd(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {
