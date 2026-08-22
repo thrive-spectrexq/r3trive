@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -93,8 +94,9 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 
 	return &Server{
 		httpServer: &http.Server{
-			Addr:    cfg.Addr,
-			Handler: r,
+			Addr:              cfg.Addr,
+			Handler:           r,
+			ReadHeaderTimeout: 5 * time.Second,
 		},
 		store:  store,
 		config: cfg,

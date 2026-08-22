@@ -85,6 +85,7 @@ func (s *NetworkSensor) monitor(ctx context.Context, ch chan<- event.Event) {
 }
 
 func (s *NetworkSensor) pollConnections(ctx context.Context, ch chan<- event.Event, path string, protocol string, hostname string) {
+	//#nosec G304
 	file, err := os.Open(path)
 	if err != nil {
 		s.errorCount.Add(1)

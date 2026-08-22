@@ -16,6 +16,7 @@ type attackJSON struct {
 // LoadATTACKData parses a JSON file containing MITRE ATT&CK techniques
 // and returns them as a slice of Documents.
 func LoadATTACKData(path string) ([]Document, error) {
+	//#nosec G304
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

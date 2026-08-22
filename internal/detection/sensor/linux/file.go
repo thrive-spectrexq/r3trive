@@ -98,7 +98,7 @@ func (s *FileSensor) monitor(ctx context.Context, ch chan<- event.Event) {
 
 	eventInotify := unix.EpollEvent{
 		Events: unix.EPOLLIN,
-		Fd:     int32(s.fd),
+		Fd:     int32(s.fd), // #nosec G115
 	}
 	if err := unix.EpollCtl(epfd, unix.EPOLL_CTL_ADD, s.fd, &eventInotify); err != nil {
 		s.healthy.Store(false)
@@ -145,7 +145,9 @@ func (s *FileSensor) monitor(ctx context.Context, ch chan<- event.Event) {
 		}
 
 		var offset uint32
+		//#nosec G115
 		for offset <= uint32(nbytes-unix.SizeofInotifyEvent) {
+			//#nosec G103
 			rawEvent := (*unix.InotifyEvent)(unsafe.Pointer(&buf[offset]))
 
 			nameLen := rawEvent.Len
@@ -220,7 +222,7 @@ func (s *FileSensor) Stop() error {
 		s.wg.Wait()
 	}
 	if s.fd > 0 {
-		unix.Close(s.fd)
+		_ = unix.Close(s.fd)
 		s.fd = 0
 	}
 	s.setStatus("Stopped")

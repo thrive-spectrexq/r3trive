@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 )
 
@@ -19,7 +20,9 @@ func APIKeyAuth(apiKey string) func(http.Handler) http.Handler {
 			if key != apiKey {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
-				json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized: invalid or missing API key"})
+				if err := json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized: invalid or missing API key"}); err != nil {
+					slog.Error("failed to encode response", "error", err)
+				}
 				return
 			}
 
