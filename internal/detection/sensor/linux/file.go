@@ -170,13 +170,14 @@ func (s *FileSensor) monitor(ctx context.Context, ch chan<- event.Event) {
 			if ok {
 				var evType event.EventType
 				mask := rawEvent.Mask
-				if mask&unix.IN_CREATE != 0 {
+				switch {
+				case mask&unix.IN_CREATE != 0:
 					evType = event.FileCreate
-				} else if mask&unix.IN_MODIFY != 0 {
+				case mask&unix.IN_MODIFY != 0:
 					evType = event.FileModify
-				} else if mask&unix.IN_DELETE != 0 {
+				case mask&unix.IN_DELETE != 0:
 					evType = event.FileDelete
-				} else if mask&unix.IN_MOVED_FROM != 0 || mask&unix.IN_MOVED_TO != 0 {
+				case mask&unix.IN_MOVED_FROM != 0 || mask&unix.IN_MOVED_TO != 0:
 					evType = event.FileRename
 				}
 

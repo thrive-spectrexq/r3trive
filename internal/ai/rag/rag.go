@@ -43,14 +43,14 @@ func NewKnowledgeBase(embedder Embedder) *KnowledgeBase {
 func (kb *KnowledgeBase) AddDocument(doc Document) {
 	kb.mu.Lock()
 	defer kb.mu.Unlock()
-	
+
 	if kb.embedder != nil && len(doc.Embedding) == 0 {
 		text := doc.Title + " " + doc.Content + " " + strings.Join(doc.Tags, " ")
 		if emb, err := kb.embedder.Embed(text); err == nil {
 			doc.Embedding = emb
 		}
 	}
-	
+
 	kb.docs = append(kb.docs, doc)
 }
 
@@ -86,9 +86,9 @@ func (kb *KnowledgeBase) RetrieveRelevant(ctx context.Context, query string, max
 		if len(doc.Embedding) == 0 {
 			continue
 		}
-		
+
 		score := CosineSimilarity(queryEmb, doc.Embedding)
-		
+
 		// Consider adding a small threshold to avoid returning completely irrelevant documents
 		if score > 0 {
 			d := doc
@@ -199,7 +199,7 @@ func (kb *KnowledgeBase) seedATTACKData() {
 			Tags:     []string{"rdp", "remote", "desktop", "lateral", "movement"},
 		},
 	}
-	
+
 	for _, doc := range docs {
 		if kb.embedder != nil {
 			text := doc.Title + " " + doc.Content + " " + strings.Join(doc.Tags, " ")

@@ -50,7 +50,6 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 
 	// Standard middleware
 	r.Use(requestIDMiddleware)
-	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 

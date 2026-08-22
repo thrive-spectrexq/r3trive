@@ -30,25 +30,25 @@ func NewMockEmbedder() *MockEmbedder {
 func (e *MockEmbedder) Embed(text string) ([]float64, error) {
 	textLower := strings.ToLower(text)
 	vec := make([]float64, len(e.vocabulary))
-	
+
 	for i, term := range e.vocabulary {
 		count := strings.Count(textLower, term)
 		vec[i] = float64(count)
 	}
-	
+
 	// Normalize the vector
 	var norm float64
 	for _, val := range vec {
 		norm += val * val
 	}
 	norm = math.Sqrt(norm)
-	
+
 	if norm > 0 {
 		for i := range vec {
 			vec[i] /= norm
 		}
 	}
-	
+
 	return vec, nil
 }
 
@@ -57,20 +57,20 @@ func CosineSimilarity(a, b []float64) float64 {
 	if len(a) != len(b) {
 		return 0.0
 	}
-	
+
 	var dotProduct float64
 	var normA float64
 	var normB float64
-	
+
 	for i := 0; i < len(a); i++ {
 		dotProduct += a[i] * b[i]
 		normA += a[i] * a[i]
 		normB += b[i] * b[i]
 	}
-	
+
 	if normA == 0 || normB == 0 {
 		return 0.0
 	}
-	
+
 	return dotProduct / (math.Sqrt(normA) * math.Sqrt(normB))
 }
