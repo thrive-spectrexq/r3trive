@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/0xrawsec/golang-etw v1.6.2
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/hillu/go-yara/v4 v4.3.4
 	github.com/jackc/pgx/v5 v5.10.0
@@ -16,7 +17,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.45.0
 	golang.org/x/sys v0.47.0
 	gopkg.in/yaml.v3 v3.0.1
-	modernc.org/sqlite v1.56.0
+	modernc.org/sqlite v1.57.0
 )
 
 require (
@@ -24,7 +25,6 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/go-chi/chi/v5 v5.3.2 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0 // indirect
