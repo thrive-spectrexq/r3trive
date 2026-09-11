@@ -1,0 +1,3589 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Endpoint detection, threat hunting and automated defense.">
+      
+      
+        <meta name="author" content="R3TRIVE Contributors">
+      
+      
+        <link rel="canonical" href="https://thrive-spectrexq.github.io/r3trive/api_reference/">
+      
+      
+        <link rel="prev" href="../soc_workflow/">
+      
+      
+        <link rel="next" href="../contributing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>API Reference - R3TRIVE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api_referencemd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="R3TRIVE" class="md-header__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            R3TRIVE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API Reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../system_architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../threat_model/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Threat Model
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../detection_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Detection Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../rule_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Rule Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ai_analyst/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  AI Analyst
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../database_schema/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Database Schema
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugin_sdk/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugin SDK
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../soc_workflow/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SOC Workflow
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="R3TRIVE" class="md-nav__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    R3TRIVE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../threat_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rule_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai_analyst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Analyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugin_sdk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../soc_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SOC Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-api-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. API Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. API Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-api-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 API Versioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-request-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Request Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-response-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Response Envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Authentication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-api-key-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 API Key Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-short-lived-session-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Short-lived Session Token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-roles-and-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Roles and Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-events-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Events API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Events API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-list-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 List Events
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-get-event" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Get Event
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-stream-events-sse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Stream Events (SSE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-alerts-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Alerts API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Alerts API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-list-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 List Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-get-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Get Alert
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-update-alert-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Update Alert Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-bulk-update-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Bulk Update Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-incidents-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Incidents API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Incidents API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-list-incidents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 List Incidents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-get-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Get Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-update-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Update Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-get-incident-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Get Incident Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-get-incident-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Get Incident Evidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-hosts-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Hosts API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Hosts API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-list-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 List Hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-get-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Get Host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-get-host-risk-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Get Host Risk Score
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-get-host-activity-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Get Host Activity Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-hunt-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Hunt API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Hunt API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-run-hunt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Run Hunt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-get-hunt-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Get Hunt Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-list-hunt-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 List Hunt History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-investigate-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Investigate API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Investigate API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-investigate-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Investigate File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-investigate-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Investigate Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-investigate-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Investigate Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-response-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Response API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Response API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-execute-response-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Execute Response Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-rollback-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Rollback Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-list-response-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 List Response Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-execute-playbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Execute Playbook
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-intelligence-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Intelligence API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Intelligence API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-add-ioc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Add IOC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-search-iocs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Search IOCs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-bulk-ioc-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Bulk IOC Import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-check-reputation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Check Reputation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-list-threat-feeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 List Threat Feeds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-rules-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Rules API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Rules API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-list-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 List Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-get-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Get Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-create-custom-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Create Custom Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-update-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Update Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-enabledisable-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Enable/Disable Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#116-get-rule-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.6 Get Rule Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-ai-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. AI API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. AI API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-explain-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Explain Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-summarize-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Summarize Activity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-generate-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Generate Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-ask-security-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Ask Security Question
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#125-reconstruct-attack-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.5 Reconstruct Attack Chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-config-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Config API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Config API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-get-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Get Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-update-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Update Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-validate-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Validate Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-streaming-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Streaming API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Streaming API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-server-sent-events-sse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Server-Sent Events (SSE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 WebSocket
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-error-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Error Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-api-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. API Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. API Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-api-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 API Versioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-request-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Request Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-response-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Response Envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Authentication
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Authentication">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-api-key-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 API Key Authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-short-lived-session-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Short-lived Session Token
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-roles-and-permissions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Roles and Permissions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-events-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Events API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Events API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-list-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 List Events
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-get-event" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Get Event
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-stream-events-sse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Stream Events (SSE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-alerts-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Alerts API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Alerts API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-list-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 List Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-get-alert" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Get Alert
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-update-alert-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Update Alert Status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-bulk-update-alerts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Bulk Update Alerts
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-incidents-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Incidents API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Incidents API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-list-incidents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 List Incidents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-get-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Get Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-update-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Update Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-get-incident-timeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Get Incident Timeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-get-incident-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Get Incident Evidence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-hosts-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Hosts API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Hosts API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-list-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 List Hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-get-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Get Host
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-get-host-risk-score" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Get Host Risk Score
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-get-host-activity-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Get Host Activity Summary
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-hunt-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Hunt API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Hunt API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-run-hunt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Run Hunt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-get-hunt-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Get Hunt Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-list-hunt-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 List Hunt History
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-investigate-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Investigate API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Investigate API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-investigate-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Investigate File
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-investigate-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Investigate Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-investigate-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Investigate Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-response-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Response API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Response API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-execute-response-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Execute Response Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-rollback-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Rollback Action
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-list-response-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 List Response Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-execute-playbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Execute Playbook
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-intelligence-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Intelligence API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Intelligence API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-add-ioc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Add IOC
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-search-iocs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Search IOCs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-bulk-ioc-import" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Bulk IOC Import
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#104-check-reputation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.4 Check Reputation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#105-list-threat-feeds" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.5 List Threat Feeds
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-rules-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Rules API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Rules API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-list-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 List Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-get-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Get Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-create-custom-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Create Custom Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-update-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Update Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-enabledisable-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Enable/Disable Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#116-get-rule-statistics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.6 Get Rule Statistics
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-ai-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. AI API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. AI API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-explain-incident" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Explain Incident
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-summarize-activity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Summarize Activity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-generate-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Generate Rule
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-ask-security-question" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Ask Security Question
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#125-reconstruct-attack-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.5 Reconstruct Attack Chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-config-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Config API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Config API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-get-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Get Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-update-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Update Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-validate-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Validate Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-streaming-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Streaming API
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Streaming API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-server-sent-events-sse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Server-Sent Events (SSE)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-websocket" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 WebSocket
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-error-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Error Reference
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/thrive-spectrexq/r3trive/edit/master/docs/api_reference.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="api_referencemd">API_REFERENCE.md<a class="headerlink" href="#api_referencemd" title="Permanent link">&para;</a></h1>
+<p><strong>R3TRIVE API Reference</strong>
+Version: 1.0.0
+Status: Draft
+Base URL: <code>https://localhost:8443/api/v1</code></p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-api-overview">API Overview</a></li>
+<li><a href="#2-authentication">Authentication</a></li>
+<li><a href="#3-events-api">Events API</a></li>
+<li><a href="#4-alerts-api">Alerts API</a></li>
+<li><a href="#5-incidents-api">Incidents API</a></li>
+<li><a href="#6-hosts-api">Hosts API</a></li>
+<li><a href="#7-hunt-api">Hunt API</a></li>
+<li><a href="#8-investigate-api">Investigate API</a></li>
+<li><a href="#9-response-api">Response API</a></li>
+<li><a href="#10-intelligence-api">Intelligence API</a></li>
+<li><a href="#11-rules-api">Rules API</a></li>
+<li><a href="#12-ai-api">AI API</a></li>
+<li><a href="#13-config-api">Config API</a></li>
+<li><a href="#14-streaming-api">Streaming API (WebSocket/SSE)</a></li>
+<li><a href="#15-error-reference">Error Reference</a></li>
+<li><a href="#16-rate-limiting">Rate Limiting</a></li>
+</ol>
+<hr />
+<h2 id="1-api-overview">1. API Overview<a class="headerlink" href="#1-api-overview" title="Permanent link">&para;</a></h2>
+<p>R3TRIVE exposes a REST API and a WebSocket/SSE streaming API. The REST API is enabled with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>r3trive<span class="w"> </span>serve<span class="w"> </span>--bind<span class="w"> </span><span class="m">0</span>.0.0.0:8443<span class="w"> </span>--tls
+</code></pre></div>
+<p>All endpoints return JSON. Timestamps are ISO 8601 with nanosecond precision.</p>
+<h3 id="11-api-versioning">1.1 API Versioning<a class="headerlink" href="#11-api-versioning" title="Permanent link">&para;</a></h3>
+<p>The API is versioned via URL path (<code>/api/v1/</code>). Breaking changes result in a new version. Version <code>v1</code> will be maintained for a minimum of 2 years after <code>v2</code> release.</p>
+<h3 id="12-request-format">1.2 Request Format<a class="headerlink" href="#12-request-format" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Content-Type: application/json
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Accept: application/json
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Authorization: Bearer &lt;token&gt;
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>X-Request-ID: &lt;client-generated UUID&gt;     # optional, echoed in response
+</code></pre></div>
+<h3 id="13-response-envelope">1.3 Response Envelope<a class="headerlink" href="#13-response-envelope" title="Permanent link">&para;</a></h3>
+<p>All responses are wrapped in a standard envelope:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w">           </span><span class="c1">// present on success</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">             </span><span class="c1">// present on error</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">"request_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"req_01HN2X..."</span><span class="p">,</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01.000000000Z"</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">}</span>
+</code></pre></div>
+<p>Error response:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"error"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">"code"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ALERT_NOT_FOUND"</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alert with ID 'alt_abc123' not found"</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">"details"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="nt">"meta"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h2 id="2-authentication">2. Authentication<a class="headerlink" href="#2-authentication" title="Permanent link">&para;</a></h2>
+<h3 id="21-api-key-authentication">2.1 API Key Authentication<a class="headerlink" href="#21-api-key-authentication" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="err">Authorization: Bearer r3t_sk_live_abc123def456...</span>
+</code></pre></div>
+<p>API keys are generated with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>r3trive<span class="w"> </span>api-key<span class="w"> </span>create<span class="w"> </span>--name<span class="w"> </span><span class="s2">"SOC Dashboard"</span><span class="w"> </span>--role<span class="w"> </span>analyst<span class="w"> </span>--expires<span class="w"> </span>90d
+</code></pre></div>
+<h3 id="22-short-lived-session-token">2.2 Short-lived Session Token<a class="headerlink" href="#22-short-lived-session-token" title="Permanent link">&para;</a></h3>
+<p>For interactive sessions (Web UI):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">POST /api/v1/auth/login</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="err">Content-Type: application/json</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="err">{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="err">  "username": "analyst@corp.com",</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="err">  "password": "...",</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="err">  "mfa_code": "123456"</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="err">}</span>
+</code></pre></div>
+<p>Response:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">"eyJhbGc..."</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">"expires_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T22:32:01Z"</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"usr_abc123"</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="nt">"username"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analyst@corp.com"</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="nt">"role"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analyst"</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="23-roles-and-permissions">2.3 Roles and Permissions<a class="headerlink" href="#23-roles-and-permissions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Endpoint Category</th>
+<th>viewer</th>
+<th>analyst</th>
+<th>responder</th>
+<th>admin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Events (read)</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Alerts (read)</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Alerts (update status)</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Incidents (read)</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Hunt</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Investigate</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Response actions</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Rules (read)</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Rules (write)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Config</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>User management</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-events-api">3. Events API<a class="headerlink" href="#3-events-api" title="Permanent link">&para;</a></h2>
+<h3 id="31-list-events">3.1 List Events<a class="headerlink" href="#31-list-events" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="err">GET /api/v1/events</span>
+</code></pre></div>
+<p>Query parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start</code></td>
+<td>timestamp</td>
+<td>Start of time range</td>
+<td>-1h</td>
+</tr>
+<tr>
+<td><code>end</code></td>
+<td>timestamp</td>
+<td>End of time range</td>
+<td>now</td>
+</tr>
+<tr>
+<td><code>host_id</code></td>
+<td>string</td>
+<td>Filter by host</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td>Filter by event type</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>severity</code></td>
+<td>string</td>
+<td>Filter by severity (low/medium/high/critical)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>limit</code></td>
+<td>integer</td>
+<td>Max results per page</td>
+<td>100</td>
+</tr>
+<tr>
+<td><code>cursor</code></td>
+<td>string</td>
+<td>Pagination cursor</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>sort</code></td>
+<td>string</td>
+<td>Sort field and order (timestamp:asc, timestamp:desc)</td>
+<td>timestamp:desc</td>
+</tr>
+</tbody>
+</table>
+<p>Example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="err">GET /api/v1/events?start=2024-03-15T14:00:00Z&amp;type=process.create&amp;severity=high&amp;limit=50</span>
+</code></pre></div></p>
+<p>Response:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">"events"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">        </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"evt_01HN2X..."</span><span class="p">,</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">        </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01.123456789Z"</span><span class="p">,</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"process.create"</span><span class="p">,</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">        </span><span class="nt">"severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"high"</span><span class="p">,</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="nt">"host"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">          </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span><span class="p">,</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">          </span><span class="nt">"hostname"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WORKSTATION-01"</span><span class="p">,</span>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">          </span><span class="nt">"os"</span><span class="p">:</span><span class="w"> </span><span class="s2">"windows"</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">        </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">          </span><span class="nt">"pid"</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">          </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"powershell.exe"</span><span class="p">,</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">          </span><span class="nt">"cmdline"</span><span class="p">:</span><span class="w"> </span><span class="s2">"powershell.exe -enc &lt;base64&gt;"</span><span class="p">,</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">          </span><span class="nt">"parent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">            </span><span class="nt">"pid"</span><span class="p">:</span><span class="w"> </span><span class="mi">1001</span><span class="p">,</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">            </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"winword.exe"</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">          </span><span class="p">}</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">    </span><span class="nt">"pagination"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">      </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1423</span><span class="p">,</span>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">      </span><span class="nt">"limit"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">      </span><span class="nt">"next_cursor"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cur_abc123"</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-10-32" name="__codelineno-10-32" href="#__codelineno-10-32"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="32-get-event">3.2 Get Event<a class="headerlink" href="#32-get-event" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="err">GET /api/v1/events/{event_id}</span>
+</code></pre></div>
+<h3 id="33-stream-events-sse">3.3 Stream Events (SSE)<a class="headerlink" href="#33-stream-events-sse" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="err">GET /api/v1/events/stream?severity=high&amp;type=process.create</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="err">Accept: text/event-stream</span>
+</code></pre></div>
+<p>See <a href="#14-streaming-api">Streaming API</a>.</p>
+<hr />
+<h2 id="4-alerts-api">4. Alerts API<a class="headerlink" href="#4-alerts-api" title="Permanent link">&para;</a></h2>
+<h3 id="41-list-alerts">4.1 List Alerts<a class="headerlink" href="#41-list-alerts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="err">GET /api/v1/alerts</span>
+</code></pre></div>
+<p>Query parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start</code> / <code>end</code></td>
+<td>timestamp</td>
+<td>Time range</td>
+</tr>
+<tr>
+<td><code>host_id</code></td>
+<td>string</td>
+<td>Filter by host</td>
+</tr>
+<tr>
+<td><code>severity</code></td>
+<td>string</td>
+<td>Filter by severity</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td>Filter by status (new/acknowledged/investigating/true_positive/false_positive/closed)</td>
+</tr>
+<tr>
+<td><code>rule_id</code></td>
+<td>string</td>
+<td>Filter by rule</td>
+</tr>
+<tr>
+<td><code>incident_id</code></td>
+<td>string</td>
+<td>Filter by parent incident</td>
+</tr>
+<tr>
+<td><code>limit</code> / <code>cursor</code></td>
+<td>—</td>
+<td>Pagination</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-get-alert">4.2 Get Alert<a class="headerlink" href="#42-get-alert" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="err">GET /api/v1/alerts/{alert_id}</span>
+</code></pre></div>
+<p>Response includes related event, correlated incident, and ATT&amp;CK mapping.</p>
+<h3 id="43-update-alert-status">4.3 Update Alert Status<a class="headerlink" href="#43-update-alert-status" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="err">PATCH /api/v1/alerts/{alert_id}</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="p">{</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"false_positive"</span><span class="p">,</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="nt">"note"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This is our backup tool, adding to allowlist"</span><span class="p">,</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="nt">"create_suppression"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">  </span><span class="nt">"suppression_expires_days"</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="44-bulk-update-alerts">4.4 Bulk Update Alerts<a class="headerlink" href="#44-bulk-update-alerts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="err">POST /api/v1/alerts/bulk-update</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="p">{</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">"alert_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"alt_001"</span><span class="p">,</span><span class="w"> </span><span class="s2">"alt_002"</span><span class="p">,</span><span class="w"> </span><span class="s2">"alt_003"</span><span class="p">],</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"acknowledged"</span><span class="p">,</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="w">  </span><span class="nt">"note"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Reviewed during morning triage"</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="p">}</span>
+</code></pre></div></p>
+<hr />
+<h2 id="5-incidents-api">5. Incidents API<a class="headerlink" href="#5-incidents-api" title="Permanent link">&para;</a></h2>
+<h3 id="51-list-incidents">5.1 List Incidents<a class="headerlink" href="#51-list-incidents" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="err">GET /api/v1/incidents</span>
+</code></pre></div>
+<p>Query parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>start</code> / <code>end</code></td>
+<td>timestamp</td>
+<td>Time range</td>
+</tr>
+<tr>
+<td><code>host_id</code></td>
+<td>string</td>
+<td>Filter by host</td>
+</tr>
+<tr>
+<td><code>severity</code></td>
+<td>string</td>
+<td>Severity filter</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td>open / investigating / resolved / closed</td>
+</tr>
+<tr>
+<td><code>risk_score_gte</code></td>
+<td>float</td>
+<td>Minimum risk score (0–100)</td>
+</tr>
+<tr>
+<td><code>technique</code></td>
+<td>string</td>
+<td>ATT&amp;CK technique ID (e.g., T1003.001)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-get-incident">5.2 Get Incident<a class="headerlink" href="#52-get-incident" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="err">GET /api/v1/incidents/{incident_id}</span>
+</code></pre></div>
+<p>Response:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="p">{</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INC-20240315-001"</span><span class="p">,</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Credential Theft Campaign"</span><span class="p">,</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="nt">"severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"critical"</span><span class="p">,</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span><span class="nt">"risk_score"</span><span class="p">:</span><span class="w"> </span><span class="mf">94.2</span><span class="p">,</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">    </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"investigating"</span><span class="p">,</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">    </span><span class="nt">"created_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01Z"</span><span class="p">,</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="w">    </span><span class="nt">"updated_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:45:22Z"</span><span class="p">,</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">    </span><span class="nt">"host"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span><span class="p">,</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">      </span><span class="nt">"hostname"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WORKSTATION-01"</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="w">    </span><span class="nt">"alert_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="w">    </span><span class="nt">"alert_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"alt_001"</span><span class="p">,</span><span class="w"> </span><span class="s2">"alt_002"</span><span class="p">,</span><span class="w"> </span><span class="s2">"..."</span><span class="p">],</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="w">    </span><span class="nt">"attack_techniques"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a><span class="w">        </span><span class="nt">"tactic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"CredentialAccess"</span><span class="p">,</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a><span class="w">        </span><span class="nt">"technique"</span><span class="p">:</span><span class="w"> </span><span class="s2">"T1003.001"</span><span class="p">,</span>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="w">        </span><span class="nt">"technique_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OS Credential Dumping: LSASS Memory"</span>
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a><span class="w">    </span><span class="nt">"timeline"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-21-26" name="__codelineno-21-26" href="#__codelineno-21-26"></a><span class="w">        </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01Z"</span><span class="p">,</span>
+<a id="__codelineno-21-27" name="__codelineno-21-27" href="#__codelineno-21-27"></a><span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alert"</span><span class="p">,</span>
+<a id="__codelineno-21-28" name="__codelineno-21-28" href="#__codelineno-21-28"></a><span class="w">        </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PowerShell spawned by Word"</span>
+<a id="__codelineno-21-29" name="__codelineno-21-29" href="#__codelineno-21-29"></a><span class="w">      </span><span class="p">},</span>
+<a id="__codelineno-21-30" name="__codelineno-21-30" href="#__codelineno-21-30"></a><span class="w">      </span><span class="p">{</span>
+<a id="__codelineno-21-31" name="__codelineno-21-31" href="#__codelineno-21-31"></a><span class="w">        </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:15Z"</span><span class="p">,</span>
+<a id="__codelineno-21-32" name="__codelineno-21-32" href="#__codelineno-21-32"></a><span class="w">        </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"alert"</span><span class="p">,</span>
+<a id="__codelineno-21-33" name="__codelineno-21-33" href="#__codelineno-21-33"></a><span class="w">        </span><span class="nt">"summary"</span><span class="p">:</span><span class="w"> </span><span class="s2">"LSASS memory read"</span>
+<a id="__codelineno-21-34" name="__codelineno-21-34" href="#__codelineno-21-34"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-21-35" name="__codelineno-21-35" href="#__codelineno-21-35"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-21-36" name="__codelineno-21-36" href="#__codelineno-21-36"></a><span class="w">    </span><span class="nt">"ai_summary"</span><span class="p">:</span><span class="w"> </span><span class="s2">"An attacker used a malicious Word macro to launch PowerShell..."</span><span class="p">,</span>
+<a id="__codelineno-21-37" name="__codelineno-21-37" href="#__codelineno-21-37"></a><span class="w">    </span><span class="nt">"response_actions"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span>
+<a id="__codelineno-21-38" name="__codelineno-21-38" href="#__codelineno-21-38"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-21-39" name="__codelineno-21-39" href="#__codelineno-21-39"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="53-update-incident">5.3 Update Incident<a class="headerlink" href="#53-update-incident" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="err">PATCH /api/v1/incidents/{incident_id}</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="p">{</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"investigating"</span><span class="p">,</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span><span class="nt">"assignee"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analyst@corp.com"</span><span class="p">,</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span><span class="nt">"priority"</span><span class="p">:</span><span class="w"> </span><span class="s2">"P1"</span><span class="p">,</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a><span class="w">  </span><span class="nt">"note"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Escalated to IR team"</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="54-get-incident-timeline">5.4 Get Incident Timeline<a class="headerlink" href="#54-get-incident-timeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="err">GET /api/v1/incidents/{incident_id}/timeline</span>
+</code></pre></div>
+<p>Returns ordered list of alerts, events, and analyst actions with timestamps.</p>
+<h3 id="55-get-incident-evidence">5.5 Get Incident Evidence<a class="headerlink" href="#55-get-incident-evidence" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="err">GET /api/v1/incidents/{incident_id}/evidence</span>
+</code></pre></div>
+<p>Returns collected evidence artifacts (process dumps, file samples, network captures).</p>
+<hr />
+<h2 id="6-hosts-api">6. Hosts API<a class="headerlink" href="#6-hosts-api" title="Permanent link">&para;</a></h2>
+<h3 id="61-list-hosts">6.1 List Hosts<a class="headerlink" href="#61-list-hosts" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="err">GET /api/v1/hosts</span>
+</code></pre></div>
+<h3 id="62-get-host">6.2 Get Host<a class="headerlink" href="#62-get-host" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="err">GET /api/v1/hosts/{host_id}</span>
+</code></pre></div>
+<p>Response includes sensor status, active monitoring configuration, recent activity summary, and risk score.</p>
+<h3 id="63-get-host-risk-score">6.3 Get Host Risk Score<a class="headerlink" href="#63-get-host-risk-score" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="err">GET /api/v1/hosts/{host_id}/risk</span>
+</code></pre></div>
+<h3 id="64-get-host-activity-summary">6.4 Get Host Activity Summary<a class="headerlink" href="#64-get-host-activity-summary" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="err">GET /api/v1/hosts/{host_id}/summary?period=24h</span>
+</code></pre></div>
+<hr />
+<h2 id="7-hunt-api">7. Hunt API<a class="headerlink" href="#7-hunt-api" title="Permanent link">&para;</a></h2>
+<h3 id="71-run-hunt">7.1 Run Hunt<a class="headerlink" href="#71-run-hunt" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="err">POST /api/v1/hunt</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="p">{</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">  </span><span class="nt">"scope"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a><span class="w">    </span><span class="nt">"host_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"host_abc123"</span><span class="p">],</span><span class="w">          </span><span class="c1">// empty = all hosts</span>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="w">    </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"production"</span><span class="p">]</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a><span class="w">  </span><span class="nt">"technique"</span><span class="p">:</span><span class="w"> </span><span class="s2">"T1003.001"</span><span class="p">,</span><span class="w">               </span><span class="c1">// optional: target specific ATT&amp;CK technique</span>
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a><span class="w">  </span><span class="nt">"ioc"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a><span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ip"</span><span class="p">,</span>
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a><span class="w">    </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"185.220.101.47"</span>
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a><span class="w">  </span><span class="nt">"ruleset"</span><span class="p">:</span><span class="w"> </span><span class="s2">"default"</span><span class="p">,</span><span class="w">                    </span><span class="c1">// default / custom / path to custom dir</span>
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a><span class="w">  </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="s2">"300s"</span>
+<a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a><span class="p">}</span>
+</code></pre></div></p>
+<p>Response:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="p">{</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a><span class="w">    </span><span class="nt">"hunt_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hunt_01HN2X..."</span><span class="p">,</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a><span class="w">    </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"running"</span><span class="p">,</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="w">    </span><span class="nt">"started_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01Z"</span>
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-32-8" name="__codelineno-32-8" href="#__codelineno-32-8"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="72-get-hunt-results">7.2 Get Hunt Results<a class="headerlink" href="#72-get-hunt-results" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="err">GET /api/v1/hunt/{hunt_id}</span>
+</code></pre></div>
+<h3 id="73-list-hunt-history">7.3 List Hunt History<a class="headerlink" href="#73-list-hunt-history" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="err">GET /api/v1/hunt</span>
+</code></pre></div>
+<hr />
+<h2 id="8-investigate-api">8. Investigate API<a class="headerlink" href="#8-investigate-api" title="Permanent link">&para;</a></h2>
+<h3 id="81-investigate-file">8.1 Investigate File<a class="headerlink" href="#81-investigate-file" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="err">POST /api/v1/investigate/file</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="p">{</span>
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a><span class="w">  </span><span class="nt">"host_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span><span class="p">,</span>
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a><span class="w">  </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:\\Users\\jsmith\\Downloads\\invoice.exe"</span><span class="p">,</span>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a><span class="w">  </span><span class="nt">"options"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a><span class="w">    </span><span class="nt">"yara"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a><span class="w">    </span><span class="nt">"strings"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a><span class="w">    </span><span class="nt">"entropy"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a><span class="w">    </span><span class="nt">"network_lookup"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a><span class="p">}</span>
+</code></pre></div></p>
+<p>Response includes: risk score, findings, ATT&amp;CK techniques, IOC matches, YARA matches, binary metadata, strings of interest.</p>
+<h3 id="82-investigate-process">8.2 Investigate Process<a class="headerlink" href="#82-investigate-process" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="err">POST /api/v1/investigate/process</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="p">{</span>
+<a id="__codelineno-38-2" name="__codelineno-38-2" href="#__codelineno-38-2"></a><span class="w">  </span><span class="nt">"host_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span><span class="p">,</span>
+<a id="__codelineno-38-3" name="__codelineno-38-3" href="#__codelineno-38-3"></a><span class="w">  </span><span class="nt">"pid"</span><span class="p">:</span><span class="w"> </span><span class="mi">4821</span>
+<a id="__codelineno-38-4" name="__codelineno-38-4" href="#__codelineno-38-4"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="83-investigate-incident">8.3 Investigate Incident<a class="headerlink" href="#83-investigate-incident" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="err">POST /api/v1/investigate/incident/{incident_id}</span>
+</code></pre></div>
+<p>Triggers deep investigation workflow on an existing incident, adding additional analysis.</p>
+<hr />
+<h2 id="9-response-api">9. Response API<a class="headerlink" href="#9-response-api" title="Permanent link">&para;</a></h2>
+<h3 id="91-execute-response-action">9.1 Execute Response Action<a class="headerlink" href="#91-execute-response-action" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="err">POST /api/v1/response/actions</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="p">{</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a><span class="w">  </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kill_process"</span><span class="p">,</span>
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="w">  </span><span class="nt">"host_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span><span class="p">,</span>
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="w">  </span><span class="nt">"params"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="w">    </span><span class="nt">"pid"</span><span class="p">:</span><span class="w"> </span><span class="mi">4821</span>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="w">  </span><span class="nt">"incident_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INC-20240315-001"</span><span class="p">,</span>
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a><span class="w">  </span><span class="nt">"dry_run"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a><span class="w">  </span><span class="nt">"note"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Killing malicious process per IR playbook"</span>
+<a id="__codelineno-41-10" name="__codelineno-41-10" href="#__codelineno-41-10"></a><span class="p">}</span>
+</code></pre></div></p>
+<p>Response:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="p">{</span>
+<a id="__codelineno-42-2" name="__codelineno-42-2" href="#__codelineno-42-2"></a><span class="w">  </span><span class="nt">"success"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-42-3" name="__codelineno-42-3" href="#__codelineno-42-3"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-42-4" name="__codelineno-42-4" href="#__codelineno-42-4"></a><span class="w">    </span><span class="nt">"action_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"act_01HN2X..."</span><span class="p">,</span>
+<a id="__codelineno-42-5" name="__codelineno-42-5" href="#__codelineno-42-5"></a><span class="w">    </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"kill_process"</span><span class="p">,</span>
+<a id="__codelineno-42-6" name="__codelineno-42-6" href="#__codelineno-42-6"></a><span class="w">    </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span>
+<a id="__codelineno-42-7" name="__codelineno-42-7" href="#__codelineno-42-7"></a><span class="w">    </span><span class="nt">"executed_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01Z"</span><span class="p">,</span>
+<a id="__codelineno-42-8" name="__codelineno-42-8" href="#__codelineno-42-8"></a><span class="w">    </span><span class="nt">"executed_by"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analyst@corp.com"</span><span class="p">,</span>
+<a id="__codelineno-42-9" name="__codelineno-42-9" href="#__codelineno-42-9"></a><span class="w">    </span><span class="nt">"rollback_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"rb_01HN2X..."</span><span class="p">,</span>
+<a id="__codelineno-42-10" name="__codelineno-42-10" href="#__codelineno-42-10"></a><span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Process 4821 (powershell.exe) terminated successfully"</span>
+<a id="__codelineno-42-11" name="__codelineno-42-11" href="#__codelineno-42-11"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-42-12" name="__codelineno-42-12" href="#__codelineno-42-12"></a><span class="p">}</span>
+</code></pre></div></p>
+<p>Available actions:</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Required Params</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kill_process</code></td>
+<td><code>pid</code></td>
+</tr>
+<tr>
+<td><code>block_ip</code></td>
+<td><code>ip</code>, optional: <code>duration</code>, <code>direction</code> (in/out/both)</td>
+</tr>
+<tr>
+<td><code>quarantine_file</code></td>
+<td><code>path</code></td>
+</tr>
+<tr>
+<td><code>isolate_host</code></td>
+<td><code>host_id</code>, optional: <code>preserve_channels</code></td>
+</tr>
+<tr>
+<td><code>disable_account</code></td>
+<td><code>username</code></td>
+</tr>
+<tr>
+<td><code>kill_connection</code></td>
+<td><code>connection_id</code></td>
+</tr>
+<tr>
+<td><code>disable_service</code></td>
+<td><code>service_name</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-rollback-action">9.2 Rollback Action<a class="headerlink" href="#92-rollback-action" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="err">POST /api/v1/response/actions/{rollback_id}/rollback</span>
+</code></pre></div>
+<h3 id="93-list-response-actions">9.3 List Response Actions<a class="headerlink" href="#93-list-response-actions" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a><span class="err">GET /api/v1/response/actions?incident_id={incident_id}</span>
+</code></pre></div>
+<h3 id="94-execute-playbook">9.4 Execute Playbook<a class="headerlink" href="#94-execute-playbook" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="err">POST /api/v1/response/playbooks/{playbook_id}/execute</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a><span class="p">{</span>
+<a id="__codelineno-46-2" name="__codelineno-46-2" href="#__codelineno-46-2"></a><span class="w">  </span><span class="nt">"incident_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INC-20240315-001"</span><span class="p">,</span>
+<a id="__codelineno-46-3" name="__codelineno-46-3" href="#__codelineno-46-3"></a><span class="w">  </span><span class="nt">"dry_run"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-46-4" name="__codelineno-46-4" href="#__codelineno-46-4"></a><span class="p">}</span>
+</code></pre></div></p>
+<hr />
+<h2 id="10-intelligence-api">10. Intelligence API<a class="headerlink" href="#10-intelligence-api" title="Permanent link">&para;</a></h2>
+<h3 id="101-add-ioc">10.1 Add IOC<a class="headerlink" href="#101-add-ioc" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="err">POST /api/v1/intel/iocs</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="p">{</span>
+<a id="__codelineno-48-2" name="__codelineno-48-2" href="#__codelineno-48-2"></a><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ip"</span><span class="p">,</span>
+<a id="__codelineno-48-3" name="__codelineno-48-3" href="#__codelineno-48-3"></a><span class="w">  </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"185.220.101.47"</span><span class="p">,</span>
+<a id="__codelineno-48-4" name="__codelineno-48-4" href="#__codelineno-48-4"></a><span class="w">  </span><span class="nt">"confidence"</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span>
+<a id="__codelineno-48-5" name="__codelineno-48-5" href="#__codelineno-48-5"></a><span class="w">  </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"tor-exit-node"</span><span class="p">,</span><span class="w"> </span><span class="s2">"c2"</span><span class="p">],</span>
+<a id="__codelineno-48-6" name="__codelineno-48-6" href="#__codelineno-48-6"></a><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analyst"</span><span class="p">,</span>
+<a id="__codelineno-48-7" name="__codelineno-48-7" href="#__codelineno-48-7"></a><span class="w">  </span><span class="nt">"note"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Observed in INC-20240315-001"</span><span class="p">,</span>
+<a id="__codelineno-48-8" name="__codelineno-48-8" href="#__codelineno-48-8"></a><span class="w">  </span><span class="nt">"ttl_days"</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span>
+<a id="__codelineno-48-9" name="__codelineno-48-9" href="#__codelineno-48-9"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="102-search-iocs">10.2 Search IOCs<a class="headerlink" href="#102-search-iocs" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="err">GET /api/v1/intel/iocs?type=ip&amp;value=185.220.101.47</span>
+</code></pre></div>
+<h3 id="103-bulk-ioc-import">10.3 Bulk IOC Import<a class="headerlink" href="#103-bulk-ioc-import" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="err">POST /api/v1/intel/iocs/bulk</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a><span class="err">Content-Type: application/json</span>
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a><span class="err">{</span>
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a><span class="err">  "iocs": [ ... ],</span>
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a><span class="err">  "source": "misp-export",</span>
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a><span class="err">  "default_ttl_days": 30</span>
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a><span class="err">}</span>
+</code></pre></div>
+<h3 id="104-check-reputation">10.4 Check Reputation<a class="headerlink" href="#104-check-reputation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="err">GET /api/v1/intel/reputation?type=ip&amp;value=8.8.8.8</span>
+</code></pre></div>
+<h3 id="105-list-threat-feeds">10.5 List Threat Feeds<a class="headerlink" href="#105-list-threat-feeds" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="err">GET /api/v1/intel/feeds</span>
+</code></pre></div>
+<hr />
+<h2 id="11-rules-api">11. Rules API<a class="headerlink" href="#11-rules-api" title="Permanent link">&para;</a></h2>
+<h3 id="111-list-rules">11.1 List Rules<a class="headerlink" href="#111-list-rules" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="err">GET /api/v1/rules</span>
+</code></pre></div>
+<p>Query parameters: <code>type</code> (behavioral/yara/sigma/correlation), <code>status</code> (stable/experimental), <code>tag</code>.</p>
+<h3 id="112-get-rule">11.2 Get Rule<a class="headerlink" href="#112-get-rule" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="err">GET /api/v1/rules/{rule_id}</span>
+</code></pre></div>
+<h3 id="113-create-custom-rule">11.3 Create Custom Rule<a class="headerlink" href="#113-create-custom-rule" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="err">POST /api/v1/rules</span>
+</code></pre></div>
+<p>Request: Rule in YAML format (see RULE_ENGINE_SPEC.md).</p>
+<h3 id="114-update-rule">11.4 Update Rule<a class="headerlink" href="#114-update-rule" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="err">PUT /api/v1/rules/{rule_id}</span>
+</code></pre></div>
+<h3 id="115-enabledisable-rule">11.5 Enable/Disable Rule<a class="headerlink" href="#115-enabledisable-rule" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="err">PATCH /api/v1/rules/{rule_id}/status</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="p">{</span><span class="w"> </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">"reason"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Too many false positives in this environment"</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="116-get-rule-statistics">11.6 Get Rule Statistics<a class="headerlink" href="#116-get-rule-statistics" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-59-1" name="__codelineno-59-1" href="#__codelineno-59-1"></a><span class="err">GET /api/v1/rules/{rule_id}/stats</span>
+</code></pre></div>
+<p>Returns: hit count, false positive rate, true positive rate, last triggered.</p>
+<hr />
+<h2 id="12-ai-api">12. AI API<a class="headerlink" href="#12-ai-api" title="Permanent link">&para;</a></h2>
+<h3 id="121-explain-incident">12.1 Explain Incident<a class="headerlink" href="#121-explain-incident" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-60-1" name="__codelineno-60-1" href="#__codelineno-60-1"></a><span class="err">POST /api/v1/ai/explain</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-61-1" name="__codelineno-61-1" href="#__codelineno-61-1"></a><span class="p">{</span>
+<a id="__codelineno-61-2" name="__codelineno-61-2" href="#__codelineno-61-2"></a><span class="w">  </span><span class="nt">"incident_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INC-20240315-001"</span><span class="p">,</span>
+<a id="__codelineno-61-3" name="__codelineno-61-3" href="#__codelineno-61-3"></a><span class="w">  </span><span class="nt">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"analyst"</span><span class="p">,</span><span class="w">           </span><span class="c1">// analyst | executive | technical</span>
+<a id="__codelineno-61-4" name="__codelineno-61-4" href="#__codelineno-61-4"></a><span class="w">  </span><span class="nt">"include_recommendations"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-61-5" name="__codelineno-61-5" href="#__codelineno-61-5"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="122-summarize-activity">12.2 Summarize Activity<a class="headerlink" href="#122-summarize-activity" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-62-1" name="__codelineno-62-1" href="#__codelineno-62-1"></a><span class="err">POST /api/v1/ai/summarize</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-63-1" name="__codelineno-63-1" href="#__codelineno-63-1"></a><span class="p">{</span>
+<a id="__codelineno-63-2" name="__codelineno-63-2" href="#__codelineno-63-2"></a><span class="w">  </span><span class="nt">"period"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24h"</span><span class="p">,</span>
+<a id="__codelineno-63-3" name="__codelineno-63-3" href="#__codelineno-63-3"></a><span class="w">  </span><span class="nt">"scope"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-63-4" name="__codelineno-63-4" href="#__codelineno-63-4"></a><span class="w">    </span><span class="nt">"host_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">              </span><span class="c1">// empty = all</span>
+<a id="__codelineno-63-5" name="__codelineno-63-5" href="#__codelineno-63-5"></a><span class="w">    </span><span class="nt">"min_severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span>
+<a id="__codelineno-63-6" name="__codelineno-63-6" href="#__codelineno-63-6"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-63-7" name="__codelineno-63-7" href="#__codelineno-63-7"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="123-generate-rule">12.3 Generate Rule<a class="headerlink" href="#123-generate-rule" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-64-1" name="__codelineno-64-1" href="#__codelineno-64-1"></a><span class="err">POST /api/v1/ai/generate-rule</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-65-1" name="__codelineno-65-1" href="#__codelineno-65-1"></a><span class="p">{</span>
+<a id="__codelineno-65-2" name="__codelineno-65-2" href="#__codelineno-65-2"></a><span class="w">  </span><span class="nt">"incident_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INC-20240315-001"</span><span class="p">,</span>
+<a id="__codelineno-65-3" name="__codelineno-65-3" href="#__codelineno-65-3"></a><span class="w">  </span><span class="nt">"rule_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"behavioral"</span><span class="p">,</span><span class="w">     </span><span class="c1">// behavioral | yara | sigma</span>
+<a id="__codelineno-65-4" name="__codelineno-65-4" href="#__codelineno-65-4"></a><span class="w">  </span><span class="nt">"context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Focus on the PowerShell obfuscation pattern"</span>
+<a id="__codelineno-65-5" name="__codelineno-65-5" href="#__codelineno-65-5"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="124-ask-security-question">12.4 Ask Security Question<a class="headerlink" href="#124-ask-security-question" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-66-1" name="__codelineno-66-1" href="#__codelineno-66-1"></a><span class="err">POST /api/v1/ai/ask</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-67-1" name="__codelineno-67-1" href="#__codelineno-67-1"></a><span class="p">{</span>
+<a id="__codelineno-67-2" name="__codelineno-67-2" href="#__codelineno-67-2"></a><span class="w">  </span><span class="nt">"question"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What lateral movement techniques were used in the last 24 hours?"</span><span class="p">,</span>
+<a id="__codelineno-67-3" name="__codelineno-67-3" href="#__codelineno-67-3"></a><span class="w">  </span><span class="nt">"context_window"</span><span class="p">:</span><span class="w"> </span><span class="s2">"24h"</span><span class="p">,</span>
+<a id="__codelineno-67-4" name="__codelineno-67-4" href="#__codelineno-67-4"></a><span class="w">  </span><span class="nt">"host_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span>
+<a id="__codelineno-67-5" name="__codelineno-67-5" href="#__codelineno-67-5"></a><span class="p">}</span>
+</code></pre></div></p>
+<h3 id="125-reconstruct-attack-chain">12.5 Reconstruct Attack Chain<a class="headerlink" href="#125-reconstruct-attack-chain" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-68-1" name="__codelineno-68-1" href="#__codelineno-68-1"></a><span class="err">POST /api/v1/ai/attack-chain</span>
+</code></pre></div>
+<p>Request:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-69-1" name="__codelineno-69-1" href="#__codelineno-69-1"></a><span class="p">{</span>
+<a id="__codelineno-69-2" name="__codelineno-69-2" href="#__codelineno-69-2"></a><span class="w">  </span><span class="nt">"incident_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"INC-20240315-001"</span>
+<a id="__codelineno-69-3" name="__codelineno-69-3" href="#__codelineno-69-3"></a><span class="p">}</span>
+</code></pre></div></p>
+<hr />
+<h2 id="13-config-api">13. Config API<a class="headerlink" href="#13-config-api" title="Permanent link">&para;</a></h2>
+<h3 id="131-get-configuration">13.1 Get Configuration<a class="headerlink" href="#131-get-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-70-1" name="__codelineno-70-1" href="#__codelineno-70-1"></a><span class="err">GET /api/v1/config</span>
+</code></pre></div>
+<p>Returns sanitized configuration (secrets redacted).</p>
+<h3 id="132-update-configuration">13.2 Update Configuration<a class="headerlink" href="#132-update-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-71-1" name="__codelineno-71-1" href="#__codelineno-71-1"></a><span class="err">PATCH /api/v1/config</span>
+</code></pre></div>
+<p>Only available to <code>admin</code> role. Triggers configuration reload.</p>
+<h3 id="133-validate-configuration">13.3 Validate Configuration<a class="headerlink" href="#133-validate-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-72-1" name="__codelineno-72-1" href="#__codelineno-72-1"></a><span class="err">POST /api/v1/config/validate</span>
+</code></pre></div>
+<p>Request: proposed configuration object. Returns validation result without applying.</p>
+<hr />
+<h2 id="14-streaming-api">14. Streaming API<a class="headerlink" href="#14-streaming-api" title="Permanent link">&para;</a></h2>
+<h3 id="141-server-sent-events-sse">14.1 Server-Sent Events (SSE)<a class="headerlink" href="#141-server-sent-events-sse" title="Permanent link">&para;</a></h3>
+<p>Connect for real-time event/alert streams:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-73-1" name="__codelineno-73-1" href="#__codelineno-73-1"></a><span class="err">GET /api/v1/stream</span>
+<a id="__codelineno-73-2" name="__codelineno-73-2" href="#__codelineno-73-2"></a><span class="err">Accept: text/event-stream</span>
+<a id="__codelineno-73-3" name="__codelineno-73-3" href="#__codelineno-73-3"></a><span class="err">Authorization: Bearer &lt;token&gt;</span>
+</code></pre></div>
+<p>Query parameters: <code>types</code> (comma-separated event types), <code>severity</code>, <code>host_id</code>.</p>
+<p>SSE event format:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-74-1" name="__codelineno-74-1" href="#__codelineno-74-1"></a>event: alert
+<a id="__codelineno-74-2" name="__codelineno-74-2" href="#__codelineno-74-2"></a>data: {"id":"alt_001","severity":"critical","rule_name":"LSASS Dump","..."}
+<a id="__codelineno-74-3" name="__codelineno-74-3" href="#__codelineno-74-3"></a>
+<a id="__codelineno-74-4" name="__codelineno-74-4" href="#__codelineno-74-4"></a>event: incident
+<a id="__codelineno-74-5" name="__codelineno-74-5" href="#__codelineno-74-5"></a>data: {"id":"INC-001","name":"Credential Theft","risk_score":94.2,"..."}
+<a id="__codelineno-74-6" name="__codelineno-74-6" href="#__codelineno-74-6"></a>
+<a id="__codelineno-74-7" name="__codelineno-74-7" href="#__codelineno-74-7"></a>event: heartbeat
+<a id="__codelineno-74-8" name="__codelineno-74-8" href="#__codelineno-74-8"></a>data: {"timestamp":"2024-03-15T14:32:01Z"}
+</code></pre></div></p>
+<h3 id="142-websocket">14.2 WebSocket<a class="headerlink" href="#142-websocket" title="Permanent link">&para;</a></h3>
+<p>For bidirectional communication (enterprise dashboard):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-75-1" name="__codelineno-75-1" href="#__codelineno-75-1"></a>wss://localhost:8443/api/v1/ws
+</code></pre></div>
+<p>Supports: subscribe/unsubscribe to event streams, real-time queries, command execution.</p>
+<hr />
+<h2 id="15-error-reference">15. Error Reference<a class="headerlink" href="#15-error-reference" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>HTTP Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UNAUTHORIZED</code></td>
+<td>401</td>
+<td>Missing or invalid authentication</td>
+</tr>
+<tr>
+<td><code>FORBIDDEN</code></td>
+<td>403</td>
+<td>Insufficient permissions for this action</td>
+</tr>
+<tr>
+<td><code>NOT_FOUND</code></td>
+<td>404</td>
+<td>Resource not found</td>
+</tr>
+<tr>
+<td><code>CONFLICT</code></td>
+<td>409</td>
+<td>Resource already exists</td>
+</tr>
+<tr>
+<td><code>VALIDATION_ERROR</code></td>
+<td>422</td>
+<td>Request body failed validation</td>
+</tr>
+<tr>
+<td><code>RATE_LIMITED</code></td>
+<td>429</td>
+<td>Rate limit exceeded</td>
+</tr>
+<tr>
+<td><code>INTERNAL_ERROR</code></td>
+<td>500</td>
+<td>Internal server error</td>
+</tr>
+<tr>
+<td><code>AI_UNAVAILABLE</code></td>
+<td>503</td>
+<td>AI backend not reachable</td>
+</tr>
+<tr>
+<td><code>SENSOR_ERROR</code></td>
+<td>503</td>
+<td>Required sensor not running</td>
+</tr>
+<tr>
+<td><code>HOST_UNREACHABLE</code></td>
+<td>503</td>
+<td>Target host agent not reachable</td>
+</tr>
+<tr>
+<td><code>ACTION_FAILED</code></td>
+<td>500</td>
+<td>Response action execution failed</td>
+</tr>
+<tr>
+<td><code>RULE_SYNTAX_ERROR</code></td>
+<td>422</td>
+<td>Detection rule syntax invalid</td>
+</tr>
+<tr>
+<td><code>YARA_COMPILE_ERROR</code></td>
+<td>422</td>
+<td>YARA rule failed to compile</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="16-rate-limiting">16. Rate Limiting<a class="headerlink" href="#16-rate-limiting" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Endpoint Category</th>
+<th>Rate Limit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authentication</td>
+<td>5 requests/minute</td>
+</tr>
+<tr>
+<td>Read endpoints</td>
+<td>1,000 requests/minute</td>
+</tr>
+<tr>
+<td>Write endpoints</td>
+<td>100 requests/minute</td>
+</tr>
+<tr>
+<td>AI endpoints</td>
+<td>20 requests/minute</td>
+</tr>
+<tr>
+<td>Hunt</td>
+<td>5 concurrent hunts</td>
+</tr>
+<tr>
+<td>Response actions</td>
+<td>60 per hour</td>
+</tr>
+</tbody>
+</table>
+<p>Rate limit headers returned on all responses:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-76-1" name="__codelineno-76-1" href="#__codelineno-76-1"></a>X-RateLimit-Limit: 1000
+<a id="__codelineno-76-2" name="__codelineno-76-2" href="#__codelineno-76-2"></a>X-RateLimit-Remaining: 987
+<a id="__codelineno-76-3" name="__codelineno-76-3" href="#__codelineno-76-3"></a>X-RateLimit-Reset: 1710510000
+<a id="__codelineno-76-4" name="__codelineno-76-4" href="#__codelineno-76-4"></a>Retry-After: 30                    # only on 429 responses
+</code></pre></div>
+<hr />
+<p><em>End of API_REFERENCE.md</em>
+<em>Related: SYSTEM_ARCHITECTURE.md, PLUGIN_SDK.md</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 R3TRIVE Project &mdash; Made with Material for MkDocs
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/thrive-spectrexq/r3trive" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

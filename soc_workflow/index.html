@@ -1,0 +1,3136 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Endpoint detection, threat hunting and automated defense.">
+      
+      
+        <meta name="author" content="R3TRIVE Contributors">
+      
+      
+        <link rel="canonical" href="https://thrive-spectrexq.github.io/r3trive/soc_workflow/">
+      
+      
+        <link rel="prev" href="../plugin_sdk/">
+      
+      
+        <link rel="next" href="../api_reference/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>SOC Workflow - R3TRIVE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#soc_workflowmd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="R3TRIVE" class="md-header__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            R3TRIVE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SOC Workflow
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../system_architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../threat_model/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Threat Model
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../detection_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Detection Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../rule_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Rule Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ai_analyst/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  AI Analyst
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../database_schema/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Database Schema
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugin_sdk/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugin SDK
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SOC Workflow
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api_reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="R3TRIVE" class="md-nav__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    R3TRIVE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../threat_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rule_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai_analyst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Analyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugin_sdk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SOC Workflow
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SOC Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-intended-audience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Intended Audience
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-soc-tier-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 SOC Tier Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-soc-integration-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. SOC Integration Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-alert-triage-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Alert Triage Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Alert Triage Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-sla-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 SLA Targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-triage-flowchart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Triage Flowchart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-false-positive-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 False Positive Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-alert-queue-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Alert Queue Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-incident-response-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Incident Response Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Incident Response Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-incident-lifecycle-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Incident Lifecycle States
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-p1p2-incident-response-critical-high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 P1/P2 Incident Response (Critical / High)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 P1/P2 Incident Response (Critical / High)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediately-015-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immediately (0–15 min)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#investigation-15-min-2-hr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Investigation (15 min – 2 hr)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#containment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Containment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eradication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eradication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recovery-and-closure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery and Closure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-shift-handoff-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Shift Handoff Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Shift Handoff Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-end-of-shift-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 End-of-Shift Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-escalation-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Escalation Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Escalation Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-escalation-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Escalation Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-escalation-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Escalation Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-threat-hunting-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Threat Hunting Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Threat Hunting Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-hunt-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Hunt Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-hunt-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Hunt Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 Hunt Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-the-hypothesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Define the Hypothesis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-execute-the-hunt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Execute the Hunt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-analyze-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Analyze Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-document-hunt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Document Hunt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-hunt-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Hunt Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-playbook-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Playbook Library
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Playbook Library">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-pb-001-ransomware-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 PB-001: Ransomware Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-pb-002-credential-theft-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 PB-002: Credential Theft Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-pb-003-suspicious-outbound-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 PB-003: Suspicious Outbound Connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-pb-004-phishing-email-indicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 PB-004: Phishing Email Indicator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-metrics-and-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Metrics and KPIs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Metrics and KPIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-operational-metrics-daily" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Operational Metrics (Daily)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-detection-effectiveness-metrics-weekly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Detection Effectiveness Metrics (Weekly)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-soc-efficiency-metrics-monthly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 SOC Efficiency Metrics (Monthly)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-role-based-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Role-Based Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Role-Based Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-tier-1-analyst-daily-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Tier 1 Analyst — Daily Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-tier-2-analyst-weekly-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Tier 2 Analyst — Weekly Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-soc-engineer-monthly-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 SOC Engineer — Monthly Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-integration-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Integration Guides
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Integration Guides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-splunk-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Splunk Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-elastickibana-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Elastic/Kibana Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-pagerduty-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 PagerDuty Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-jira-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Jira Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-microsoft-teams-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Microsoft Teams Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-intended-audience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Intended Audience
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-soc-tier-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 SOC Tier Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-soc-integration-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. SOC Integration Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-alert-triage-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Alert Triage Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Alert Triage Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-sla-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 SLA Targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-triage-flowchart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Triage Flowchart
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-false-positive-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 False Positive Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-alert-queue-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Alert Queue Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-incident-response-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Incident Response Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Incident Response Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-incident-lifecycle-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Incident Lifecycle States
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-p1p2-incident-response-critical-high" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 P1/P2 Incident Response (Critical / High)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 P1/P2 Incident Response (Critical / High)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#immediately-015-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Immediately (0–15 min)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#investigation-15-min-2-hr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Investigation (15 min – 2 hr)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#containment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Containment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#eradication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eradication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recovery-and-closure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery and Closure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-shift-handoff-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Shift Handoff Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Shift Handoff Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-end-of-shift-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 End-of-Shift Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-escalation-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Escalation Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Escalation Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-escalation-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Escalation Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-escalation-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Escalation Template
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-threat-hunting-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Threat Hunting Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Threat Hunting Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-hunt-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Hunt Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-hunt-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Hunt Workflow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.2 Hunt Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-the-hypothesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Define the Hypothesis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-execute-the-hunt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Execute the Hunt
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-analyze-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Analyze Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-document-hunt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Document Hunt
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-hunt-packages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Hunt Packages
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-playbook-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Playbook Library
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Playbook Library">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-pb-001-ransomware-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 PB-001: Ransomware Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-pb-002-credential-theft-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 PB-002: Credential Theft Response
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-pb-003-suspicious-outbound-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 PB-003: Suspicious Outbound Connection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-pb-004-phishing-email-indicator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 PB-004: Phishing Email Indicator
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-metrics-and-kpis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Metrics and KPIs
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Metrics and KPIs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-operational-metrics-daily" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Operational Metrics (Daily)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-detection-effectiveness-metrics-weekly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Detection Effectiveness Metrics (Weekly)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-soc-efficiency-metrics-monthly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 SOC Efficiency Metrics (Monthly)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-role-based-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Role-Based Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Role-Based Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-tier-1-analyst-daily-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Tier 1 Analyst — Daily Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-tier-2-analyst-weekly-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Tier 2 Analyst — Weekly Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-soc-engineer-monthly-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 SOC Engineer — Monthly Checklist
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-integration-guides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Integration Guides
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Integration Guides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-splunk-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Splunk Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-elastickibana-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Elastic/Kibana Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-pagerduty-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 PagerDuty Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#114-jira-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.4 Jira Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#115-microsoft-teams-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.5 Microsoft Teams Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/thrive-spectrexq/r3trive/edit/master/docs/soc_workflow.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="soc_workflowmd">SOC_WORKFLOW.md<a class="headerlink" href="#soc_workflowmd" title="Permanent link">&para;</a></h1>
+<p><strong>R3TRIVE SOC Workflow and Operations Guide</strong>
+Version: 1.0.0
+Status: Draft</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-soc-integration-architecture">SOC Integration Architecture</a></li>
+<li><a href="#3-alert-triage-workflow">Alert Triage Workflow</a></li>
+<li><a href="#4-incident-response-workflow">Incident Response Workflow</a></li>
+<li><a href="#5-shift-handoff-procedures">Shift Handoff Procedures</a></li>
+<li><a href="#6-escalation-procedures">Escalation Procedures</a></li>
+<li><a href="#7-threat-hunting-workflow">Threat Hunting Workflow</a></li>
+<li><a href="#8-playbook-library">Playbook Library</a></li>
+<li><a href="#9-metrics-and-kpis">Metrics and KPIs</a></li>
+<li><a href="#10-role-based-procedures">Role-Based Procedures</a></li>
+<li><a href="#11-integration-guides">Integration Guides</a></li>
+</ol>
+<hr />
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>This document defines operational workflows for Security Operations Centers (SOCs) using R3TRIVE. It covers alert triage, incident response, threat hunting, escalation, and integration with common SOC tooling.</p>
+<h3 id="11-intended-audience">1.1 Intended Audience<a class="headerlink" href="#11-intended-audience" title="Permanent link">&para;</a></h3>
+<ul>
+<li>SOC Tier 1 Analysts (alert triage, initial investigation)</li>
+<li>SOC Tier 2 Analysts (deep investigation, threat hunting)</li>
+<li>Incident Responders (containment, eradication, recovery)</li>
+<li>SOC Managers (reporting, KPI tracking)</li>
+<li>Security Engineers (integration, tuning)</li>
+</ul>
+<h3 id="12-soc-tier-model">1.2 SOC Tier Model<a class="headerlink" href="#12-soc-tier-model" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Role</th>
+<th>R3TRIVE Permissions</th>
+<th>Primary Activities</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tier 1</td>
+<td>Alert Analyst</td>
+<td><code>analyst</code></td>
+<td>Alert triage, initial classification, escalation</td>
+</tr>
+<tr>
+<td>Tier 2</td>
+<td>Senior Analyst</td>
+<td><code>analyst</code> + hunting</td>
+<td>Deep investigation, threat hunting, rule tuning</td>
+</tr>
+<tr>
+<td>Tier 3</td>
+<td>IR Specialist</td>
+<td><code>responder</code></td>
+<td>Incident response, containment, forensics</td>
+</tr>
+<tr>
+<td>Tier 4</td>
+<td>SOC Engineer</td>
+<td><code>admin</code></td>
+<td>Platform config, rule authoring, integration</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-soc-integration-architecture">2. SOC Integration Architecture<a class="headerlink" href="#2-soc-integration-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                         ENDPOINT FLEET                              │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  Agent  Agent  Agent  Agent  Agent  Agent  ...  (N endpoints)       │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└───────────────────────────────┬─────────────────────────────────────┘
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                                │ Events (NATS/TLS)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                                ▼
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>┌─────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│                      R3TRIVE CONTROLLER                             │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  Detection  Correlation  AI Analyst  Response  Storage (PostgreSQL) │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>└──────┬──────────────┬────────────────────────────────┬──────────────┘
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>       │              │                                │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>       ▼              ▼                                ▼
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>┌──────────┐  ┌───────────────┐              ┌────────────────┐
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│   SIEM   │  │ Ticketing     │              │  SOC Dashboard │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│ (Splunk/ │  │ (Jira/SN/PD)  │              │  (Web UI)      │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  Elastic)│  └───────────────┘              └────────────────┘
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>└──────────┘         │
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>       │              ▼
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>       │    ┌───────────────┐
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>       │    │   SOAR        │
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>       │    │ (xSOAR/Splunk)│
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>       │    └───────────────┘
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>       │
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>       ▼
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>┌──────────────────────────────┐
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│   Long-term Retention (S3)   │
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>└──────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="3-alert-triage-workflow">3. Alert Triage Workflow<a class="headerlink" href="#3-alert-triage-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="31-overview">3.1 Overview<a class="headerlink" href="#31-overview" title="Permanent link">&para;</a></h3>
+<p>The triage workflow is the primary activity for Tier 1 analysts. The goal is to classify every alert as true positive, false positive, or needs escalation within the defined SLA.</p>
+<h3 id="32-sla-targets">3.2 SLA Targets<a class="headerlink" href="#32-sla-targets" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Alert Severity</th>
+<th>Initial Review SLA</th>
+<th>Escalation Decision SLA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Critical</td>
+<td>15 minutes</td>
+<td>30 minutes</td>
+</tr>
+<tr>
+<td>High</td>
+<td>1 hour</td>
+<td>2 hours</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>4 hours</td>
+<td>8 hours</td>
+</tr>
+<tr>
+<td>Low</td>
+<td>24 hours</td>
+<td>48 hours</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-triage-flowchart">3.3 Triage Flowchart<a class="headerlink" href="#33-triage-flowchart" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>New Alert Received
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    │
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    ▼
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>┌───────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│  Step 1: Initial Assessment (5 min for Critical, 15 min others)   │
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│                                                                   │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│  Review:                                                          │
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│  • What type of alert is it? (rule name + ATT&amp;CK technique)       │
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│  • Which host? What is the host's criticality?                    │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│  • What is the current risk score?                                │
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│  • Are there related alerts or an existing incident?              │
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>└───────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    │
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    ▼
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>┌───────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│  Step 2: Context Gathering                                        │
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│                                                                   │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│  r3trive explain &lt;alert_id&gt;        # AI-assisted context          │
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│  r3trive investigate --pid &lt;pid&gt;   # if process-related           │
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│                                                                   │
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│  Check:                                                           │
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│  • Is this host expected to perform this activity?                │
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│  • Is this user expected to perform this activity?                │
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│  • Is there a change ticket covering this activity?               │
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│  • Has this rule fired on this host before? (false positive hist) │
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>└───────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>    │
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>    ├──────────────────────────────────────┐
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>    ▼                                      ▼
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>Known False Positive?                  Confirmed or Suspected TP?
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>    │                                      │
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>    ▼                                      ▼
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>Mark as False Positive              Acknowledge Alert
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>Create/update suppression           Escalate to Tier 2
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>rule if recurring                   Open Incident if not exists
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>Document in notes                   Set priority based on severity
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    │                                      │
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    ▼                                      ▼
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>Closed ────────────────────────────► Incident Response Workflow
+</code></pre></div>
+<h3 id="34-false-positive-handling">3.4 False Positive Handling<a class="headerlink" href="#34-false-positive-handling" title="Permanent link">&para;</a></h3>
+<p>When an alert is confirmed as a false positive:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Mark alert as FP with suppression rule creation</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>r3trive<span class="w"> </span>alert<span class="w"> </span>update<span class="w"> </span>&lt;alert_id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span>--status<span class="w"> </span>false_positive<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span>--note<span class="w"> </span><span class="s2">"Backup job accesses many files nightly - scheduled task BACKUP-001"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span>--create-suppression<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span>--suppression-expires<span class="w"> </span>90d
+</code></pre></div>
+<p><strong>Required documentation for false positive records:</strong></p>
+<ol>
+<li>Why this is a false positive (specific justification, not just "expected behavior")</li>
+<li>What legitimate activity caused the alert</li>
+<li>Any supporting evidence (change ticket, approved process documentation)</li>
+<li>Whether a suppression rule was created and when it expires</li>
+</ol>
+<h3 id="35-alert-queue-management">3.5 Alert Queue Management<a class="headerlink" href="#35-alert-queue-management" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># View current alert queue (sorted by severity + age)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>r3trive<span class="w"> </span>alerts<span class="w"> </span>list<span class="w"> </span>--status<span class="w"> </span>new<span class="w"> </span>--sort<span class="w"> </span>severity:desc,created_at:asc
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Claim an alert for investigation</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>r3trive<span class="w"> </span>alert<span class="w"> </span>update<span class="w"> </span>&lt;alert_id&gt;<span class="w"> </span>--status<span class="w"> </span>acknowledged<span class="w"> </span>--assignee<span class="w"> </span>me
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Bulk acknowledge low-priority alerts during noise periods</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>r3trive<span class="w"> </span>alerts<span class="w"> </span>bulk-update<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span>--filter<span class="w"> </span><span class="s2">"severity=low,rule_id=R3T-DISC-*,host_tag=dev"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span>--status<span class="w"> </span>acknowledged<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span>--note<span class="w"> </span><span class="s2">"Dev environment discovery noise during deployment window"</span>
+</code></pre></div>
+<hr />
+<h2 id="4-incident-response-workflow">4. Incident Response Workflow<a class="headerlink" href="#4-incident-response-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="41-incident-lifecycle-states">4.1 Incident Lifecycle States<a class="headerlink" href="#41-incident-lifecycle-states" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>OPEN → INVESTIGATING → CONTAINED → ERADICATED → RECOVERED → CLOSED
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                           │
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>                           └──► FALSE_POSITIVE (if misclassified)
+</code></pre></div>
+<h3 id="42-p1p2-incident-response-critical-high">4.2 P1/P2 Incident Response (Critical / High)<a class="headerlink" href="#42-p1p2-incident-response-critical-high" title="Permanent link">&para;</a></h3>
+<h4 id="immediately-015-min">Immediately (0–15 min)<a class="headerlink" href="#immediately-015-min" title="Permanent link">&para;</a></h4>
+<p><strong>Tier 1 Actions:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># 1. Confirm alert is a true positive</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>r3trive<span class="w"> </span>explain<span class="w"> </span>&lt;incident_id&gt;
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># 2. Escalate immediately to Tier 2 and IR</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>r3trive<span class="w"> </span>incident<span class="w"> </span>update<span class="w"> </span>&lt;incident_id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">  </span>--priority<span class="w"> </span>P1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="w">  </span>--assignee<span class="w"> </span>&lt;tier2_oncall&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span>--status<span class="w"> </span>investigating<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="w">  </span>--note<span class="w"> </span><span class="s2">"Escalated to IR team. Initial assessment: credential dumping active."</span>
+</code></pre></div></p>
+<p><strong>Notification:</strong>
+- Page Tier 2 on-call via PagerDuty
+- Notify SOC Manager
+- Open Slack incident channel <code>#inc-&lt;YYYYMMDD&gt;-&lt;ID&gt;</code>
+- (P1 only) Notify CISO</p>
+<h4 id="investigation-15-min-2-hr">Investigation (15 min – 2 hr)<a class="headerlink" href="#investigation-15-min-2-hr" title="Permanent link">&para;</a></h4>
+<p><strong>Tier 2 Actions:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Reconstruct the attack chain</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>r3trive<span class="w"> </span>attack-chain<span class="w"> </span>&lt;incident_id&gt;
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="c1"># Identify scope — what else was affected?</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>r3trive<span class="w"> </span>hunt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span>--ioc<span class="w"> </span><span class="s2">"185.220.101.47"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span>--ioc<span class="w"> </span><span class="s2">"invoice.docm"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">  </span>--since<span class="w"> </span><span class="s2">"2h ago"</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="c1"># Collect forensic evidence before containment</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>r3trive<span class="w"> </span>investigate<span class="w"> </span>&lt;incident_id&gt;<span class="w"> </span>--collect-evidence
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="c1"># AI-assisted analysis</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>r3trive<span class="w"> </span>ask<span class="w"> </span><span class="s2">"What was the attacker's likely objective based on INC-20240315-001?"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">  </span>--incident<span class="w"> </span>&lt;incident_id&gt;
+</code></pre></div>
+<p><strong>Determine scope:</strong>
+- Which hosts are affected?
+- Which accounts are compromised?
+- What data may have been accessed or exfiltrated?
+- Is the attacker still active (live incident)?</p>
+<h4 id="containment">Containment<a class="headerlink" href="#containment" title="Permanent link">&para;</a></h4>
+<p><strong>Tier 3 / Responder Actions:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># Isolate affected host (blocks all network except R3TRIVE C2 channel)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>r3trive<span class="w"> </span>respond<span class="w"> </span>--action<span class="w"> </span>isolate_host<span class="w"> </span>--host<span class="w"> </span>&lt;host_id&gt;<span class="w"> </span>--incident<span class="w"> </span>&lt;incident_id&gt;
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="c1"># Kill malicious processes</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>r3trive<span class="w"> </span>respond<span class="w"> </span>--action<span class="w"> </span>kill_process<span class="w"> </span>--pid<span class="w"> </span>&lt;pid&gt;<span class="w"> </span>--host<span class="w"> </span>&lt;host_id&gt;
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="c1"># Block C2 IP across all endpoints</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>r3trive<span class="w"> </span>respond<span class="w"> </span>--action<span class="w"> </span>block_ip<span class="w"> </span>--ip<span class="w"> </span><span class="m">185</span>.220.101.47<span class="w"> </span>--scope<span class="w"> </span>fleet
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="c1"># Disable compromised account</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>r3trive<span class="w"> </span>respond<span class="w"> </span>--action<span class="w"> </span>disable_account<span class="w"> </span>--user<span class="w"> </span><span class="s2">"DOMAIN\\jsmith"</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="c1"># Reset all active sessions (via plugin)</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>r3trive<span class="w"> </span>respond<span class="w"> </span>--plugin-action<span class="w"> </span>ad.force_logoff<span class="w"> </span>--user<span class="w"> </span><span class="s2">"DOMAIN\\jsmith"</span>
+</code></pre></div>
+<p>Update incident status:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>r3trive<span class="w"> </span>incident<span class="w"> </span>update<span class="w"> </span>&lt;incident_id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span>--status<span class="w"> </span>contained<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span>--note<span class="w"> </span><span class="s2">"Host isolated at </span><span class="k">$(</span>date<span class="k">)</span><span class="s2">. C2 IP blocked fleet-wide. Account disabled."</span>
+</code></pre></div></p>
+<h4 id="eradication">Eradication<a class="headerlink" href="#eradication" title="Permanent link">&para;</a></h4>
+<p>Manual steps (outside R3TRIVE scope):
+- Rebuild or reimage affected systems
+- Remove malware artifacts and persistence mechanisms
+- Patch exploited vulnerabilities
+- Rotate credentials</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># Verify eradication</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>r3trive<span class="w"> </span>hunt<span class="w"> </span>--host<span class="w"> </span>&lt;host_id&gt;<span class="w"> </span>--ruleset<span class="w"> </span>post-incident<span class="w"> </span>--since<span class="w"> </span>&lt;containment_time&gt;
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Document eradication</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>r3trive<span class="w"> </span>incident<span class="w"> </span>update<span class="w"> </span>&lt;incident_id&gt;<span class="w"> </span>--status<span class="w"> </span>eradicated<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span>--note<span class="w"> </span><span class="s2">"Host reimaged. Persistence removed (registry key + scheduled task). Patch applied."</span>
+</code></pre></div>
+<h4 id="recovery-and-closure">Recovery and Closure<a class="headerlink" href="#recovery-and-closure" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Verify clean before returning to production</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>r3trive<span class="w"> </span>audit<span class="w"> </span>--host<span class="w"> </span>&lt;host_id&gt;<span class="w"> </span>--profile<span class="w"> </span>post-incident
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="c1"># Close incident with full documentation</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>r3trive<span class="w"> </span>incident<span class="w"> </span>close<span class="w"> </span>&lt;incident_id&gt;<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span>--root-cause<span class="w"> </span><span class="s2">"Phishing email delivered malicious macro via invoice.docm"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span>--impact<span class="w"> </span><span class="s2">"Credentials for jsmith compromised; no confirmed lateral movement"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span>--note<span class="w"> </span><span class="s2">"Lessons learned: patch Office macro policy, implement FIDO2 MFA"</span>
+</code></pre></div>
+<hr />
+<h2 id="5-shift-handoff-procedures">5. Shift Handoff Procedures<a class="headerlink" href="#5-shift-handoff-procedures" title="Permanent link">&para;</a></h2>
+<h3 id="51-end-of-shift-checklist">5.1 End-of-Shift Checklist<a class="headerlink" href="#51-end-of-shift-checklist" title="Permanent link">&para;</a></h3>
+<p>Every outgoing analyst must complete before shift end:</p>
+<p><strong>Alert Queue:</strong>
+- [ ] All <code>Critical</code> and <code>High</code> alerts triaged
+- [ ] All personally assigned alerts updated with current status and notes
+- [ ] No alerts in <code>acknowledged</code> state for more than 2x SLA time without escalation</p>
+<p><strong>Incident Updates:</strong>
+- [ ] All active incidents have been updated within the last 4 hours
+- [ ] Any P1/P2 incidents have current Slack thread summarizing status</p>
+<p><strong>Generate Shift Summary:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>r3trive<span class="w"> </span>summarize<span class="w"> </span>--since<span class="w"> </span><span class="s2">"8h ago"</span><span class="w"> </span>--format<span class="w"> </span>shift-handoff
+</code></pre></div></p>
+<p><strong>Template for shift handoff note:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>SHIFT HANDOFF — [DATE] [TIME] → [TIME]
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>OVERALL THREAT LEVEL: [LOW/MEDIUM/HIGH/CRITICAL]
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>ACTIVE INCIDENTS:
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>- INC-20240315-001 [P1/INVESTIGATING] — Credential theft on WORKSTATION-01
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>  Status: Host isolated. Awaiting reimage approval from IT.
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>  Next action: Validate clean before returning to network (assigned: incoming analyst)
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>ALERTS REQUIRING FOLLOW-UP:
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>- ALT-001 [HIGH/ACKNOWLEDGED] — Suspicious PowerShell on SERVER-02
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>  Context: No parent process data available. Needs Tier 2 review.
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>SUPPRESSION RULES CREATED:
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>- SUPP-042: Backup job on BACKUP-SRV suppressed for R3T-IMPACT-001 (90 days)
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a>NOTES FOR INCOMING:
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a>- BACKUP-SRV has scheduled maintenance window 02:00–04:00, expect elevated file activity alerts
+</code></pre></div></p>
+<hr />
+<h2 id="6-escalation-procedures">6. Escalation Procedures<a class="headerlink" href="#6-escalation-procedures" title="Permanent link">&para;</a></h2>
+<h3 id="61-escalation-matrix">6.1 Escalation Matrix<a class="headerlink" href="#61-escalation-matrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Situation</th>
+<th>Escalate To</th>
+<th>Channel</th>
+<th>Timeframe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Critical alert</td>
+<td>Tier 2 on-call</td>
+<td>PagerDuty</td>
+<td>Immediate</td>
+</tr>
+<tr>
+<td>Suspected active breach</td>
+<td>IR lead + CISO</td>
+<td>Phone + Slack</td>
+<td>Immediate</td>
+</tr>
+<tr>
+<td>Ransomware indicators</td>
+<td>IR lead + IT leadership</td>
+<td>Phone</td>
+<td>Immediate</td>
+</tr>
+<tr>
+<td>Data exfiltration</td>
+<td>IR lead + Legal + CISO</td>
+<td>Phone</td>
+<td>Immediate</td>
+</tr>
+<tr>
+<td>Persistent threat actor</td>
+<td>Tier 2 + Threat Intel</td>
+<td>Slack</td>
+<td>Within 30 min</td>
+</tr>
+<tr>
+<td>Alert volume spike (&gt;200% baseline)</td>
+<td>SOC Manager</td>
+<td>Slack</td>
+<td>Within 15 min</td>
+</tr>
+<tr>
+<td>Platform health issue</td>
+<td>SOC Engineer</td>
+<td>Slack</td>
+<td>Within 15 min</td>
+</tr>
+</tbody>
+</table>
+<h3 id="62-escalation-template">6.2 Escalation Template<a class="headerlink" href="#62-escalation-template" title="Permanent link">&para;</a></h3>
+<p>When escalating to IR:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>ESCALATION NOTICE — [DATE TIME]
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>Escalating: [YOUR NAME / TIER 1]
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>To: [ESCALATION TARGET]
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>Incident: [INC ID or "No incident yet"]
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>Severity: [P1/P2/P3]
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>SUMMARY:
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>[1-3 sentence description of what happened]
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>INDICATORS OBSERVED:
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>- [List key events/alerts]
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a>AFFECTED SCOPE:
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a>- Hosts: [list]
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>- Users: [list]
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a>- Systems: [list]
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a>ACTIONS TAKEN SO FAR:
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a>- [list]
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a>
+<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a>RECOMMENDED IMMEDIATE ACTIONS:
+<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a>- [list]
+<a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a>
+<a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a>DATA LINKS:
+<a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a>- Incident: https://r3trive.corp.com/incidents/[INC-ID]
+<a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a>- Slack channel: #inc-[ID]
+</code></pre></div>
+<hr />
+<h2 id="7-threat-hunting-workflow">7. Threat Hunting Workflow<a class="headerlink" href="#7-threat-hunting-workflow" title="Permanent link">&para;</a></h2>
+<h3 id="71-hunt-types">7.1 Hunt Types<a class="headerlink" href="#71-hunt-types" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Hunt Type</th>
+<th>Trigger</th>
+<th>Frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hypothesis-driven</strong></td>
+<td>Threat intel, new CVE, industry reports</td>
+<td>As needed</td>
+</tr>
+<tr>
+<td><strong>IoC-driven</strong></td>
+<td>New IOC received from feed or sharing</td>
+<td>Within 24h</td>
+</tr>
+<tr>
+<td><strong>Technique-driven</strong></td>
+<td>ATT&amp;CK technique not well-covered by detection</td>
+<td>Weekly</td>
+</tr>
+<tr>
+<td><strong>Baseline deviation</strong></td>
+<td>Anomaly score spike on host or user</td>
+<td>As triggered</td>
+</tr>
+<tr>
+<td><strong>Post-incident</strong></td>
+<td>After resolving an incident</td>
+<td>After each incident</td>
+</tr>
+<tr>
+<td><strong>Scheduled</strong></td>
+<td>Routine sweep of high-value targets</td>
+<td>Weekly</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-hunt-workflow">7.2 Hunt Workflow<a class="headerlink" href="#72-hunt-workflow" title="Permanent link">&para;</a></h3>
+<h4 id="1-define-the-hypothesis">1. Define the Hypothesis<a class="headerlink" href="#1-define-the-hypothesis" title="Permanent link">&para;</a></h4>
+<p>Document the hunt objective before starting:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>HUNT: APT29-style credential theft via LSASS
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>HYPOTHESIS: Threat actor has LSASS access going undetected via signed tool
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>TECHNIQUE: T1003.001
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>DATA SOURCE: Process events (last 72h)
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>SCOPE: All Domain Controllers + Finance workstations
+</code></pre></div></p>
+<h4 id="2-execute-the-hunt">2. Execute the Hunt<a class="headerlink" href="#2-execute-the-hunt" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># Hunt by ATT&amp;CK technique across fleet</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>r3trive<span class="w"> </span>hunt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span>--technique<span class="w"> </span>T1003.001<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span>--scope<span class="w"> </span><span class="s2">"tag:domain-controller,tag:finance"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span>--since<span class="w"> </span>72h
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="c1"># Hunt for specific IOC</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>r3trive<span class="w"> </span>hunt<span class="w"> </span>--ioc<span class="w"> </span><span class="s2">"domain:evil.example.com"</span><span class="w"> </span>--since<span class="w"> </span>30d
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="c1"># Hunt with custom Sigma rule</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>r3trive<span class="w"> </span>sigma<span class="w"> </span>hunt<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">  </span>--rule<span class="w"> </span>/rules/custom/apt29_lsass.yml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">  </span>--since<span class="w"> </span>72h
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="c1"># Free-form hunt with YARA</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>r3trive<span class="w"> </span>yara<span class="w"> </span>scan<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="w">  </span>--dir<span class="w"> </span><span class="s2">"C:\\Windows\\Temp"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="w">  </span>--scope<span class="w"> </span><span class="s2">"tag:domain-controller"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="w">  </span>--recursive
+</code></pre></div>
+<h4 id="3-analyze-results">3. Analyze Results<a class="headerlink" href="#3-analyze-results" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="c1"># Get AI analysis of hunt results</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>r3trive<span class="w"> </span>explain<span class="w"> </span>--hunt-id<span class="w"> </span>&lt;hunt_id&gt;
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="c1"># Ask targeted question about results</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>r3trive<span class="w"> </span>ask<span class="w"> </span><span class="s2">"Were any signed binaries used for LSASS access in this hunt?"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span>--hunt<span class="w"> </span>&lt;hunt_id&gt;
+</code></pre></div>
+<h4 id="4-document-hunt">4. Document Hunt<a class="headerlink" href="#4-document-hunt" title="Permanent link">&para;</a></h4>
+<p>Every hunt must be documented with:
+- Hypothesis tested
+- Data sources queried
+- Time range covered
+- Scope (hosts, users, tags)
+- Results (positive findings or confirmed negative)
+- New rules created (if any)
+- False positives identified</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>r3trive<span class="w"> </span>hunt<span class="w"> </span>report<span class="w"> </span>--hunt-id<span class="w"> </span>&lt;hunt_id&gt;<span class="w"> </span>--output<span class="w"> </span>hunt_report.md
+</code></pre></div>
+<h3 id="73-hunt-packages">7.3 Hunt Packages<a class="headerlink" href="#73-hunt-packages" title="Permanent link">&para;</a></h3>
+<p>Pre-built hunt packages for common scenarios:</p>
+<table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Targets</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>credential-theft</code></td>
+<td>All Windows hosts</td>
+<td>LSASS access, SAM hive access, credential tool artifacts</td>
+</tr>
+<tr>
+<td><code>persistence</code></td>
+<td>All hosts</td>
+<td>Scheduled tasks, registry run keys, startup folders, services</td>
+</tr>
+<tr>
+<td><code>lateral-movement</code></td>
+<td>Servers</td>
+<td>PsExec, WMI, RDP, pass-the-hash indicators</td>
+</tr>
+<tr>
+<td><code>ransomware-prep</code></td>
+<td>All hosts</td>
+<td>Shadow copy deletion, backup disruption, recovery disable</td>
+</tr>
+<tr>
+<td><code>c2-communication</code></td>
+<td>All hosts</td>
+<td>Beaconing, DNS tunneling, unusual outbound protocols</td>
+</tr>
+<tr>
+<td><code>insider-threat</code></td>
+<td>All hosts</td>
+<td>Data staging, bulk file access, cloud upload, USB write</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>r3trive<span class="w"> </span>hunt<span class="w"> </span>--package<span class="w"> </span>credential-theft<span class="w"> </span>--since<span class="w"> </span>7d
+</code></pre></div>
+<hr />
+<h2 id="8-playbook-library">8. Playbook Library<a class="headerlink" href="#8-playbook-library" title="Permanent link">&para;</a></h2>
+<h3 id="81-pb-001-ransomware-response">8.1 PB-001: Ransomware Response<a class="headerlink" href="#81-pb-001-ransomware-response" title="Permanent link">&para;</a></h3>
+<p><strong>Trigger:</strong> Risk score ≥ 85 with <code>ransomware_behavior</code> incident type</p>
+<p><strong>Automated Steps:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PB-001</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ransomware Containment</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nt">auto_trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nt">trigger</span><span class="p">:</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="w">  </span><span class="nt">incident_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ransomware_behavior</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="w">  </span><span class="nt">risk_score_gte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">85</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="nt">steps</span><span class="p">:</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kill_process</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> pid</span><span class="p">:</span><span class="w"> </span><span class="s">"$.incident.primary_pid"</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="w">    </span><span class="nt">on_failure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">continue</span>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">isolate_host</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="w">      </span><span class="nt">host_id</span><span class="p">:</span><span class="w"> </span><span class="s">"$.incident.host_id"</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="w">      </span><span class="nt">preserve_channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">r3trive-c2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">management-vlan</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quarantine_file</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> paths</span><span class="p">:</span><span class="w"> </span><span class="s">"$.incident.artifact_paths"</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">plugin.pagerduty.create_incident</span>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="w">      </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">"RANSOMWARE</span><span class="nv"> </span><span class="s">DETECTED:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$.incident.host.hostname</span><span class="nv"> </span><span class="s">}}"</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="w">      </span><span class="nt">priority</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a><span class="w">      </span><span class="nt">on_call_schedule</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ir-team</span>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">plugin.slack.send</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-19-24" name="__codelineno-19-24" href="#__codelineno-19-24"></a><span class="w">      </span><span class="nt">channel</span><span class="p">:</span><span class="w"> </span><span class="s">"#security-incidents"</span>
+<a id="__codelineno-19-25" name="__codelineno-19-25" href="#__codelineno-19-25"></a><span class="w">      </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">":rotating_light:</span><span class="nv"> </span><span class="s">RANSOMWARE</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$.host.hostname</span><span class="nv"> </span><span class="s">}}</span><span class="nv"> </span><span class="s">—</span><span class="nv"> </span><span class="s">Host</span><span class="nv"> </span><span class="s">isolated.</span><span class="nv"> </span><span class="s">INC:</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$.incident.id</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div></p>
+<p><strong>Manual Steps (Tier 3):</strong>
+1. Verify isolation is effective (check network connectivity from isolated host)
+2. Preserve forensic copy of encrypted files (before any cleanup)
+3. Identify ransomware family (<code>r3trive investigate &lt;malware_path&gt;</code>)
+4. Check backup integrity and recoverability
+5. Determine blast radius (what did this host have access to?)
+6. Notify Legal if customer data may be involved
+7. Begin eradication (reimage from clean baseline)</p>
+<hr />
+<h3 id="82-pb-002-credential-theft-response">8.2 PB-002: Credential Theft Response<a class="headerlink" href="#82-pb-002-credential-theft-response" title="Permanent link">&para;</a></h3>
+<p><strong>Trigger:</strong> LSASS access from non-trusted process (R3T-CRED-001)</p>
+<p><strong>Automated Steps:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PB-002</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Credential Theft Response</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="nt">auto_trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">          </span><span class="c1"># Requires analyst approval</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="nt">trigger</span><span class="p">:</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">  </span><span class="nt">rule_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">R3T-CRED-001</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">  </span><span class="nt">confidence_gte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.8</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="nt">steps</span><span class="p">:</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alert</span>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> channel</span><span class="p">:</span><span class="w"> </span><span class="nv">pagerduty</span><span class="p p-Indicator">,</span><span class="nt"> severity</span><span class="p">:</span><span class="w"> </span><span class="nv">critical</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">collect_evidence</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a><span class="w">      </span><span class="nt">types</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">process_memory</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">network_connections</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">open_files</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a><span class="w">      </span><span class="nt">pid</span><span class="p">:</span><span class="w"> </span><span class="s">"$.alert.data.source.pid"</span>
+</code></pre></div></p>
+<p><strong>Manual Steps (Tier 2/3):</strong>
+1. Identify the tool used (Mimikatz, ProcDump, CobaltStrike, etc.)
+2. Determine what credentials were accessible (domain accounts on this host)
+3. Disable or force-reset ALL accounts that were logged into this host
+4. Check for lateral movement from this host (last 2h)
+5. Revoke Kerberos tickets fleet-wide for affected users
+6. Investigate how attacker reached this point (trace parent process chain)
+7. Determine if this is initial access or post-exploitation</p>
+<hr />
+<h3 id="83-pb-003-suspicious-outbound-connection">8.3 PB-003: Suspicious Outbound Connection<a class="headerlink" href="#83-pb-003-suspicious-outbound-connection" title="Permanent link">&para;</a></h3>
+<p><strong>Trigger:</strong> Beaconing detection (regular interval outbound) or connection to known-bad IP</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PB-003</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Suspicious Outbound C2 Block</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="nt">auto_trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="nt">trigger</span><span class="p">:</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">  </span><span class="nt">any</span><span class="p">:</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">rule_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">R3T-C2-001</span><span class="w">    </span><span class="c1"># beaconing</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">ioc_match</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="w">      </span><span class="nt">ioc_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ip</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a><span class="w">      </span><span class="nt">confidence_gte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">80</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a><span class="nt">steps</span><span class="p">:</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">block_ip</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="w">      </span><span class="nt">ip</span><span class="p">:</span><span class="w"> </span><span class="s">"$.event.data.remote_ip"</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a><span class="w">      </span><span class="nt">direction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">outbound</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a><span class="w">      </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">24h</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a><span class="w">      </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fleet</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kill_connection</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a><span class="w">      </span><span class="nt">connection_id</span><span class="p">:</span><span class="w"> </span><span class="s">"$.event.data.connection_id"</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alert</span>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> channel</span><span class="p">:</span><span class="w"> </span><span class="nv">slack</span><span class="p p-Indicator">,</span><span class="nt"> severity</span><span class="p">:</span><span class="w"> </span><span class="nv">high</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<p><strong>Manual Steps:</strong>
+1. Identify what process initiated the connection
+2. Investigate the binary (YARA scan, PE analysis)
+3. Check if the IP is a Tor exit node (reduces confidence of attribution)
+4. Search for this IP contact across all hosts in last 30 days
+5. Determine initial access vector for the malware</p>
+<hr />
+<h3 id="84-pb-004-phishing-email-indicator">8.4 PB-004: Phishing Email Indicator<a class="headerlink" href="#84-pb-004-phishing-email-indicator" title="Permanent link">&para;</a></h3>
+<p><strong>Trigger:</strong> Document with macro opened followed by shell or network connection</p>
+<p><strong>Automated Steps:</strong>
+- Alert Tier 2 analyst
+- Collect process tree evidence</p>
+<p><strong>Manual Steps (Tier 2):</strong>
+1. Identify the document filename and sender (via email plugin or manual check)
+2. Extract any URLs, attachments, or IOCs from the document
+3. Search email gateway logs for recipients of this email
+4. Send phishing takedown notification (IT/email admin)
+5. Search all endpoints for the document hash
+6. Notify any additional recipients to delete without opening</p>
+<hr />
+<h2 id="9-metrics-and-kpis">9. Metrics and KPIs<a class="headerlink" href="#9-metrics-and-kpis" title="Permanent link">&para;</a></h2>
+<h3 id="91-operational-metrics-daily">9.1 Operational Metrics (Daily)<a class="headerlink" href="#91-operational-metrics-daily" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="c1"># Generate daily metrics report</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>r3trive<span class="w"> </span>report<span class="w"> </span>daily<span class="w"> </span>--output<span class="w"> </span>daily-report.json
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="c1"># Key metrics:</span>
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a><span class="c1"># - Alerts generated / closed / escalated</span>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a><span class="c1"># - MTTR (Mean Time to Respond) by severity</span>
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a><span class="c1"># - False positive rate by rule</span>
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a><span class="c1"># - Active incidents count by severity</span>
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a><span class="c1"># - Hunt coverage (techniques hunted)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>KPI</th>
+<th>Target</th>
+<th>Alert Threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MTTR Critical</td>
+<td>&lt; 1 hour</td>
+<td>&gt; 2 hours</td>
+</tr>
+<tr>
+<td>MTTR High</td>
+<td>&lt; 4 hours</td>
+<td>&gt; 8 hours</td>
+</tr>
+<tr>
+<td>False positive rate</td>
+<td>&lt; 15%</td>
+<td>&gt; 30%</td>
+</tr>
+<tr>
+<td>Alert queue age (Critical)</td>
+<td>&lt; 15 min</td>
+<td>&gt; 30 min</td>
+</tr>
+<tr>
+<td>Detection-to-alert latency</td>
+<td>&lt; 10ms p99</td>
+<td>&gt; 100ms p99</td>
+</tr>
+<tr>
+<td>Agent coverage</td>
+<td>&gt; 98%</td>
+<td>&lt; 95%</td>
+</tr>
+<tr>
+<td>Open critical incidents</td>
+<td>0 uninvestigated</td>
+<td>&gt; 3</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-detection-effectiveness-metrics-weekly">9.2 Detection Effectiveness Metrics (Weekly)<a class="headerlink" href="#92-detection-effectiveness-metrics-weekly" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Detection rate</td>
+<td>% of simulated attacks detected (red team)</td>
+</tr>
+<tr>
+<td>ATT&amp;CK coverage</td>
+<td>% of ATT&amp;CK techniques with active detection</td>
+</tr>
+<tr>
+<td>Dwell time</td>
+<td>Average time from initial compromise to detection</td>
+</tr>
+<tr>
+<td>Noise ratio</td>
+<td>Alerts per true positive</td>
+</tr>
+<tr>
+<td>Rule hit rate</td>
+<td>% of rules that fired at least once in the period</td>
+</tr>
+<tr>
+<td>Suppression coverage</td>
+<td>% of false positives caught by suppressions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="93-soc-efficiency-metrics-monthly">9.3 SOC Efficiency Metrics (Monthly)<a class="headerlink" href="#93-soc-efficiency-metrics-monthly" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analyst workload</td>
+<td>Alerts per analyst per day</td>
+</tr>
+<tr>
+<td>Escalation rate</td>
+<td>% of T1 alerts escalated to T2</td>
+</tr>
+<tr>
+<td>AI assistance rate</td>
+<td>% of investigations using AI explain</td>
+</tr>
+<tr>
+<td>Hunt coverage</td>
+<td># unique techniques hunted per month</td>
+</tr>
+<tr>
+<td>Playbook automation rate</td>
+<td>% of incidents with automated first response</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-role-based-procedures">10. Role-Based Procedures<a class="headerlink" href="#10-role-based-procedures" title="Permanent link">&para;</a></h2>
+<h3 id="101-tier-1-analyst-daily-checklist">10.1 Tier 1 Analyst — Daily Checklist<a class="headerlink" href="#101-tier-1-analyst-daily-checklist" title="Permanent link">&para;</a></h3>
+<p><strong>Start of Shift:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="c1"># 1. Review shift handoff summary</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>r3trive<span class="w"> </span>summarize<span class="w"> </span>--since<span class="w"> </span><span class="s2">"8h ago"</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="c1"># 2. Check platform health</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>r3trive<span class="w"> </span>health
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a><span class="c1"># 3. Review open alert queue</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>r3trive<span class="w"> </span>alerts<span class="w"> </span>list<span class="w"> </span>--status<span class="w"> </span>new<span class="w"> </span>--sort<span class="w"> </span>severity:desc
+</code></pre></div></p>
+<p><strong>During Shift:</strong>
+- Triage all incoming alerts within SLA
+- Document every decision in alert notes
+- Escalate according to escalation matrix
+- Update any assigned incidents at least every 2 hours</p>
+<p><strong>End of Shift:</strong>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="c1"># Generate handoff summary</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>r3trive<span class="w"> </span>summarize<span class="w"> </span>--since<span class="w"> </span><span class="s2">"8h ago"</span><span class="w"> </span>--format<span class="w"> </span>shift-handoff
+</code></pre></div></p>
+<h3 id="102-tier-2-analyst-weekly-checklist">10.2 Tier 2 Analyst — Weekly Checklist<a class="headerlink" href="#102-tier-2-analyst-weekly-checklist" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] Review all false positive submissions from last week, validate suppression rules</li>
+<li>[ ] Run weekly scheduled threat hunt (rotate hunt packages weekly)</li>
+<li>[ ] Review rule statistics for excessive false positives, tune top offenders</li>
+<li>[ ] Check for new Sigma rules to import</li>
+<li>[ ] Update IOC feeds and verify synchronization</li>
+<li>[ ] Review AI feedback scores, report consistent low-quality responses</li>
+</ul>
+<h3 id="103-soc-engineer-monthly-checklist">10.3 SOC Engineer — Monthly Checklist<a class="headerlink" href="#103-soc-engineer-monthly-checklist" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] Review and update detection rule library (add community rules, remove outdated)</li>
+<li>[ ] Validate all playbooks against current IR process</li>
+<li>[ ] Test alert-to-notification pipeline end-to-end</li>
+<li>[ ] Review suppression rule expiry, revalidate or remove expired suppressions</li>
+<li>[ ] Test backup and restore of event database</li>
+<li>[ ] Review API key expiry for integrations</li>
+<li>[ ] Update ATT&amp;CK knowledge base in AI analyst layer</li>
+<li>[ ] Run AI benchmark suite, report quality regression</li>
+</ul>
+<hr />
+<h2 id="11-integration-guides">11. Integration Guides<a class="headerlink" href="#11-integration-guides" title="Permanent link">&para;</a></h2>
+<h3 id="111-splunk-integration">11.1 Splunk Integration<a class="headerlink" href="#111-splunk-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="c1"># r3trive plugin configure com.r3trive.splunk</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="w">  </span><span class="nt">splunk</span><span class="p">:</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="w">    </span><span class="nt">hec_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://splunk.corp.com:8088/services/collector</span>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="w">    </span><span class="nt">hec_token</span><span class="p">:</span><span class="w"> </span><span class="s">"${SPLUNK_HEC_TOKEN}"</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="w">    </span><span class="nt">index</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security_events</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="w">    </span><span class="nt">sourcetype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">r3trive:event</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="w">    </span><span class="nt">min_severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">medium</span>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="w">    </span><span class="nt">flush_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
+</code></pre></div>
+<p>Splunk search examples:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a># All R3TRIVE critical alerts last 24h
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>index=security_events sourcetype="r3trive:alert" severity=critical earliest=-24h
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a># Incidents by ATT&amp;CK technique
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a>index=security_events sourcetype="r3trive:incident"
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>| stats count by attack_techniques{}
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a># MTTA by severity
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a>index=security_events sourcetype="r3trive:alert"
+<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>| eval response_time=(acknowledged_at - created_at)/60
+<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>| stats avg(response_time) by severity
+</code></pre></div></p>
+<h3 id="112-elastickibana-integration">11.2 Elastic/Kibana Integration<a class="headerlink" href="#112-elastickibana-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="w">  </span><span class="nt">elastic</span><span class="p">:</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a><span class="w">    </span><span class="nt">elasticsearch_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://elastic.corp.com:9200</span>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a><span class="w">    </span><span class="nt">api_key</span><span class="p">:</span><span class="w"> </span><span class="s">"${ELASTIC_API_KEY}"</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a><span class="w">    </span><span class="nt">index_pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">r3trive-{type}-{date}</span><span class="w">  </span><span class="c1"># r3trive-events-2024.03.15</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="w">    </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">r3trive-ingest</span>
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a><span class="w">    </span><span class="nt">min_severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">low</span>
+</code></pre></div>
+<h3 id="113-pagerduty-integration">11.3 PagerDuty Integration<a class="headerlink" href="#113-pagerduty-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a><span class="w">  </span><span class="nt">pagerduty</span><span class="p">:</span>
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a><span class="w">    </span><span class="nt">integration_key</span><span class="p">:</span><span class="w"> </span><span class="s">"${PAGERDUTY_INTEGRATION_KEY}"</span>
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a><span class="w">    </span><span class="nt">min_severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">high</span>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a><span class="w">    </span><span class="nt">severity_mapping</span><span class="p">:</span>
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a><span class="w">      </span><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a><span class="w">      </span><span class="nt">high</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">error</span>
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a><span class="w">      </span><span class="nt">medium</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warning</span>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a><span class="w">      </span><span class="nt">low</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span>
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a><span class="w">    </span><span class="nt">deduplicate_key</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">incident_id</span><span class="nv"> </span><span class="s">}}"</span>
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a><span class="w">    </span><span class="nt">auto_resolve_on_incident_close</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h3 id="114-jira-integration">11.4 Jira Integration<a class="headerlink" href="#114-jira-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="w">  </span><span class="nt">jira</span><span class="p">:</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://corp.atlassian.net</span>
+<a id="__codelineno-29-4" name="__codelineno-29-4" href="#__codelineno-29-4"></a><span class="w">    </span><span class="nt">api_token</span><span class="p">:</span><span class="w"> </span><span class="s">"${JIRA_API_TOKEN}"</span>
+<a id="__codelineno-29-5" name="__codelineno-29-5" href="#__codelineno-29-5"></a><span class="w">    </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">"security-bot@corp.com"</span>
+<a id="__codelineno-29-6" name="__codelineno-29-6" href="#__codelineno-29-6"></a><span class="w">    </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SEC</span>
+<a id="__codelineno-29-7" name="__codelineno-29-7" href="#__codelineno-29-7"></a><span class="w">    </span><span class="nt">issue_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Security Incident</span>
+<a id="__codelineno-29-8" name="__codelineno-29-8" href="#__codelineno-29-8"></a><span class="w">    </span><span class="nt">min_risk_score</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span>
+<a id="__codelineno-29-9" name="__codelineno-29-9" href="#__codelineno-29-9"></a><span class="w">    </span><span class="nt">field_mapping</span><span class="p">:</span>
+<a id="__codelineno-29-10" name="__codelineno-29-10" href="#__codelineno-29-10"></a><span class="w">      </span><span class="nt">summary</span><span class="p">:</span><span class="w"> </span><span class="s">"[R3TRIVE]</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">incident.name</span><span class="nv"> </span><span class="s">}}"</span>
+<a id="__codelineno-29-11" name="__codelineno-29-11" href="#__codelineno-29-11"></a><span class="w">      </span><span class="nt">priority</span><span class="p">:</span>
+<a id="__codelineno-29-12" name="__codelineno-29-12" href="#__codelineno-29-12"></a><span class="w">        </span><span class="nt">P1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Highest</span>
+<a id="__codelineno-29-13" name="__codelineno-29-13" href="#__codelineno-29-13"></a><span class="w">        </span><span class="nt">P2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">High</span>
+<a id="__codelineno-29-14" name="__codelineno-29-14" href="#__codelineno-29-14"></a><span class="w">        </span><span class="nt">P3</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Medium</span>
+<a id="__codelineno-29-15" name="__codelineno-29-15" href="#__codelineno-29-15"></a><span class="w">        </span><span class="nt">P4</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Low</span>
+<a id="__codelineno-29-16" name="__codelineno-29-16" href="#__codelineno-29-16"></a><span class="w">      </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">incident.ai_summary</span><span class="nv"> </span><span class="s">}}\n\n*Incident</span><span class="nv"> </span><span class="s">ID:*</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">incident.id</span><span class="nv"> </span><span class="s">}}\n*Risk</span><span class="nv"> </span><span class="s">Score:*</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">incident.risk_score</span><span class="nv"> </span><span class="s">}}"</span>
+<a id="__codelineno-29-17" name="__codelineno-29-17" href="#__codelineno-29-17"></a><span class="w">    </span><span class="nt">auto_close_on_resolve</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div>
+<h3 id="115-microsoft-teams-integration">11.5 Microsoft Teams Integration<a class="headerlink" href="#115-microsoft-teams-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a><span class="w">  </span><span class="nt">teams</span><span class="p">:</span>
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a><span class="w">    </span><span class="nt">webhook_url</span><span class="p">:</span><span class="w"> </span><span class="s">"${TEAMS_WEBHOOK_URL}"</span>
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="w">    </span><span class="nt">min_severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">high</span>
+<a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="w">    </span><span class="nt">card_template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">adaptive</span><span class="w">     </span><span class="c1"># adaptive | simple</span>
+<a id="__codelineno-30-6" name="__codelineno-30-6" href="#__codelineno-30-6"></a><span class="w">    </span><span class="nt">channel_routing</span><span class="p">:</span>
+<a id="__codelineno-30-7" name="__codelineno-30-7" href="#__codelineno-30-7"></a><span class="w">      </span><span class="nt">critical</span><span class="p">:</span><span class="w"> </span><span class="s">"https://teams-webhook-critical"</span>
+<a id="__codelineno-30-8" name="__codelineno-30-8" href="#__codelineno-30-8"></a><span class="w">      </span><span class="nt">high</span><span class="p">:</span><span class="w"> </span><span class="s">"https://teams-webhook-standard"</span>
+</code></pre></div>
+<hr />
+<p><em>End of SOC_WORKFLOW.md</em>
+<em>Related: AI_ANALYST_SPEC.md, SYSTEM_ARCHITECTURE.md, API_REFERENCE.md</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 R3TRIVE Project &mdash; Made with Material for MkDocs
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/thrive-spectrexq/r3trive" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

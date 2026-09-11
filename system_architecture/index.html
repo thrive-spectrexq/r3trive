@@ -1,0 +1,4567 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Endpoint detection, threat hunting and automated defense.">
+      
+      
+        <meta name="author" content="R3TRIVE Contributors">
+      
+      
+        <link rel="canonical" href="https://thrive-spectrexq.github.io/r3trive/system_architecture/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../threat_model/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Architecture - R3TRIVE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#system_architecturemd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="R3TRIVE" class="md-header__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            R3TRIVE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../threat_model/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Threat Model
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../detection_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Detection Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../rule_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Rule Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ai_analyst/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  AI Analyst
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../database_schema/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Database Schema
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugin_sdk/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugin SDK
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../soc_workflow/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SOC Workflow
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api_reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="R3TRIVE" class="md-nav__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    R3TRIVE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Scope
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Terminology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-design-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Design Philosophy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Design Philosophy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-separation-of-concerns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Separation of Concerns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-event-sourcing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Event Sourcing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-minimal-footprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Minimal Footprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-defense-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Defense in Depth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-graceful-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Graceful Degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-component-deep-dives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Component Deep Dives
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Component Deep Dives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-cli-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 CLI Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 CLI Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#411-command-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.1 Command Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#412-output-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.2 Output Formatting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#413-exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.3 Exit Codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-command-router" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Command Router
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 Command Router">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#421-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.1 Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#422-rbac-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.2 RBAC Roles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-detection-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Detection Core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Detection Core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-sensor-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Sensor Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3.1 Sensor Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#432-event-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.2 Event Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#433-event-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.3 Event Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#434-ebpf-program-lifecycle-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.4 eBPF Program Lifecycle (Linux)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-correlation-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Correlation Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 Correlation Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#441-processing-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4.1 Processing Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#442-correlation-rule-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4.2 Correlation Rule Language
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#443-risk-scoring-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4.3 Risk Scoring Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-response-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Response Core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.5 Response Core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#451-action-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5.1 Action Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#452-playbook-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5.2 Playbook Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#453-dry-run-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5.3 Dry-Run Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-threat-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Threat Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.6 Threat Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#461-ioc-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6.1 IOC Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#462-yara-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6.2 YARA Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#463-sigma-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6.3 Sigma Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#47-ai-analyst-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7 AI Analyst Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.7 AI Analyst Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#471-model-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7.1 Model Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#472-context-window-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7.2 Context Window Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#48-plugin-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8 Plugin System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.8 Plugin System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#481-plugin-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8.1 Plugin Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#482-plugin-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8.2 Plugin Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#49-storage-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9 Storage Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.9 Storage Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#491-storage-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9.1 Storage Tiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#492-write-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9.2 Write Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#493-event-log-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9.3 Event Log Integrity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#410-telemetry-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.10 Telemetry Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.10 Telemetry Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4101-signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.10.1 Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Data Flows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Data Flows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-normal-monitoring-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Normal Monitoring Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-investigation-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Investigation Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-automated-defense-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Automated Defense Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-deployment-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Deployment Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Deployment Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-standalone-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Standalone Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-agent-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Agent + Controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-cloud-native" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Cloud-Native
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-air-gapped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Air-Gapped
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-security-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Security Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Security Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-component-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Component Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.1 Component Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-communication-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Communication Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-anti-tampering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Anti-Tampering
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-performance-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Performance Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Performance Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-resource-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Resource Targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-event-throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Event Throughput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-scaling-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Scaling Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-failure-modes-and-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Failure Modes and Resilience
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Failure Modes and Resilience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-sensor-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Sensor Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-storage-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Storage Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-ai-layer-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 AI Layer Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-correlation-engine-backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Correlation Engine Backlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-cross-platform-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Cross-Platform Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Cross-Platform Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-build-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Build Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-platform-specific-privilege-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Platform-Specific Privilege Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-path-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Path Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-scalability-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Scalability Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Scalability Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-fleet-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Fleet Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-horizontal-scaling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Horizontal Scaling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-database-partitioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Database Partitioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-integration-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Integration Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Integration Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-siem-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 SIEM Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-soar-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 SOAR Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-ticketing-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Ticketing Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-threat-intelligence-platforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Threat Intelligence Platforms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../threat_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rule_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai_analyst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Analyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugin_sdk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../soc_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SOC Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Introduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Introduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Scope
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Non-Goals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Terminology
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-design-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Design Philosophy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Design Philosophy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-separation-of-concerns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Separation of Concerns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-event-sourcing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Event Sourcing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-minimal-footprint" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 Minimal Footprint
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-defense-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.4 Defense in Depth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-graceful-degradation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.5 Graceful Degradation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-component-deep-dives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Component Deep Dives
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Component Deep Dives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-cli-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 CLI Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.1 CLI Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#411-command-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.1 Command Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#412-output-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.2 Output Formatting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#413-exit-codes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1.3 Exit Codes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-command-router" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Command Router
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.2 Command Router">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#421-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.1 Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#422-rbac-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2.2 RBAC Roles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-detection-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Detection Core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 Detection Core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-sensor-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.1 Sensor Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3.1 Sensor Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#linux-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Linux Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#windows-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windows Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#macos-sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        macOS Sensors
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#432-event-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.2 Event Schema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#433-event-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.3 Event Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#434-ebpf-program-lifecycle-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3.4 eBPF Program Lifecycle (Linux)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-correlation-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Correlation Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 Correlation Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#441-processing-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4.1 Processing Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#442-correlation-rule-language" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4.2 Correlation Rule Language
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#443-risk-scoring-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4.3 Risk Scoring Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-response-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Response Core
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.5 Response Core">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#451-action-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5.1 Action Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#452-playbook-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5.2 Playbook Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#453-dry-run-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5.3 Dry-Run Mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-threat-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Threat Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.6 Threat Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#461-ioc-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6.1 IOC Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#462-yara-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6.2 YARA Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#463-sigma-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6.3 Sigma Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#47-ai-analyst-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7 AI Analyst Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.7 AI Analyst Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#471-model-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7.1 Model Support
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#472-context-window-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7.2 Context Window Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#48-plugin-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8 Plugin System
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.8 Plugin System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#481-plugin-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8.1 Plugin Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#482-plugin-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8.2 Plugin Interface
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#49-storage-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9 Storage Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.9 Storage Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#491-storage-tiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9.1 Storage Tiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#492-write-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9.2 Write Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#493-event-log-integrity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.9.3 Event Log Integrity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#410-telemetry-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.10 Telemetry Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.10 Telemetry Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4101-signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.10.1 Signals
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Data Flows
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Data Flows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-normal-monitoring-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Normal Monitoring Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-investigation-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Investigation Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-automated-defense-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Automated Defense Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-deployment-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Deployment Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Deployment Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-standalone-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Standalone Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-agent-controller" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Agent + Controller
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-cloud-native" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Cloud-Native
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-air-gapped" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Air-Gapped
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-security-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Security Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Security Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-component-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Component Security
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7.1 Component Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-binary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Binary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agent-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-communication-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Communication Security
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-anti-tampering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Anti-Tampering
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-performance-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Performance Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Performance Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-resource-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Resource Targets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-event-throughput" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Event Throughput
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-scaling-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Scaling Limits
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-failure-modes-and-resilience" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Failure Modes and Resilience
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Failure Modes and Resilience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-sensor-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Sensor Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-storage-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Storage Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-ai-layer-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 AI Layer Failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-correlation-engine-backlog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Correlation Engine Backlog
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-cross-platform-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Cross-Platform Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Cross-Platform Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-build-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Build Matrix
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-platform-specific-privilege-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Platform-Specific Privilege Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-path-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Path Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-scalability-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Scalability Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Scalability Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-fleet-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Fleet Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-horizontal-scaling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Horizontal Scaling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-database-partitioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 Database Partitioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-integration-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Integration Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Integration Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-siem-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 SIEM Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-soar-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 SOAR Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#123-ticketing-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.3 Ticketing Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#124-threat-intelligence-platforms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.4 Threat Intelligence Platforms
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/thrive-spectrexq/r3trive/edit/master/docs/system_architecture.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="system_architecturemd">SYSTEM_ARCHITECTURE.md<a class="headerlink" href="#system_architecturemd" title="Permanent link">&para;</a></h1>
+<p><strong>R3TRIVE System Architecture Specification</strong>
+Version: 1.0.0
+Status: Draft
+Last Updated: 2024-03-15</p>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-introduction">Introduction</a></li>
+<li><a href="#2-design-philosophy">Design Philosophy</a></li>
+<li><a href="#3-high-level-architecture">High-Level Architecture</a></li>
+<li><a href="#4-component-deep-dives">Component Deep Dives</a></li>
+<li>4.1 CLI Layer</li>
+<li>4.2 Command Router</li>
+<li>4.3 Detection Core</li>
+<li>4.4 Correlation Engine</li>
+<li>4.5 Response Core</li>
+<li>4.6 Threat Engine</li>
+<li>4.7 AI Analyst Layer</li>
+<li>4.8 Plugin System</li>
+<li>4.9 Storage Layer</li>
+<li>4.10 Telemetry Layer</li>
+<li><a href="#5-data-flows">Data Flows</a></li>
+<li><a href="#6-deployment-models">Deployment Models</a></li>
+<li><a href="#7-security-architecture">Security Architecture</a></li>
+<li><a href="#8-performance-model">Performance Model</a></li>
+<li><a href="#9-failure-modes-and-resilience">Failure Modes and Resilience</a></li>
+<li><a href="#10-cross-platform-considerations">Cross-Platform Considerations</a></li>
+<li><a href="#11-scalability-architecture">Scalability Architecture</a></li>
+<li><a href="#12-integration-architecture">Integration Architecture</a></li>
+</ol>
+<hr />
+<h2 id="1-introduction">1. Introduction<a class="headerlink" href="#1-introduction" title="Permanent link">&para;</a></h2>
+<p>R3TRIVE is designed around the principle that security tooling should be <strong>fast, portable, and composable</strong>. This document describes every subsystem, the interfaces between them, and the design decisions that govern their behavior.</p>
+<h3 id="11-scope">1.1 Scope<a class="headerlink" href="#11-scope" title="Permanent link">&para;</a></h3>
+<p>This document covers:
+- All internal subsystems and their responsibilities
+- Data flow between subsystems
+- External interfaces (APIs, plugins, storage)
+- Deployment topologies
+- Security properties of the system itself</p>
+<h3 id="12-non-goals">1.2 Non-Goals<a class="headerlink" href="#12-non-goals" title="Permanent link">&para;</a></h3>
+<p>This document does not cover:
+- Implementation details of individual detection rules
+- Specific ATT&amp;CK technique mappings (see DETECTION_ENGINE_SPEC.md)
+- User-facing command documentation (see API_REFERENCE.md)</p>
+<h3 id="13-terminology">1.3 Terminology<a class="headerlink" href="#13-terminology" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event</td>
+<td>A single observable action on a host (e.g., process creation)</td>
+</tr>
+<tr>
+<td>Alert</td>
+<td>A flagged event that matches a detection rule</td>
+</tr>
+<tr>
+<td>Incident</td>
+<td>A correlated group of alerts representing a threat campaign</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>A file, binary, or registry entry of investigative interest</td>
+</tr>
+<tr>
+<td>IOC</td>
+<td>Indicator of Compromise</td>
+</tr>
+<tr>
+<td>TTP</td>
+<td>Tactic, Technique, and Procedure (MITRE ATT&amp;CK terminology)</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td>R3TRIVE running in continuous monitoring mode on a host</td>
+</tr>
+<tr>
+<td>Controller</td>
+<td>R3TRIVE running in fleet management mode</td>
+</tr>
+<tr>
+<td>Sensor</td>
+<td>A platform-specific module that collects raw OS events</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2-design-philosophy">2. Design Philosophy<a class="headerlink" href="#2-design-philosophy" title="Permanent link">&para;</a></h2>
+<h3 id="21-separation-of-concerns">2.1 Separation of Concerns<a class="headerlink" href="#21-separation-of-concerns" title="Permanent link">&para;</a></h3>
+<p>Every subsystem has a single, well-defined responsibility. The Detection Core detects. The Correlation Engine correlates. The Response Core responds. They communicate through typed interfaces and never through shared mutable state.</p>
+<h3 id="22-event-sourcing">2.2 Event Sourcing<a class="headerlink" href="#22-event-sourcing" title="Permanent link">&para;</a></h3>
+<p>All state in R3TRIVE is derived from an append-only event log. This gives us:
+- Reproducible investigation replays
+- Time-travel debugging
+- Tamper evidence
+- Audit compliance</p>
+<h3 id="23-minimal-footprint">2.3 Minimal Footprint<a class="headerlink" href="#23-minimal-footprint" title="Permanent link">&para;</a></h3>
+<p>The agent must not be a target. It must:
+- Use less than 2% CPU during steady-state monitoring
+- Consume less than 150MB RAM
+- Write minimal disk I/O (batch writes, configurable flush intervals)
+- Not open unnecessary network ports in agent mode</p>
+<h3 id="24-defense-in-depth">2.4 Defense in Depth<a class="headerlink" href="#24-defense-in-depth" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE is itself hardened against attack. Process memory is locked where the OS permits. Configuration files are checksum-verified on load. Communication between components is mutually authenticated.</p>
+<h3 id="25-graceful-degradation">2.5 Graceful Degradation<a class="headerlink" href="#25-graceful-degradation" title="Permanent link">&para;</a></h3>
+<p>If the AI layer is unavailable, detection continues. If the correlation engine is backlogged, events are queued. If storage is full, critical events take priority. No single component failure causes total loss of visibility.</p>
+<hr />
+<h2 id="3-high-level-architecture">3. High-Level Architecture<a class="headerlink" href="#3-high-level-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌──────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                         USER INTERFACE LAYER                     │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                                                                  │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────────┐     │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│  │  CLI (cobra)│  │  REST API   │  │  Web Dashboard (Ent.) │     │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│  └──────┬──────┘  └──────┬──────┘  └──────────┬────────────┘     │ 
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>└─────────┼────────────────┼──────────────────────┼───────────────┘
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>          │                │                      │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>          └────────────────┴──────────────────────┘
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                   │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                                   ▼
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>┌──────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│                        COMMAND ROUTER                            │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│                                                                  │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌─────────────┐    │ 
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│  │  Auth/AuthZ│ │Rate Limiter│ │ Middleware  │ │ Output Fmt │    │
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  └────────────┘ └────────────┘ └────────────┘ └─────────────┘    │ 
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>└──────────────────────────────┬───────────────────────────────────┘
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                               │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>         ┌─────────────────────┼──────────────────────┐
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>         │                     │                      │
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>         ▼                     ▼                      ▼
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>┌─────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│  DETECTION CORE │  │  RESPONSE CORE   │  │  THREAT ENGINE   │
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│                 │  │                  │  │                  │
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│  ┌───────────┐  │  │  ┌────────────┐  │  │  ┌────────────┐  │
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│  │ Sensors   │  │  │  │  Playbooks │  │  │  │ YARA       │  │
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│  ├───────────┤  │  │  ├────────────┤  │  │  ├────────────┤  │
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│  │ Process   │  │  │  │  Actions   │  │  │  │ Sigma      │  │
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│  │ File      │  │  │  │  - kill    │  │  │  ├────────────┤  │
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│  │ Network   │  │  │  │  - block   │  │  │  │ IOC Feeds  │  │
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>│  │ Registry  │  │  │  │  - isolate │  │  │  ├────────────┤  │
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│  │ Service   │  │  │  │  - quarant.│  │  │  │ Reputation │  │
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>│  └───────────┘  │  │  └────────────┘  │  │  └────────────┘  │
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>└────────┬────────┘  └────────┬─────────┘  └────────┬─────────┘
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>         │                    │                      │
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>         └────────────────────┴──────────────────────┘
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>                              │
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>                              ▼
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>┌──────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>│                      CORRELATION ENGINE                          │
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>│                                                                  │
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>│  ┌──────────────┐  ┌────────────────┐  ┌───────────────────┐     │
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>│  │ Event Stream │  │ Rule Evaluator │  │ ATT&amp;CK Mapper     │     │
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>│  ├──────────────┤  ├────────────────┤  ├───────────────────┤     │
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>│  │ Ring Buffer  │  │ Temporal Window│  │ Campaign Grouping │     │
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>│  └──────────────┘  └────────────────┘  └───────────────────┘     │
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>└──────────────────────────────┬───────────────────────────────────┘
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>                               │
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>                               ▼
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>┌──────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>│                       AI ANALYST LAYER                           │
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>│                                                                  │
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>│  ┌──────────────┐  ┌────────────────┐  ┌───────────────────┐     │
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>│  │ Prompt Engine│  │ Context Builder│  │  Model Router     │     │
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>│  ├──────────────┤  ├────────────────┤  ├───────────────────┤     │
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>│  │ RAG / KB     │  │ History Store  │  │ Ollama / OpenAI   │     │
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>│  └──────────────┘  └────────────────┘  └───────────────────┘     │
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>└──────────────────────────────┬───────────────────────────────────┘
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>                               │
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>                               ▼
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>┌──────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>│                        PLUGIN SYSTEM                             │
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>│                                                                  │
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐     │
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a>│  │   SIEM   │ │   EDR    │ │  Tickets │ │  Cloud / Custom  │     │
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>│  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘     │
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>└──────────────────────────────┬───────────────────────────────────┘
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>                               │
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a>               ┌───────────────┴────────────────┐
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a>               ▼                                ▼
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a>┌──────────────────────┐            ┌───────────────────────┐
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>│   STORAGE LAYER      │            │   TELEMETRY LAYER     │
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>│                      │            │                       │
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>│  SQLite (local)      │            │  OpenTelemetry        │
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>│  PostgreSQL (fleet)  │            │  Traces / Metrics     │
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>│  Event Log (append)  │            │  Logs                 │
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>└──────────────────────┘            └───────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="4-component-deep-dives">4. Component Deep Dives<a class="headerlink" href="#4-component-deep-dives" title="Permanent link">&para;</a></h2>
+<h3 id="41-cli-layer">4.1 CLI Layer<a class="headerlink" href="#41-cli-layer" title="Permanent link">&para;</a></h3>
+<p>The CLI is built on <strong>cobra</strong> with structured output support for human-readable and machine-readable (JSON, NDJSON, CSV) formats.</p>
+<h4 id="411-command-hierarchy">4.1.1 Command Hierarchy<a class="headerlink" href="#411-command-hierarchy" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>r3trive
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── init              # Initialize configuration
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── monitor           # Continuous endpoint monitoring
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── --level       # alert level filter (low/medium/high/critical)
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── --output      # output format
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   └── --daemon      # run as background daemon
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>├── hunt              # Threat hunting
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── --technique   # target ATT&amp;CK technique
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   ├── --ioc         # hunt for specific IOC
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   └── --ruleset     # custom rule directory
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>├── investigate       # Deep artifact investigation
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   ├── [file]        # investigate file
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   ├── --pid         # investigate running process
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   └── --incident    # re-investigate logged incident
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>├── audit             # Security baseline audit
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   ├── --profile     # audit profile (cis-level1, cis-level2, custom)
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   └── --output      # output format (json, html, pdf)
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>├── defend            # Automated defense
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   ├── --mode        # passive (alert only) / active (take action)
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   └── --threshold   # risk score threshold for auto-response
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>├── explain           # AI explanation of incident/alert
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>├── summarize         # AI summary of recent activity
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>├── generate-rule     # AI-generated detection rule from incident
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>├── ask               # Free-form AI security query
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>├── yara
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│   ├── scan          # YARA scan file or directory
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│   └── validate      # Validate YARA rule syntax
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>├── sigma
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│   ├── hunt          # Hunt using Sigma rules
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│   └── convert       # Convert Sigma to native format
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>├── plugin
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   ├── list          # List installed plugins
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│   ├── install       # Install plugin
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   └── configure     # Configure plugin
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>└── config
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>    ├── show          # Show current configuration
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>    ├── set           # Set configuration value
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    └── validate      # Validate configuration
+</code></pre></div>
+<h4 id="412-output-formatting">4.1.2 Output Formatting<a class="headerlink" href="#412-output-formatting" title="Permanent link">&para;</a></h4>
+<p>All commands support <code>--output</code> flag with values:
+- <code>table</code> (default, human-readable)
+- <code>json</code> (structured, single object)
+- <code>ndjson</code> (newline-delimited, for streaming)
+- <code>csv</code> (for tabular data)
+- <code>quiet</code> (exit code only, for scripts)</p>
+<h4 id="413-exit-codes">4.1.3 Exit Codes<a class="headerlink" href="#413-exit-codes" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Success, no threats found</td>
+</tr>
+<tr>
+<td>1</td>
+<td>General error</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Configuration error</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Permission error</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Threats detected (low)</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Threats detected (medium)</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Threats detected (high)</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Threats detected (critical)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="42-command-router">4.2 Command Router<a class="headerlink" href="#42-command-router" title="Permanent link">&para;</a></h3>
+<p>The Command Router is the internal dispatch layer between the CLI/API and the operational subsystems. It is not exposed directly to users.</p>
+<h4 id="421-responsibilities">4.2.1 Responsibilities<a class="headerlink" href="#421-responsibilities" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Authentication</strong>: Validate API keys and session tokens for API mode</li>
+<li><strong>Authorization</strong>: Enforce RBAC policies on sensitive operations</li>
+<li><strong>Rate Limiting</strong>: Prevent resource exhaustion from rapid command execution</li>
+<li><strong>Middleware Pipeline</strong>: Logging, tracing, and metrics injection</li>
+<li><strong>Context Propagation</strong>: Pass request context (user, session, correlation ID) downstream</li>
+</ul>
+<h4 id="422-rbac-roles">4.2.2 RBAC Roles<a class="headerlink" href="#422-rbac-roles" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>viewer</code></td>
+<td>monitor (read-only), summarize, explain</td>
+</tr>
+<tr>
+<td><code>analyst</code></td>
+<td>viewer + hunt, investigate, audit</td>
+</tr>
+<tr>
+<td><code>responder</code></td>
+<td>analyst + defend, quarantine, block</td>
+</tr>
+<tr>
+<td><code>admin</code></td>
+<td>responder + plugin management, config, user management</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="43-detection-core">4.3 Detection Core<a class="headerlink" href="#43-detection-core" title="Permanent link">&para;</a></h3>
+<p>The Detection Core is the most performance-critical component. It must collect OS-level events with minimal latency and overhead.</p>
+<h4 id="431-sensor-architecture">4.3.1 Sensor Architecture<a class="headerlink" href="#431-sensor-architecture" title="Permanent link">&para;</a></h4>
+<p>Sensors are platform-specific collection modules. Each sensor implements a common interface:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Sensor</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="nx">Name</span><span class="p">()</span><span class="w"> </span><span class="kt">string</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">Platform</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="nx">Platform</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">Start</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">ch</span><span class="w"> </span><span class="kt">chan</span><span class="o">&lt;-</span><span class="w"> </span><span class="nx">Event</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nx">Stop</span><span class="p">()</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nx">Health</span><span class="p">()</span><span class="w"> </span><span class="nx">SensorHealth</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+</code></pre></div>
+<h5 id="linux-sensors">Linux Sensors<a class="headerlink" href="#linux-sensors" title="Permanent link">&para;</a></h5>
+<table>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Mechanism</th>
+<th>Events</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ProcessSensor</td>
+<td>eBPF (kernel 5.8+) / fallback: /proc polling</td>
+<td>exec, fork, exit</td>
+</tr>
+<tr>
+<td>FileSensor</td>
+<td>inotify / eBPF</td>
+<td>create, modify, delete, rename</td>
+</tr>
+<tr>
+<td>NetworkSensor</td>
+<td>eBPF (tc hook) / pcap fallback</td>
+<td>connect, listen, send, recv</td>
+</tr>
+<tr>
+<td>RegistrySensor</td>
+<td>N/A on Linux</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ServiceSensor</td>
+<td>systemd D-Bus / /proc/1</td>
+<td>start, stop, enable</td>
+</tr>
+</tbody>
+</table>
+<h5 id="windows-sensors">Windows Sensors<a class="headerlink" href="#windows-sensors" title="Permanent link">&para;</a></h5>
+<table>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Mechanism</th>
+<th>Events</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ProcessSensor</td>
+<td>ETW (Event Tracing for Windows)</td>
+<td>exec, inject, exit</td>
+</tr>
+<tr>
+<td>FileSensor</td>
+<td>ETW / USN Journal</td>
+<td>create, modify, delete, rename</td>
+</tr>
+<tr>
+<td>NetworkSensor</td>
+<td>ETW / WFP callbacks</td>
+<td>connect, listen, send, recv</td>
+</tr>
+<tr>
+<td>RegistrySensor</td>
+<td>ETW RegNtSetValue callbacks</td>
+<td>read, write, delete</td>
+</tr>
+<tr>
+<td>ServiceSensor</td>
+<td>Service Control Manager ETW</td>
+<td>create, start, stop</td>
+</tr>
+</tbody>
+</table>
+<h5 id="macos-sensors">macOS Sensors<a class="headerlink" href="#macos-sensors" title="Permanent link">&para;</a></h5>
+<table>
+<thead>
+<tr>
+<th>Sensor</th>
+<th>Mechanism</th>
+<th>Events</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ProcessSensor</td>
+<td>Endpoint Security Framework</td>
+<td>exec, fork, exit</td>
+</tr>
+<tr>
+<td>FileSensor</td>
+<td>Endpoint Security Framework</td>
+<td>create, modify, delete</td>
+</tr>
+<tr>
+<td>NetworkSensor</td>
+<td>Network Extension / libpcap</td>
+<td>connect, listen</td>
+</tr>
+<tr>
+<td>RegistrySensor</td>
+<td>N/A on macOS</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ServiceSensor</td>
+<td>launchd XPC / fs_usage</td>
+<td>load, start, stop</td>
+</tr>
+</tbody>
+</table>
+<h4 id="432-event-schema">4.3.2 Event Schema<a class="headerlink" href="#432-event-schema" title="Permanent link">&para;</a></h4>
+<p>Every event produced by any sensor conforms to this schema:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"evt_01HN2X4Y5Z6A7B8C9D0E1F2G3H"</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2024-03-15T14:32:01.000000000Z"</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"host"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"host_abc123"</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">"hostname"</span><span class="p">:</span><span class="w"> </span><span class="s2">"WORKSTATION-01"</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">"os"</span><span class="p">:</span><span class="w"> </span><span class="s2">"linux"</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">"os_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Ubuntu 22.04.3 LTS"</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">"arch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"amd64"</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">    </span><span class="nt">"tags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"production"</span><span class="p">,</span><span class="w"> </span><span class="s2">"finance"</span><span class="p">]</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"process.create"</span><span class="p">,</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span><span class="nt">"severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span><span class="p">,</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">  </span><span class="nt">"sensor"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ProcessSensor"</span><span class="p">,</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="nt">"pid"</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">    </span><span class="nt">"ppid"</span><span class="p">:</span><span class="w"> </span><span class="mi">1001</span><span class="p">,</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cmd.exe"</span><span class="p">,</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">    </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:\\Windows\\System32\\cmd.exe"</span><span class="p">,</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">    </span><span class="nt">"cmdline"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cmd.exe /c powershell -enc &lt;base64&gt;"</span><span class="p">,</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="nt">"user"</span><span class="p">:</span><span class="w"> </span><span class="s2">"DOMAIN\\jsmith"</span><span class="p">,</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">    </span><span class="nt">"uid"</span><span class="p">:</span><span class="w"> </span><span class="mi">1001</span><span class="p">,</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">    </span><span class="nt">"gid"</span><span class="p">:</span><span class="w"> </span><span class="mi">1001</span><span class="p">,</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a><span class="w">    </span><span class="nt">"session_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3"</span><span class="p">,</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="w">    </span><span class="nt">"hashes"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="w">      </span><span class="nt">"md5"</span><span class="p">:</span><span class="w"> </span><span class="s2">"9b51a57b..."</span><span class="p">,</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">      </span><span class="nt">"sha256"</span><span class="p">:</span><span class="w"> </span><span class="s2">"e3b0c44298fc..."</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="w">    </span><span class="nt">"parent"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">      </span><span class="nt">"pid"</span><span class="p">:</span><span class="w"> </span><span class="mi">1001</span><span class="p">,</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"explorer.exe"</span><span class="p">,</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">      </span><span class="nt">"path"</span><span class="p">:</span><span class="w"> </span><span class="s2">"C:\\Windows\\explorer.exe"</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a><span class="w">  </span><span class="nt">"enrichments"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a><span class="w">  </span><span class="nt">"raw"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;base64 encoded raw event if applicable&gt;"</span>
+<a id="__codelineno-3-37" name="__codelineno-3-37" href="#__codelineno-3-37"></a><span class="p">}</span>
+</code></pre></div>
+<h4 id="433-event-pipeline">4.3.3 Event Pipeline<a class="headerlink" href="#433-event-pipeline" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>OS Kernel
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    │
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    ▼ (eBPF hook / ETW / ESF)
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>Sensor (platform-specific)
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    │
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    ▼
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>Event Normalizer
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    │  (maps platform-specific fields to common schema)
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    ▼
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>Event Enricher
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    │  (adds hashes, parent process, user info, geo-IP)
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    ▼
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>Event Validator
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    │  (schema validation, drop malformed events)
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>    ▼
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>Event Ring Buffer (in-memory, configurable size)
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    │
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    ├──► Real-time Detection Rules
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    │
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    ├──► Correlation Engine (async)
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>    │
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    └──► Storage Layer (async, batched)
+</code></pre></div>
+<h4 id="434-ebpf-program-lifecycle-linux">4.3.4 eBPF Program Lifecycle (Linux)<a class="headerlink" href="#434-ebpf-program-lifecycle-linux" title="Permanent link">&para;</a></h4>
+<p>R3TRIVE compiles eBPF programs at runtime using CO-RE (Compile Once, Run Everywhere) to support kernels 5.4+. The loading sequence is:</p>
+<ol>
+<li>Detect kernel version and available BTF (BPF Type Format) data</li>
+<li>Load pre-compiled eBPF object (embedded in binary via <code>//go:embed</code>)</li>
+<li>Attach to tracepoints/kprobes via <code>cilium/ebpf</code></li>
+<li>Set up perf ring buffer for event delivery</li>
+<li>Start userspace consumer goroutine</li>
+</ol>
+<p>Fallback for kernels &lt; 5.4: <code>/proc</code> polling with 100ms interval (higher overhead).</p>
+<hr />
+<h3 id="44-correlation-engine">4.4 Correlation Engine<a class="headerlink" href="#44-correlation-engine" title="Permanent link">&para;</a></h3>
+<p>The Correlation Engine transforms raw event streams into meaningful security incidents.</p>
+<h4 id="441-processing-pipeline">4.4.1 Processing Pipeline<a class="headerlink" href="#441-processing-pipeline" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Event Stream (from Detection Core)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    │
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    ▼
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>Event Classifier
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    │  (assigns event to category: process, network, file, etc.)
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    ▼
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>Temporal Window Manager
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    │  (sliding windows: 60s, 5m, 15m, 1h, 24h)
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    ▼
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>Rule Evaluator
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    │  (evaluates correlation rules against windowed events)
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    ▼
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>Incident Factory
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    │  (creates/updates incident records)
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    ▼
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>ATT&amp;CK Mapper
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>    │  (maps incidents to MITRE ATT&amp;CK techniques)
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>    ▼
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>Risk Scorer
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    │  (calculates composite risk score 0-100)
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>    ▼
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>Incident Store
+</code></pre></div>
+<h4 id="442-correlation-rule-language">4.4.2 Correlation Rule Language<a class="headerlink" href="#442-correlation-rule-language" title="Permanent link">&para;</a></h4>
+<p>Correlation rules are defined in YAML and evaluated by the rule engine. See RULE_ENGINE_SPEC.md for full DSL specification.</p>
+<p>Example correlation rule (PowerShell credential dump detection):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">COR-001</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PowerShell Credential Dump Chain</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Detects PowerShell spawned by Office followed by credential access</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="nt">window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5m</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="nt">conditions</span><span class="p">:</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">sequence</span><span class="p">:</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">event</span><span class="p">:</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">process.create</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">        </span><span class="nt">data.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">powershell.exe</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">        </span><span class="nt">data.parent.name</span><span class="p">:</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">          </span><span class="nt">oneOf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">winword.exe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">excel.exe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">outlook.exe</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">event</span><span class="p">:</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">process.create</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">        </span><span class="nt">data.name</span><span class="p">:</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">          </span><span class="nt">oneOf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">lsass.exe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">mimikatz.exe</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">procdump.exe</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">        </span><span class="nt">data.parent.name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">powershell.exe</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">        </span><span class="nt">within</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2m</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="nt">attack</span><span class="p">:</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">  </span><span class="nt">tactic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CredentialAccess</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">  </span><span class="nt">technique</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">T1003.001</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="nt">response</span><span class="p">:</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">  </span><span class="nt">auto_actions</span><span class="p">:</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">kill_process</span><span class="p">:</span><span class="w"> </span><span class="s">"$.events[1].data.pid"</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">alert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">critical</span>
+</code></pre></div>
+<h4 id="443-risk-scoring-model">4.4.3 Risk Scoring Model<a class="headerlink" href="#443-risk-scoring-model" title="Permanent link">&para;</a></h4>
+<p>Risk score = Σ(finding_weight × confidence) × campaign_multiplier × recency_decay</p>
+<p>Where:
+- <code>finding_weight</code> is the base severity weight (low=10, medium=25, high=50, critical=90)
+- <code>confidence</code> is 0.0–1.0 based on detection method reliability
+- <code>campaign_multiplier</code> is 1.0–2.0 based on correlation with other incidents
+- <code>recency_decay</code> reduces score for older events (half-life = 24 hours)</p>
+<hr />
+<h3 id="45-response-core">4.5 Response Core<a class="headerlink" href="#45-response-core" title="Permanent link">&para;</a></h3>
+<p>The Response Core executes containment and remediation actions.</p>
+<h4 id="451-action-types">4.5.1 Action Types<a class="headerlink" href="#451-action-types" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Description</th>
+<th>Reversible</th>
+<th>Privilege Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>kill_process</code></td>
+<td>Terminate process by PID</td>
+<td>No</td>
+<td>Elevated</td>
+</tr>
+<tr>
+<td><code>block_ip</code></td>
+<td>Add firewall rule to block IP</td>
+<td>Yes</td>
+<td>Elevated</td>
+</tr>
+<tr>
+<td><code>quarantine_file</code></td>
+<td>Move file to quarantine store</td>
+<td>Yes</td>
+<td>Elevated</td>
+</tr>
+<tr>
+<td><code>disable_account</code></td>
+<td>Disable user account</td>
+<td>Yes</td>
+<td>Admin</td>
+</tr>
+<tr>
+<td><code>isolate_host</code></td>
+<td>Block all network except C2 channel</td>
+<td>Yes</td>
+<td>Elevated</td>
+</tr>
+<tr>
+<td><code>kill_connection</code></td>
+<td>Terminate active network connection</td>
+<td>No</td>
+<td>Elevated</td>
+</tr>
+<tr>
+<td><code>disable_service</code></td>
+<td>Stop and disable service</td>
+<td>Yes</td>
+<td>Admin</td>
+</tr>
+<tr>
+<td><code>revoke_token</code></td>
+<td>Revoke auth tokens via plugin</td>
+<td>Yes</td>
+<td>Plugin-dependent</td>
+</tr>
+</tbody>
+</table>
+<h4 id="452-playbook-engine">4.5.2 Playbook Engine<a class="headerlink" href="#452-playbook-engine" title="Permanent link">&para;</a></h4>
+<p>Responses can be automated through playbooks — ordered sequences of actions with conditions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PB-001</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ransomware Containment</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="nt">trigger</span><span class="p">:</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">incident_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ransomware_behavior</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nt">risk_score_gte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">85</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="nt">steps</span><span class="p">:</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Kill malicious process</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kill_process</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">      </span><span class="nt">pid</span><span class="p">:</span><span class="w"> </span><span class="s">"$.incident.primary_pid"</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="nt">on_failure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">continue</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Isolate host</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">isolate_host</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">      </span><span class="nt">host_id</span><span class="p">:</span><span class="w"> </span><span class="s">"$.incident.host_id"</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">      </span><span class="nt">preserve_channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"r3trive-c2"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="nt">on_failure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alert_admin</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Quarantine dropped files</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quarantine_file</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">      </span><span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="s">"$.incident.artifact_paths"</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create ticket</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">    </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">plugin.ticketing.create</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">      </span><span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="s">"Ransomware</span><span class="nv"> </span><span class="s">on</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">$.incident.host.hostname</span><span class="nv"> </span><span class="s">}}"</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">      </span><span class="nt">priority</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">      </span><span class="nt">body</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">$.incident</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">summarize</span><span class="nv"> </span><span class="s">}}"</span>
+</code></pre></div>
+<h4 id="453-dry-run-mode">4.5.3 Dry-Run Mode<a class="headerlink" href="#453-dry-run-mode" title="Permanent link">&para;</a></h4>
+<p>All response actions support <code>--dry-run</code> flag which logs what actions would be taken without executing them. This is the default in <code>passive</code> mode.</p>
+<hr />
+<h3 id="46-threat-engine">4.6 Threat Engine<a class="headerlink" href="#46-threat-engine" title="Permanent link">&para;</a></h3>
+<p>The Threat Engine provides threat intelligence correlation and rule-based scanning.</p>
+<h4 id="461-ioc-management">4.6.1 IOC Management<a class="headerlink" href="#461-ioc-management" title="Permanent link">&para;</a></h4>
+<p>IOCs are ingested from:
+- STIX/TAXII feeds
+- MISP exports
+- Manual input (<code>r3trive ioc add</code>)
+- AI-extracted IOCs from incident analysis</p>
+<p>IOC types supported:
+- IP address (v4 and v6)
+- Domain
+- URL
+- File hash (MD5, SHA1, SHA256, SHA512)
+- Certificate thumbprint
+- Email address
+- User agent string
+- Registry key</p>
+<h4 id="462-yara-integration">4.6.2 YARA Integration<a class="headerlink" href="#462-yara-integration" title="Permanent link">&para;</a></h4>
+<p>YARA rules are compiled at startup and maintained in a compiled rule set for O(1) lookup. The scanner supports:
+- Multi-threaded scanning
+- Memory scanning of running processes
+- Recursive directory scanning
+- Timeout per scan
+- Metadata extraction for matched rules</p>
+<h4 id="463-sigma-integration">4.6.3 Sigma Integration<a class="headerlink" href="#463-sigma-integration" title="Permanent link">&para;</a></h4>
+<p>Sigma rules are converted to native R3TRIVE correlation rules at load time using a built-in Sigma transpiler. The conversion is lossy for platform-specific features; a compatibility report is generated.</p>
+<hr />
+<h3 id="47-ai-analyst-layer">4.7 AI Analyst Layer<a class="headerlink" href="#47-ai-analyst-layer" title="Permanent link">&para;</a></h3>
+<p>The AI Analyst Layer provides natural-language security analysis. See AI_ANALYST_SPEC.md for full specification.</p>
+<h4 id="471-model-support">4.7.1 Model Support<a class="headerlink" href="#471-model-support" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Backend</th>
+<th>Type</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ollama</td>
+<td>Local</td>
+<td>Air-gapped, privacy-sensitive</td>
+</tr>
+<tr>
+<td>OpenAI API</td>
+<td>Cloud</td>
+<td>Best quality, requires connectivity</td>
+</tr>
+<tr>
+<td>Any OpenAI-compatible</td>
+<td>Cloud/local</td>
+<td>Flexibility</td>
+</tr>
+<tr>
+<td>Anthropic API</td>
+<td>Cloud</td>
+<td>Optional integration</td>
+</tr>
+</tbody>
+</table>
+<h4 id="472-context-window-management">4.7.2 Context Window Management<a class="headerlink" href="#472-context-window-management" title="Permanent link">&para;</a></h4>
+<p>Each AI request includes:
+1. System prompt (security analyst persona)
+2. Structured incident/event data (JSON)
+3. Relevant ATT&amp;CK context (from knowledge base)
+4. Historical context (last N incidents)
+5. User query</p>
+<p>Total context is managed to fit within the model's context window, with priority ordering: user query &gt; incident data &gt; historical context.</p>
+<hr />
+<h3 id="48-plugin-system">4.8 Plugin System<a class="headerlink" href="#48-plugin-system" title="Permanent link">&para;</a></h3>
+<p>Plugins extend R3TRIVE without modifying the core. See PLUGIN_SDK.md for full specification.</p>
+<h4 id="481-plugin-types">4.8.1 Plugin Types<a class="headerlink" href="#481-plugin-types" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input</code></td>
+<td>Ingest events from external sources</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td>Send alerts/incidents to external systems</td>
+</tr>
+<tr>
+<td><code>enrichment</code></td>
+<td>Add context to events</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td>Add new response action types</td>
+</tr>
+<tr>
+<td><code>intelligence</code></td>
+<td>Add threat feed sources</td>
+</tr>
+</tbody>
+</table>
+<h4 id="482-plugin-interface">4.8.2 Plugin Interface<a class="headerlink" href="#482-plugin-interface" title="Permanent link">&para;</a></h4>
+<p>Plugins communicate with the core via gRPC over a Unix domain socket (or TCP for remote plugins). This provides:
+- Language independence (any gRPC-capable language)
+- Process isolation (plugin crash doesn't crash core)
+- Security boundary (plugins run with minimal privilege)</p>
+<hr />
+<h3 id="49-storage-layer">4.9 Storage Layer<a class="headerlink" href="#49-storage-layer" title="Permanent link">&para;</a></h3>
+<h4 id="491-storage-tiers">4.9.1 Storage Tiers<a class="headerlink" href="#491-storage-tiers" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Technology</th>
+<th>Use Case</th>
+<th>Retention Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hot</td>
+<td>In-memory ring buffer</td>
+<td>Real-time correlation</td>
+<td>Last 10,000 events</td>
+</tr>
+<tr>
+<td>Warm</td>
+<td>SQLite</td>
+<td>Local agent, single-host</td>
+<td>30 days</td>
+</tr>
+<tr>
+<td>Cold</td>
+<td>PostgreSQL</td>
+<td>Fleet, multi-host</td>
+<td>1 year</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td>S3/GCS/Azure Blob</td>
+<td>Long-term compliance</td>
+<td>Configurable</td>
+</tr>
+</tbody>
+</table>
+<h4 id="492-write-path">4.9.2 Write Path<a class="headerlink" href="#492-write-path" title="Permanent link">&para;</a></h4>
+<p>All writes are asynchronous. Events flow from the ring buffer to SQLite in batches (default: 100 events or 1 second, whichever comes first). PostgreSQL sync occurs on a configurable schedule.</p>
+<h4 id="493-event-log-integrity">4.9.3 Event Log Integrity<a class="headerlink" href="#493-event-log-integrity" title="Permanent link">&para;</a></h4>
+<p>Each event record includes:
+- Sequential event ID
+- SHA256 hash of the event content
+- Chain hash (SHA256 of previous chain hash + current event hash)
+- Signature (when key management is configured)</p>
+<p>This creates a tamper-evident chain that can be verified with <code>r3trive verify-log</code>.</p>
+<p>See DATABASE_SCHEMA.md for complete schema.</p>
+<hr />
+<h3 id="410-telemetry-layer">4.10 Telemetry Layer<a class="headerlink" href="#410-telemetry-layer" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE emits OpenTelemetry signals for all major operations.</p>
+<h4 id="4101-signals">4.10.1 Signals<a class="headerlink" href="#4101-signals" title="Permanent link">&para;</a></h4>
+<p><strong>Traces</strong>: Request-scoped traces for every command execution, covering all subsystem calls.</p>
+<p><strong>Metrics</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>r3trive.events.total</code></td>
+<td>Counter</td>
+<td>Total events processed</td>
+</tr>
+<tr>
+<td><code>r3trive.events.per_second</code></td>
+<td>Gauge</td>
+<td>Current event processing rate</td>
+</tr>
+<tr>
+<td><code>r3trive.alerts.total</code></td>
+<td>Counter</td>
+<td>Total alerts generated</td>
+</tr>
+<tr>
+<td><code>r3trive.incidents.active</code></td>
+<td>Gauge</td>
+<td>Currently active incidents</td>
+</tr>
+<tr>
+<td><code>r3trive.detection.latency</code></td>
+<td>Histogram</td>
+<td>Time from event to alert</td>
+</tr>
+<tr>
+<td><code>r3trive.correlation.latency</code></td>
+<td>Histogram</td>
+<td>Time from alert to incident</td>
+</tr>
+<tr>
+<td><code>r3trive.ai.request.duration</code></td>
+<td>Histogram</td>
+<td>AI API call duration</td>
+</tr>
+<tr>
+<td><code>r3trive.sensor.health</code></td>
+<td>Gauge</td>
+<td>Per-sensor health score</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Logs</strong>: Structured JSON logs emitted to stderr or configurable sink. Log levels: trace, debug, info, warn, error.</p>
+<hr />
+<h2 id="5-data-flows">5. Data Flows<a class="headerlink" href="#5-data-flows" title="Permanent link">&para;</a></h2>
+<h3 id="51-normal-monitoring-flow">5.1 Normal Monitoring Flow<a class="headerlink" href="#51-normal-monitoring-flow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>1. OS generates kernel event (e.g., new process created)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>2. Sensor (eBPF/ETW/ESF) receives event in kernel/user boundary
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>3. EventNormalizer maps to common schema
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>4. EventEnricher adds hash, parent, user info
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>5. Event written to ring buffer
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>6. Real-time rules evaluated against event (&lt; 1ms target)
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>7. If rule match: Alert created, written to storage
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>8. Event forwarded to Correlation Engine queue
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>9. Correlation Engine evaluates temporal patterns
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>10. If correlation match: Incident created/updated
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>11. Incident forwarded to AI Analyst for async enrichment
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>12. If defense rules trigger: Response Core executes action
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>13. All events batched to SQLite / PostgreSQL
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>14. Telemetry emitted to configured exporter
+</code></pre></div>
+<h3 id="52-investigation-flow">5.2 Investigation Flow<a class="headerlink" href="#52-investigation-flow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>1. User runs `r3trive investigate &lt;target&gt;`
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>2. Command Router validates request
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>3. Detection Core performs static analysis on artifact
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>4. Threat Engine checks IOC matches, YARA scan
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>5. Historical events queried from Storage for related activity
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>6. Correlation Engine identifies related incidents
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>7. AI Analyst Layer constructs investigation report
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>8. Risk score calculated
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>9. Report rendered to user in requested format
+</code></pre></div>
+<h3 id="53-automated-defense-flow">5.3 Automated Defense Flow<a class="headerlink" href="#53-automated-defense-flow" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>1. Incident risk score exceeds configured threshold
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>2. Playbook Engine selects matching playbook
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>3. Playbook steps evaluated in order
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>4. Response Core executes each action
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>5. Results logged to incident timeline
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>6. Notification sent via configured plugins
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>7. Rollback plan stored for manual review
+</code></pre></div>
+<hr />
+<h2 id="6-deployment-models">6. Deployment Models<a class="headerlink" href="#6-deployment-models" title="Permanent link">&para;</a></h2>
+<h3 id="61-standalone-agent">6.1 Standalone Agent<a class="headerlink" href="#61-standalone-agent" title="Permanent link">&para;</a></h3>
+<p>Single binary on a single host. Stores data locally in SQLite. No network communication required except for optional AI and threat feed updates.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>┌─────────────────────────────────┐
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>│           Host Machine          │
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>│                                 │
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>│  ┌───────────────────────────┐  │
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>│  │  R3TRIVE (all components) │  │
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>│  │  SQLite local storage     │  │
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>│  └───────────────────────────┘  │
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>└─────────────────────────────────┘
+</code></pre></div>
+<h3 id="62-agent-controller">6.2 Agent + Controller<a class="headerlink" href="#62-agent-controller" title="Permanent link">&para;</a></h3>
+<p>Multiple agents report to a centralized controller. Agents send events and receive configuration from the controller.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>┌───────────┐  ┌───────────┐  ┌───────────┐
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>│  Agent 1  │  │  Agent 2  │  │  Agent N  │
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>└─────┬─────┘  └─────┬─────┘  └─────┬─────┘
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>      │               │               │
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>      └───────────────┴───────────────┘
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>                      │ (NATS / TLS)
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>                      ▼
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>             ┌─────────────────┐
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>             │   Controller    │
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>             │  PostgreSQL     │
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a>             │  Fleet Mgmt     │
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>             │  Central AI     │
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>             └─────────────────┘
+</code></pre></div>
+<h3 id="63-cloud-native">6.3 Cloud-Native<a class="headerlink" href="#63-cloud-native" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE agents run as DaemonSets in Kubernetes. Central components run as Deployments with HA PostgreSQL.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>┌────────────────────────────────────────┐
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>│           Kubernetes Cluster           │
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>│                                        │
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>│  DaemonSet: r3trive-agent              │
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>│  (one pod per node)                    │
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>│                                        │
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>│  Deployment: r3trive-controller (HA)   │
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>│  Deployment: r3trive-ai (HA)           │
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>│  StatefulSet: PostgreSQL               │
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a>│  StatefulSet: NATS cluster             │
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a>└────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="64-air-gapped">6.4 Air-Gapped<a class="headerlink" href="#64-air-gapped" title="Permanent link">&para;</a></h3>
+<p>For environments without internet access:
+- All threat feeds cached locally
+- Local Ollama instance for AI features
+- No external calls
+- Update packages delivered via signed archive</p>
+<hr />
+<h2 id="7-security-architecture">7. Security Architecture<a class="headerlink" href="#7-security-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="71-component-security">7.1 Component Security<a class="headerlink" href="#71-component-security" title="Permanent link">&para;</a></h3>
+<h4 id="cli-binary">CLI Binary<a class="headerlink" href="#cli-binary" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Compiled with <code>-trimpath</code> to remove build paths</li>
+<li>CGO disabled where possible for reduced attack surface</li>
+<li>Version information embedded via <code>ldflags</code> at build time</li>
+<li>Binary signing via <code>cosign</code></li>
+</ul>
+<h4 id="agent-process">Agent Process<a class="headerlink" href="#agent-process" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Drops capabilities after startup except those required for sensors</li>
+<li>Locks process memory (<code>mlock</code>) for sensitive data in memory</li>
+<li>Watchdog process monitors agent health and restarts on crash</li>
+<li>Agent process not accessible via standard process list in hardened mode (Linux namespace isolation)</li>
+</ul>
+<h4 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Configuration files are checksum-verified on load</li>
+<li>Secrets never written to disk in plaintext</li>
+<li>Environment variable or keychain-based secret injection</li>
+</ul>
+<h3 id="72-communication-security">7.2 Communication Security<a class="headerlink" href="#72-communication-security" title="Permanent link">&para;</a></h3>
+<p>All inter-component communication uses mTLS. Certificate rotation is automated.</p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Protocol</th>
+<th>Authentication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent → Controller</td>
+<td>gRPC over TLS 1.3</td>
+<td>mTLS + API key</td>
+</tr>
+<tr>
+<td>Plugin → Core</td>
+<td>gRPC over Unix socket</td>
+<td>Socket permissions</td>
+</tr>
+<tr>
+<td>REST API clients</td>
+<td>HTTPS TLS 1.3</td>
+<td>Bearer token / mTLS</td>
+</tr>
+<tr>
+<td>AI API calls</td>
+<td>HTTPS TLS 1.3</td>
+<td>API key (in memory)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-anti-tampering">7.3 Anti-Tampering<a class="headerlink" href="#73-anti-tampering" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE detects attempts to interfere with its own operation:
+- Monitors its own process for injection attempts
+- Detects debugger attachment
+- Validates rule file checksums before loading
+- Alerts on configuration modification during runtime</p>
+<hr />
+<h2 id="8-performance-model">8. Performance Model<a class="headerlink" href="#8-performance-model" title="Permanent link">&para;</a></h2>
+<h3 id="81-resource-targets">8.1 Resource Targets<a class="headerlink" href="#81-resource-targets" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Idle</th>
+<th>Active Monitoring</th>
+<th>Threat Hunting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td>&lt; 0.5%</td>
+<td>&lt; 2%</td>
+<td>&lt; 15%</td>
+</tr>
+<tr>
+<td>RAM</td>
+<td>&lt; 50MB</td>
+<td>&lt; 150MB</td>
+<td>&lt; 500MB</td>
+</tr>
+<tr>
+<td>Disk I/O</td>
+<td>&lt; 1 MB/s</td>
+<td>&lt; 5 MB/s</td>
+<td>&lt; 50 MB/s</td>
+</tr>
+<tr>
+<td>Network</td>
+<td>0</td>
+<td>~100 KB/s (telemetry)</td>
+<td>Configurable</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-event-throughput">8.2 Event Throughput<a class="headerlink" href="#82-event-throughput" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Events/second (ingest)</td>
+<td>&gt; 50,000</td>
+</tr>
+<tr>
+<td>Event-to-alert latency (p99)</td>
+<td>&lt; 10ms</td>
+</tr>
+<tr>
+<td>Alert-to-incident latency (p99)</td>
+<td>&lt; 500ms</td>
+</tr>
+<tr>
+<td>YARA scan throughput</td>
+<td>&gt; 500 MB/s</td>
+</tr>
+<tr>
+<td>AI response latency (p50, local)</td>
+<td>&lt; 5s</td>
+</tr>
+<tr>
+<td>AI response latency (p50, cloud)</td>
+<td>&lt; 2s</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-scaling-limits">8.3 Scaling Limits<a class="headerlink" href="#83-scaling-limits" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Max Hosts</th>
+<th>Max Events/Day</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standalone (SQLite)</td>
+<td>1</td>
+<td>50M</td>
+</tr>
+<tr>
+<td>Small fleet (PostgreSQL)</td>
+<td>100</td>
+<td>5B</td>
+</tr>
+<tr>
+<td>Enterprise (PostgreSQL + sharding)</td>
+<td>10,000+</td>
+<td>500B+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="9-failure-modes-and-resilience">9. Failure Modes and Resilience<a class="headerlink" href="#9-failure-modes-and-resilience" title="Permanent link">&para;</a></h2>
+<h3 id="91-sensor-failure">9.1 Sensor Failure<a class="headerlink" href="#91-sensor-failure" title="Permanent link">&para;</a></h3>
+<p>If a sensor fails to start or crashes:
+- Warning is logged and emitted as metric
+- Other sensors continue operating
+- Sensor restart attempted with exponential backoff (1s, 2s, 4s, 8s, max 60s)
+- Health endpoint reports degraded status</p>
+<h3 id="92-storage-failure">9.2 Storage Failure<a class="headerlink" href="#92-storage-failure" title="Permanent link">&para;</a></h3>
+<p>If storage is unavailable:
+- Events buffered in memory ring buffer
+- Buffer size configurable (default: 100,000 events)
+- When buffer full: oldest events dropped, counter incremented
+- Alert emitted on buffer &gt; 80% capacity</p>
+<h3 id="93-ai-layer-failure">9.3 AI Layer Failure<a class="headerlink" href="#93-ai-layer-failure" title="Permanent link">&para;</a></h3>
+<p>If AI backend is unavailable:
+- All detection and response continues unaffected
+- AI-dependent commands return graceful error
+- Automatic retry with backoff on transient errors
+- Fallback to cached analysis for known incident types</p>
+<h3 id="94-correlation-engine-backlog">9.4 Correlation Engine Backlog<a class="headerlink" href="#94-correlation-engine-backlog" title="Permanent link">&para;</a></h3>
+<p>If correlation engine falls behind:
+- Input queue depth monitored
+- Automatic shedding of low-priority events (rate limited)
+- High-severity events always processed
+- Alert triggered when queue depth &gt; 10,000 events</p>
+<hr />
+<h2 id="10-cross-platform-considerations">10. Cross-Platform Considerations<a class="headerlink" href="#10-cross-platform-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="101-build-matrix">10.1 Build Matrix<a class="headerlink" href="#101-build-matrix" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th>Arch</th>
+<th>Sensor Method</th>
+<th>CGO Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux</td>
+<td>amd64</td>
+<td>eBPF (primary)</td>
+<td>Yes (for eBPF loader)</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>arm64</td>
+<td>eBPF (primary)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>386</td>
+<td>/proc polling</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>amd64</td>
+<td>ETW</td>
+<td>Yes (windows bindings)</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>arm64</td>
+<td>ETW</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>amd64</td>
+<td>Endpoint Security</td>
+<td>Yes (ESF requires entitlement)</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>arm64</td>
+<td>Endpoint Security</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-platform-specific-privilege-requirements">10.2 Platform-Specific Privilege Requirements<a class="headerlink" href="#102-platform-specific-privilege-requirements" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Requirement</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linux</td>
+<td><code>CAP_BPF</code>, <code>CAP_PERFMON</code></td>
+<td>eBPF program loading</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td><code>CAP_SYS_PTRACE</code></td>
+<td>Process inspection</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>Elevated (admin)</td>
+<td>ETW session creation</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td>Full Disk Access + Endpoint Security entitlement</td>
+<td>ESF requires apple-signed entitlement or system extension</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103-path-handling">10.3 Path Handling<a class="headerlink" href="#103-path-handling" title="Permanent link">&para;</a></h3>
+<p>All internal path handling uses <code>filepath.Join</code> and OS-native separators. No hardcoded <code>/</code> or <code>\</code> separators. Case-insensitivity handled per-platform for file and registry comparisons.</p>
+<hr />
+<h2 id="11-scalability-architecture">11. Scalability Architecture<a class="headerlink" href="#11-scalability-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="111-fleet-architecture">11.1 Fleet Architecture<a class="headerlink" href="#111-fleet-architecture" title="Permanent link">&para;</a></h3>
+<p>In fleet mode, a NATS JetStream cluster is used for reliable event delivery:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>Agents (N) ──NATS publish──► JetStream cluster ──► Controller consumers
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>                                     │
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>                              ┌──────▼───────┐
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>                              │  Partitioned │
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>                              │  Streams     │
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>                              │  (by host)   │
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>                              └──────────────┘
+</code></pre></div>
+<p>NATS subject hierarchy:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>r3trive.events.&lt;host_id&gt;.&lt;event_type&gt;
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>r3trive.alerts.&lt;host_id&gt;.&lt;severity&gt;
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>r3trive.incidents.&lt;incident_id&gt;
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>r3trive.commands.&lt;host_id&gt;
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>r3trive.responses.&lt;host_id&gt;
+</code></pre></div></p>
+<h3 id="112-horizontal-scaling">11.2 Horizontal Scaling<a class="headerlink" href="#112-horizontal-scaling" title="Permanent link">&para;</a></h3>
+<p>Controller components are stateless and can be horizontally scaled behind a load balancer. State lives in PostgreSQL. PostgreSQL uses read replicas for query scaling.</p>
+<h3 id="113-database-partitioning">11.3 Database Partitioning<a class="headerlink" href="#113-database-partitioning" title="Permanent link">&para;</a></h3>
+<p>Events table is partitioned by:
+1. Host ID (hash partitioning)
+2. Timestamp (range partitioning, daily)</p>
+<p>This enables efficient per-host queries and time-range scans with partition pruning.</p>
+<hr />
+<h2 id="12-integration-architecture">12. Integration Architecture<a class="headerlink" href="#12-integration-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="121-siem-integration">12.1 SIEM Integration<a class="headerlink" href="#121-siem-integration" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE can forward events and incidents to SIEMs via:
+- Syslog (RFC 3164 and RFC 5424)
+- CEF (Common Event Format)
+- LEEF (Log Event Extended Format)
+- Elastic Common Schema (ECS) JSON
+- OCSF (Open Cybersecurity Schema Framework)</p>
+<h3 id="122-soar-integration">12.2 SOAR Integration<a class="headerlink" href="#122-soar-integration" title="Permanent link">&para;</a></h3>
+<p>Bidirectional integration with SOAR platforms:
+- R3TRIVE can receive investigation commands from SOAR
+- R3TRIVE sends incident data and evidence to SOAR
+- Supported: Splunk SOAR, Palo Alto XSOAR, custom via webhooks</p>
+<h3 id="123-ticketing-integration">12.3 Ticketing Integration<a class="headerlink" href="#123-ticketing-integration" title="Permanent link">&para;</a></h3>
+<p>Automatic ticket creation on incident detection. Supported platforms via plugins:
+- ServiceNow
+- Jira
+- PagerDuty
+- Opsgenie
+- Custom webhook</p>
+<h3 id="124-threat-intelligence-platforms">12.4 Threat Intelligence Platforms<a class="headerlink" href="#124-threat-intelligence-platforms" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Platform</th>
+<th>Protocol</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MISP</td>
+<td>REST API</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>OpenCTI</td>
+<td>GraphQL API</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>ThreatConnect</td>
+<td>REST API</td>
+<td>Read</td>
+</tr>
+<tr>
+<td>VirusTotal</td>
+<td>REST API</td>
+<td>Read</td>
+</tr>
+<tr>
+<td>TAXII 2.1</td>
+<td>HTTPS</td>
+<td>Read</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>End of SYSTEM_ARCHITECTURE.md</em>
+<em>Related: DETECTION_ENGINE_SPEC.md, PLUGIN_SDK.md, API_REFERENCE.md, DATABASE_SCHEMA.md</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 R3TRIVE Project &mdash; Made with Material for MkDocs
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/thrive-spectrexq/r3trive" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

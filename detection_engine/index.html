@@ -1,0 +1,3254 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Endpoint detection, threat hunting and automated defense.">
+      
+      
+        <meta name="author" content="R3TRIVE Contributors">
+      
+      
+        <link rel="canonical" href="https://thrive-spectrexq.github.io/r3trive/detection_engine/">
+      
+      
+        <link rel="prev" href="../threat_model/">
+      
+      
+        <link rel="next" href="../rule_engine/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Detection Engine - R3TRIVE</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#detection_engine_specmd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="R3TRIVE" class="md-header__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            R3TRIVE
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Detection Engine
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Overview
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../system_architecture/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../threat_model/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Threat Model
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Detection Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../rule_engine/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Rule Engine
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../ai_analyst/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  AI Analyst
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../database_schema/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Database Schema
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../plugin_sdk/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Plugin SDK
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../soc_workflow/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  SOC Workflow
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api_reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="R3TRIVE" class="md-nav__button md-logo" aria-label="R3TRIVE" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    R3TRIVE
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/thrive-spectrexq/r3trive" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    thrive-spectrexq/r3trive
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system_architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../threat_model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Threat Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection Engine
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-detection-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Detection Philosophy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Detection Philosophy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-behavioral-over-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Behavioral Over Signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-detection-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Detection in Depth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-context-is-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Context Is Everything
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-detection-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Detection Layers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-behavioral-detection-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Behavioral Detection Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Behavioral Detection Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-process-behavior-heuristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Process Behavior Heuristics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Process Behavior Heuristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell-spawned-by-office-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Spawned by Office Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsass-memory-read" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSASS Memory Read
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process-hollowing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process Hollowing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ransomware-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ransomware Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse-shell-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reverse Shell Indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defense-evasion-security-tool-kill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defense Evasion: Security Tool Kill
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-network-behavior-heuristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Network Behavior Heuristics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Network Behavior Heuristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beaconing-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beaconing Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-tunneling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Tunneling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#large-data-exfiltration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large Data Exfiltration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-file-system-behavior-heuristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 File System Behavior Heuristics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 File System Behavior Heuristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shadow-copy-deletion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shadow Copy Deletion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#startup-folder-modification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup Folder Modification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rule-evaluation-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Rule Evaluation Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Rule Evaluation Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-rule-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Rule Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-rule-evaluation-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Rule Evaluation Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-rule-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Rule Versioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-yara-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. YARA Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. YARA Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-yara-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 YARA Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-scan-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Scan Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-built-in-yara-rule-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Built-in YARA Rule Categories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-custom-yara-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Custom YARA Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-yara-rule-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 YARA Rule Timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-sigma-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Sigma Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Sigma Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-sigma-transpiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Sigma Transpiler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-sigma-rule-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Sigma Rule Sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-sigma-conversion-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Sigma Conversion Report
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ioc-matching-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. IOC Matching Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. IOC Matching Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-ioc-store-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 IOC Store Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-ioc-expiration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 IOC Expiration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-ioc-confidence-scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 IOC Confidence Scoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-ioc-deconfliction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 IOC Deconfliction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-ml-anomaly-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. ML Anomaly Detection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. ML Anomaly Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-baseline-learning-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Baseline Learning Phase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-anomaly-detection-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Anomaly Detection Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-anomaly-scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Anomaly Scoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-model-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Model Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-alert-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Alert Lifecycle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Alert Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-alert-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Alert States
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-false-positive-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. False Positive Reduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. False Positive Reduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-suppression-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Suppression Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-trusted-process-allowlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Trusted Process Allowlist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-contextual-suppression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Contextual Suppression
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-attck-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. ATT&amp;CK Mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. ATT&amp;CK Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-coverage-heatmap-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Coverage Heatmap Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-coverage-statistics-target" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Coverage Statistics (Target)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-detection-rule-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Detection Rule Library
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Detection Rule Library">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-built-in-rule-counts-target-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Built-in Rule Counts (Target v1.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-rule-update-cadence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Rule Update Cadence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rule_engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ai_analyst/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Analyst
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database_schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Database Schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugin_sdk/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Plugin SDK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../soc_workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SOC Workflow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-detection-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Detection Philosophy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Detection Philosophy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-behavioral-over-signature" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Behavioral Over Signature
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-detection-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Detection in Depth
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-context-is-everything" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Context Is Everything
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-detection-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Detection Layers
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-behavioral-detection-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Behavioral Detection Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Behavioral Detection Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-process-behavior-heuristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Process Behavior Heuristics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Process Behavior Heuristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shell-spawned-by-office-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Spawned by Office Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lsass-memory-read" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LSASS Memory Read
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process-hollowing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Process Hollowing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ransomware-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ransomware Behavior
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reverse-shell-indicators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reverse Shell Indicators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defense-evasion-security-tool-kill" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Defense Evasion: Security Tool Kill
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-network-behavior-heuristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Network Behavior Heuristics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Network Behavior Heuristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beaconing-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beaconing Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dns-tunneling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DNS Tunneling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#large-data-exfiltration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Large Data Exfiltration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-file-system-behavior-heuristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 File System Behavior Heuristics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 File System Behavior Heuristics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shadow-copy-deletion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shadow Copy Deletion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#startup-folder-modification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Startup Folder Modification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-rule-evaluation-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Rule Evaluation Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Rule Evaluation Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-rule-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Rule Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-rule-evaluation-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Rule Evaluation Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-rule-versioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Rule Versioning
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-yara-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. YARA Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. YARA Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-yara-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 YARA Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-scan-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Scan Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-built-in-yara-rule-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Built-in YARA Rule Categories
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-custom-yara-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Custom YARA Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-yara-rule-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 YARA Rule Timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-sigma-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Sigma Integration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Sigma Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-sigma-transpiler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Sigma Transpiler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-sigma-rule-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Sigma Rule Sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-sigma-conversion-report" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Sigma Conversion Report
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-ioc-matching-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. IOC Matching Engine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. IOC Matching Engine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-ioc-store-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 IOC Store Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-ioc-expiration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 IOC Expiration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-ioc-confidence-scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 IOC Confidence Scoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#74-ioc-deconfliction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.4 IOC Deconfliction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-ml-anomaly-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. ML Anomaly Detection
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. ML Anomaly Detection">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-baseline-learning-phase" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Baseline Learning Phase
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-anomaly-detection-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Anomaly Detection Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-anomaly-scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Anomaly Scoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-model-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Model Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-alert-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Alert Lifecycle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Alert Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-alert-states" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Alert States
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-false-positive-reduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. False Positive Reduction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. False Positive Reduction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-suppression-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Suppression Rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#102-trusted-process-allowlist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.2 Trusted Process Allowlist
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#103-contextual-suppression" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.3 Contextual Suppression
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-attck-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. ATT&amp;CK Mapping
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. ATT&amp;CK Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-coverage-heatmap-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Coverage Heatmap Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112-coverage-statistics-target" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 Coverage Statistics (Target)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-detection-rule-library" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Detection Rule Library
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Detection Rule Library">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-built-in-rule-counts-target-v10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Built-in Rule Counts (Target v1.0)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#122-rule-update-cadence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.2 Rule Update Cadence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/thrive-spectrexq/r3trive/edit/master/docs/detection_engine.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="detection_engine_specmd">DETECTION_ENGINE_SPEC.md<a class="headerlink" href="#detection_engine_specmd" title="Permanent link">&para;</a></h1>
+<p><strong>R3TRIVE Detection Engine Specification</strong>
+Version: 1.0.0
+Status: Draft / Architectural Specification</p>
+<blockquote>
+<p>[!NOTE]
+<strong>Implementation Status</strong>: Windows ETW, Linux <code>/proc</code> polling, macOS process sensor, YARA scanning, Sigma transpiler, and IOC matching are implemented. eBPF kernel probes (Linux) and Endpoint Security Framework (macOS) are currently <code>[PLANNED]</code> / <code>[NOT YET IMPLEMENTED]</code>.</p>
+</blockquote>
+<hr />
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-detection-philosophy">Detection Philosophy</a></li>
+<li><a href="#2-detection-layers">Detection Layers</a></li>
+<li><a href="#3-behavioral-detection-engine">Behavioral Detection Engine</a></li>
+<li><a href="#4-rule-evaluation-engine">Rule Evaluation Engine</a></li>
+<li><a href="#5-yara-integration">YARA Integration</a></li>
+<li><a href="#6-sigma-integration">Sigma Integration</a></li>
+<li><a href="#7-ioc-matching-engine">IOC Matching Engine</a></li>
+<li><a href="#8-ml-anomaly-detection">ML Anomaly Detection</a></li>
+<li><a href="#9-alert-lifecycle">Alert Lifecycle</a></li>
+<li><a href="#10-false-positive-reduction">False Positive Reduction</a></li>
+<li><a href="#11-attck-mapping">ATT&amp;CK Mapping</a></li>
+<li><a href="#12-detection-rule-library">Detection Rule Library</a></li>
+</ol>
+<hr />
+<h2 id="1-detection-philosophy">1. Detection Philosophy<a class="headerlink" href="#1-detection-philosophy" title="Permanent link">&para;</a></h2>
+<h3 id="11-behavioral-over-signature">1.1 Behavioral Over Signature<a class="headerlink" href="#11-behavioral-over-signature" title="Permanent link">&para;</a></h3>
+<p>Signatures are brittle. A single byte change evades a signature-based rule. R3TRIVE's primary detection method is behavioral: what does this process <strong>do</strong>, not what does it <strong>look like</strong>.</p>
+<p>The hierarchy of detection confidence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>High Confidence (behavioral)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  ├── Process creates child that establishes outbound connection
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  ├── Process reads LSASS memory
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  ├── Mass file rename with entropy increase (ransomware)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>  └── Shell spawned by Office application
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Medium Confidence (pattern)
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  ├── Process name matches known tool (mimikatz)
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  ├── Command line contains obfuscated PowerShell (-enc)
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>  └── Network connection to known-bad IP
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>Lower Confidence (static)
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>  ├── File hash matches known malware
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>  └── YARA signature match (known-good context)
+</code></pre></div>
+<h3 id="12-detection-in-depth">1.2 Detection in Depth<a class="headerlink" href="#12-detection-in-depth" title="Permanent link">&para;</a></h3>
+<p>Multiple independent detection methods should be able to catch the same attack. An adversary who evades behavioral detection may still be caught by IOC matching. One who changes hashes may still match a YARA rule.</p>
+<h3 id="13-context-is-everything">1.3 Context Is Everything<a class="headerlink" href="#13-context-is-everything" title="Permanent link">&para;</a></h3>
+<p>An event is never evaluated in isolation. A PowerShell process is not suspicious. A PowerShell process spawned by Word, 3 seconds after a macro executed, connecting outbound to a Tor exit node, is very suspicious. Context window and event sequencing are fundamental to accurate detection.</p>
+<hr />
+<h2 id="2-detection-layers">2. Detection Layers<a class="headerlink" href="#2-detection-layers" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>│  Layer 5: AI-Assisted Detection                                 │
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│  (novel techniques, complex attack chains, analyst augmentation)│
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├─────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│  Layer 4: ML Anomaly Detection                                  │
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│  (statistical deviation from learned baseline)                  │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>├─────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│  Layer 3: Correlation Rules                                     │
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│  (multi-event temporal patterns → incidents)                    │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>├─────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│  Layer 2: Atomic Detection Rules                                │
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│  (single-event behavioral rules → alerts)                       │
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>├─────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│  Layer 1: IOC Matching                                          │
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│  (hash, IP, domain, URL lookup against threat intel)            │
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>├─────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│  Layer 0: YARA / Sigma                                          │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│  (static and log-based signature matching)                      │
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="3-behavioral-detection-engine">3. Behavioral Detection Engine<a class="headerlink" href="#3-behavioral-detection-engine" title="Permanent link">&para;</a></h2>
+<h3 id="31-process-behavior-heuristics">3.1 Process Behavior Heuristics<a class="headerlink" href="#31-process-behavior-heuristics" title="Permanent link">&para;</a></h3>
+<p>The behavioral engine builds a model of expected process behavior:</p>
+<h4 id="shell-spawned-by-office-application">Shell Spawned by Office Application<a class="headerlink" href="#shell-spawned-by-office-application" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Trigger: process.create event
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  parent.name ∈ {winword.exe, excel.exe, powerpnt.exe, outlook.exe, onenote.exe}
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>  child.name ∈ {cmd.exe, powershell.exe, wscript.exe, cscript.exe, mshta.exe, 
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>                regsvr32.exe, rundll32.exe, certutil.exe, bitsadmin.exe}
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Severity: High
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>ATT&amp;CK: T1059, T1566.001
+</code></pre></div>
+<h4 id="lsass-memory-read">LSASS Memory Read<a class="headerlink" href="#lsass-memory-read" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Trigger: process.open_process event
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  target.name == lsass.exe
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  source.name ∉ {antivirus_whitelist, r3trive, svchost.exe}
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  access_mask contains PROCESS_VM_READ
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>Severity: Critical
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>ATT&amp;CK: T1003.001
+</code></pre></div>
+<h4 id="process-hollowing">Process Hollowing<a class="headerlink" href="#process-hollowing" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Trigger: sequence within 10s
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  1. process.create with suspended flag
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  2. process.virtual_alloc in remote process
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  3. process.create_remote_thread
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Severity: Critical
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>ATT&amp;CK: T1055.012
+</code></pre></div>
+<h4 id="ransomware-behavior">Ransomware Behavior<a class="headerlink" href="#ransomware-behavior" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Trigger: within 30s window
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  file.rename events &gt; 50 where:
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    entropy(new_content) &gt; 7.5
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    extension changed
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  OR file.write events &gt; 100 where:
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    entropy(written_bytes) &gt; 7.5
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>Severity: Critical
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>ATT&amp;CK: T1486
+</code></pre></div>
+<h4 id="reverse-shell-indicators">Reverse Shell Indicators<a class="headerlink" href="#reverse-shell-indicators" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Trigger: process.create
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  name ∈ {bash, sh, zsh, cmd.exe, powershell.exe}
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  parent.name ∈ {python, python3, nc, ncat, socat, perl, ruby, php}
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  network.connect event within 5s from same PID
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  network.remote_port ∈ {80, 443, 4444, 4445, 1337, 8080, 8443}
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>Severity: High
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>ATT&amp;CK: T1059, T1071
+</code></pre></div>
+<h4 id="defense-evasion-security-tool-kill">Defense Evasion: Security Tool Kill<a class="headerlink" href="#defense-evasion-security-tool-kill" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Trigger: process.terminate event
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  target.name ∈ {security_products_list}  // maintained list of ~200 products
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  source elevated privilege: true
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>Severity: High
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>ATT&amp;CK: T1562.001
+</code></pre></div>
+<h3 id="32-network-behavior-heuristics">3.2 Network Behavior Heuristics<a class="headerlink" href="#32-network-behavior-heuristics" title="Permanent link">&para;</a></h3>
+<h4 id="beaconing-detection">Beaconing Detection<a class="headerlink" href="#beaconing-detection" title="Permanent link">&para;</a></h4>
+<p>Beaconing detection uses statistical analysis of connection intervals:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Algorithm:
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>1. Collect all outbound connections to same (ip, port) within 1-hour window
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>2. Calculate inter-connection intervals
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>3. Compute coefficient of variation (CV = stddev / mean)
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>4. If CV &lt; 0.2 AND connection count &gt; 5: beacon detected
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>   (low variation = regular interval = C2 beacon)
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>Severity: High
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>ATT&amp;CK: T1071
+</code></pre></div>
+<h4 id="dns-tunneling">DNS Tunneling<a class="headerlink" href="#dns-tunneling" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Triggers:
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  dns.query events where:
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    query_length &gt; 50 characters
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    subdomain depth &gt; 4
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    query_rate &gt; 10/minute to same domain
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    OR entropy(subdomain) &gt; 3.5 (random-looking)
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>Severity: Medium
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>ATT&amp;CK: T1071.004
+</code></pre></div>
+<h4 id="large-data-exfiltration">Large Data Exfiltration<a class="headerlink" href="#large-data-exfiltration" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>Trigger:
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  network.send to external IP
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  total_bytes_sent &gt; 100MB within 1 hour
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  AND no corresponding network.receive suggesting backup/sync
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>  AND hour_of_day outside normal business hours (configurable)
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>Severity: High
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>ATT&amp;CK: T1041
+</code></pre></div>
+<h3 id="33-file-system-behavior-heuristics">3.3 File System Behavior Heuristics<a class="headerlink" href="#33-file-system-behavior-heuristics" title="Permanent link">&para;</a></h3>
+<h4 id="shadow-copy-deletion">Shadow Copy Deletion<a class="headerlink" href="#shadow-copy-deletion" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>Trigger: process.create
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  cmdline matches:
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    vssadmin.exe delete shadows
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    wmic shadowcopy delete
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    wbadmin delete catalog
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    bcdedit /set recoveryenabled no
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>Severity: Critical
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>ATT&amp;CK: T1490
+</code></pre></div>
+<h4 id="startup-folder-modification">Startup Folder Modification<a class="headerlink" href="#startup-folder-modification" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Trigger: file.create OR file.modify
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  path matches:
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    C:\Users\*\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\*
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\*
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>    ~/.config/autostart/*.desktop
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    /etc/init.d/*, /etc/rc*.d/*
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>  written by unexpected process
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>Severity: High
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>ATT&amp;CK: T1547.001
+</code></pre></div>
+<hr />
+<h2 id="4-rule-evaluation-engine">4. Rule Evaluation Engine<a class="headerlink" href="#4-rule-evaluation-engine" title="Permanent link">&para;</a></h2>
+<h3 id="41-rule-format">4.1 Rule Format<a class="headerlink" href="#41-rule-format" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE uses a YAML-based rule format for atomic detection rules:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># Rule Schema</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">                    </span><span class="c1"># Unique rule ID (e.g., R3T-001)</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">                  </span><span class="c1"># Human-readable rule name</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">           </span><span class="c1"># What this rule detects</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">semver</span><span class="w">               </span><span class="c1"># Rule version</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stable|experimental|deprecated</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="nt">author</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="nt">references</span><span class="p">:</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">url</span><span class="w">                       </span><span class="c1"># CVE, blog post, etc.</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="nt">tags</span><span class="p">:</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">                    </span><span class="c1"># e.g., "ransomware", "apt", "lolbas"</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="c1"># Detection Logic</span>
+<a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="nt">detection</span><span class="p">:</span>
+<a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">atomic|sequence|aggregate</span>
+<a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a>
+<a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">  </span><span class="c1"># For atomic (single event):</span>
+<a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">  </span><span class="nt">event</span><span class="p">:</span>
+<a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">              </span><span class="c1"># event type (process.create, file.write, etc.)</span>
+<a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">    </span><span class="nt">conditions</span><span class="p">:</span><span class="w">               </span><span class="c1"># field match conditions</span>
+<a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="w">      </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+<a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="w">      </span><span class="nt">field</span><span class="p">:</span>
+<a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a><span class="w">        </span><span class="nt">gte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+<a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a><span class="w">        </span><span class="nt">lte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
+<a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a><span class="w">        </span><span class="nt">regex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pattern</span>
+<a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a><span class="w">        </span><span class="nt">oneOf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">a</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">b</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">c</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a><span class="w">        </span><span class="nt">notOneOf</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">a</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">b</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">c</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a><span class="w">        </span><span class="nt">contains</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">substring</span>
+<a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a>
+<a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a><span class="w">  </span><span class="c1"># For sequence (ordered events):</span>
+<a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a><span class="w">  </span><span class="nt">sequence</span><span class="p">:</span>
+<a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">event</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">event</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<a id="__codelineno-13-34" name="__codelineno-13-34" href="#__codelineno-13-34"></a><span class="w">      </span><span class="nt">within</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duration</span><span class="w">        </span><span class="c1"># relative to previous event</span>
+<a id="__codelineno-13-35" name="__codelineno-13-35" href="#__codelineno-13-35"></a>
+<a id="__codelineno-13-36" name="__codelineno-13-36" href="#__codelineno-13-36"></a><span class="w">  </span><span class="c1"># For aggregate (statistical):</span>
+<a id="__codelineno-13-37" name="__codelineno-13-37" href="#__codelineno-13-37"></a><span class="w">  </span><span class="nt">aggregate</span><span class="p">:</span>
+<a id="__codelineno-13-38" name="__codelineno-13-38" href="#__codelineno-13-38"></a><span class="w">    </span><span class="nt">event</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a><span class="w">    </span><span class="nt">count_gte</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integer</span>
+<a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a><span class="w">    </span><span class="nt">window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">duration</span>
+<a id="__codelineno-13-41" name="__codelineno-13-41" href="#__codelineno-13-41"></a><span class="w">    </span><span class="nt">group_by</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">field</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">...</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a>
+<a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a><span class="c1"># Filtering</span>
+<a id="__codelineno-13-44" name="__codelineno-13-44" href="#__codelineno-13-44"></a><span class="nt">filter</span><span class="p">:</span>
+<a id="__codelineno-13-45" name="__codelineno-13-45" href="#__codelineno-13-45"></a><span class="w">  </span><span class="nt">exclude</span><span class="p">:</span>
+<a id="__codelineno-13-46" name="__codelineno-13-46" href="#__codelineno-13-46"></a><span class="w">    </span><span class="nt">process.path</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">list</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">of</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">trusted</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">paths</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-13-47" name="__codelineno-13-47" href="#__codelineno-13-47"></a><span class="w">  </span><span class="nt">require</span><span class="p">:</span>
+<a id="__codelineno-13-48" name="__codelineno-13-48" href="#__codelineno-13-48"></a><span class="w">    </span><span class="nt">process.elevated</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-13-49" name="__codelineno-13-49" href="#__codelineno-13-49"></a>
+<a id="__codelineno-13-50" name="__codelineno-13-50" href="#__codelineno-13-50"></a><span class="c1"># Output</span>
+<a id="__codelineno-13-51" name="__codelineno-13-51" href="#__codelineno-13-51"></a><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">low|medium|high|critical</span>
+<a id="__codelineno-13-52" name="__codelineno-13-52" href="#__codelineno-13-52"></a><span class="nt">confidence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0-1.0</span>
+<a id="__codelineno-13-53" name="__codelineno-13-53" href="#__codelineno-13-53"></a>
+<a id="__codelineno-13-54" name="__codelineno-13-54" href="#__codelineno-13-54"></a><span class="nt">attack</span><span class="p">:</span>
+<a id="__codelineno-13-55" name="__codelineno-13-55" href="#__codelineno-13-55"></a><span class="w">  </span><span class="nt">tactic</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<a id="__codelineno-13-56" name="__codelineno-13-56" href="#__codelineno-13-56"></a><span class="w">  </span><span class="nt">technique</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">           </span><span class="c1"># e.g., T1059.001</span>
+<a id="__codelineno-13-57" name="__codelineno-13-57" href="#__codelineno-13-57"></a><span class="w">  </span><span class="nt">subtechnique</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<a id="__codelineno-13-58" name="__codelineno-13-58" href="#__codelineno-13-58"></a>
+<a id="__codelineno-13-59" name="__codelineno-13-59" href="#__codelineno-13-59"></a><span class="nt">response</span><span class="p">:</span>
+<a id="__codelineno-13-60" name="__codelineno-13-60" href="#__codelineno-13-60"></a><span class="w">  </span><span class="nt">auto_actions</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w">            </span><span class="c1"># optional: trigger automated response</span>
+<a id="__codelineno-13-61" name="__codelineno-13-61" href="#__codelineno-13-61"></a><span class="w">  </span><span class="nt">notify</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w">                  </span><span class="c1"># notification channels</span>
+</code></pre></div>
+<h3 id="42-rule-evaluation-performance">4.2 Rule Evaluation Performance<a class="headerlink" href="#42-rule-evaluation-performance" title="Permanent link">&para;</a></h3>
+<p>Rules are compiled at startup into an optimized evaluation tree:</p>
+<ol>
+<li>Rules are indexed by event type (O(1) lookup for candidate rules)</li>
+<li>Within a type, conditions are evaluated short-circuit (fail fast)</li>
+<li>Expensive operations (regex, entropy) evaluated last</li>
+<li>Rules with <code>confidence &lt; 0.5</code> and no ATT&amp;CK technique are not evaluated in <code>--level high</code> mode</li>
+</ol>
+<h3 id="43-rule-versioning">4.3 Rule Versioning<a class="headerlink" href="#43-rule-versioning" title="Permanent link">&para;</a></h3>
+<p>Rules are versioned and pinned. Updates via <code>r3trive rules update</code> pull from the signed R3TRIVE rule repository. Custom rules in <code>/rules/custom/</code> are never overwritten by updates.</p>
+<hr />
+<h2 id="5-yara-integration">5. YARA Integration<a class="headerlink" href="#5-yara-integration" title="Permanent link">&para;</a></h2>
+<h3 id="51-yara-engine">5.1 YARA Engine<a class="headerlink" href="#51-yara-engine" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE embeds a Go binding to the YARA C library (via cgo) for native performance. The YARA engine:</p>
+<ul>
+<li>Compiles all rules at startup into a single compiled ruleset</li>
+<li>Supports external variables for context injection (<code>filepath</code>, <code>filesize</code>, <code>filename</code>)</li>
+<li>Runs scans in isolated goroutines with timeout enforcement</li>
+<li>Memory-maps large files for efficient scanning</li>
+</ul>
+<h3 id="52-scan-modes">5.2 Scan Modes<a class="headerlink" href="#52-scan-modes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File scan</td>
+<td><code>r3trive yara scan &lt;file&gt;</code></td>
+<td>Scan a single file</td>
+</tr>
+<tr>
+<td>Directory scan</td>
+<td><code>r3trive yara scan --dir &lt;path&gt;</code></td>
+<td>Recursive directory scan</td>
+</tr>
+<tr>
+<td>Memory scan</td>
+<td><code>r3trive yara scan --pid &lt;pid&gt;</code></td>
+<td>Scan process memory</td>
+</tr>
+<tr>
+<td>Stream scan</td>
+<td>Internal (continuous)</td>
+<td>Scan files as they're written</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-built-in-yara-rule-categories">5.3 Built-in YARA Rule Categories<a class="headerlink" href="#53-built-in-yara-rule-categories" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Count</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ransomware</td>
+<td>200+</td>
+<td>Known ransomware families</td>
+</tr>
+<tr>
+<td>RAT</td>
+<td>150+</td>
+<td>Remote access trojans</td>
+</tr>
+<tr>
+<td>Credential stealers</td>
+<td>100+</td>
+<td>Credential harvesting tools</td>
+</tr>
+<tr>
+<td>Exploit kits</td>
+<td>80+</td>
+<td>Web exploit kit artifacts</td>
+</tr>
+<tr>
+<td>Rootkits</td>
+<td>50+</td>
+<td>Kernel-level malware</td>
+</tr>
+<tr>
+<td>Packers</td>
+<td>40+</td>
+<td>Known packer signatures</td>
+</tr>
+<tr>
+<td>Webshells</td>
+<td>200+</td>
+<td>Web shell detection</td>
+</tr>
+<tr>
+<td>LOLBAS abuse</td>
+<td>60+</td>
+<td>Living-off-the-land binary abuse patterns</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-custom-yara-rules">5.4 Custom YARA Rules<a class="headerlink" href="#54-custom-yara-rules" title="Permanent link">&para;</a></h3>
+<p>Place custom rules in <code>/rules/yara/custom/</code>. They are loaded alongside built-in rules. Naming convention: <code>&lt;category&gt;_&lt;name&gt;_&lt;version&gt;.yar</code>.</p>
+<h3 id="55-yara-rule-timeout">5.5 YARA Rule Timeout<a class="headerlink" href="#55-yara-rule-timeout" title="Permanent link">&para;</a></h3>
+<p>Per-scan timeout is enforced to prevent regex catastrophe:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># config.yaml</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="nt">yara</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">  </span><span class="nt">scan_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span><span class="w">          </span><span class="c1"># timeout per file scan</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">  </span><span class="nt">memory_scan_timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60s</span><span class="w">   </span><span class="c1"># timeout per process memory scan</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">  </span><span class="nt">max_file_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100MB</span><span class="w">       </span><span class="c1"># skip files larger than this</span>
+</code></pre></div>
+<hr />
+<h2 id="6-sigma-integration">6. Sigma Integration<a class="headerlink" href="#6-sigma-integration" title="Permanent link">&para;</a></h2>
+<h3 id="61-sigma-transpiler">6.1 Sigma Transpiler<a class="headerlink" href="#61-sigma-transpiler" title="Permanent link">&para;</a></h3>
+<p>R3TRIVE includes a Sigma-to-native transpiler. Sigma rules are converted to R3TRIVE atomic detection rules at load time.</p>
+<p>Supported Sigma backends:
+- <code>windows</code> (ETW log sources)
+- <code>linux</code> (syslog, auditd, eBPF)
+- <code>macos</code> (ESF, unified log)</p>
+<p>Unsupported Sigma features (graceful skip):
+- <code>near</code> condition (approximated with temporal window)
+- <code>count</code> on non-aggregatable fields</p>
+<h3 id="62-sigma-rule-sources">6.2 Sigma Rule Sources<a class="headerlink" href="#62-sigma-rule-sources" title="Permanent link">&para;</a></h3>
+<p>Built-in Sigma rules sourced from:
+- <a href="https://github.com/SigmaHQ/sigma">SigmaHQ/sigma</a> (core rule set, 3,000+ rules)
+- R3TRIVE custom Sigma rules (100+ rules)</p>
+<h3 id="63-sigma-conversion-report">6.3 Sigma Conversion Report<a class="headerlink" href="#63-sigma-conversion-report" title="Permanent link">&para;</a></h3>
+<p>When loading Sigma rules, a compatibility report is generated:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>$ r3trive sigma validate --dir /rules/sigma/
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>Sigma Compatibility Report
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>==========================
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>Total rules: 3,247
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>Converted successfully: 2,891 (89%)
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>Partially converted: 298 (9%)
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>Failed to convert: 58 (2%)
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>Failed rules (excerpt):
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>  - win_rdp_reverse_tunnel.yml: 'near' condition not supported
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>  - linux_persistence_rc_local.yml: platform detection failed
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>  ...
+</code></pre></div>
+<hr />
+<h2 id="7-ioc-matching-engine">7. IOC Matching Engine<a class="headerlink" href="#7-ioc-matching-engine" title="Permanent link">&para;</a></h2>
+<h3 id="71-ioc-store-design">7.1 IOC Store Design<a class="headerlink" href="#71-ioc-store-design" title="Permanent link">&para;</a></h3>
+<p>The IOC store is optimized for high-throughput lookups during live event processing:</p>
+<table>
+<thead>
+<tr>
+<th>IOC Type</th>
+<th>Data Structure</th>
+<th>Lookup Complexity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IP address</td>
+<td>Radix tree (supports CIDR)</td>
+<td>O(log n)</td>
+</tr>
+<tr>
+<td>Domain</td>
+<td>Suffix trie</td>
+<td>O(k) where k=domain length</td>
+</tr>
+<tr>
+<td>URL</td>
+<td>Hash map (SHA256 of normalized URL)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>File hash (MD5/SHA1/SHA256)</td>
+<td>Hash set</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>Certificate thumbprint</td>
+<td>Hash set</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>User agent</td>
+<td>Aho-Corasick automaton</td>
+<td>O(n) where n=text length</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-ioc-expiration">7.2 IOC Expiration<a class="headerlink" href="#72-ioc-expiration" title="Permanent link">&para;</a></h3>
+<p>All IOCs carry a TTL. Expired IOCs are not used for matching but are retained for historical correlation.</p>
+<p>Default TTLs by source:</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Default TTL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Commercial threat feed</td>
+<td>Per-feed (typically 90 days)</td>
+</tr>
+<tr>
+<td>MISP</td>
+<td>Per-event attribute</td>
+</tr>
+<tr>
+<td>Manual IOC add</td>
+<td>365 days</td>
+</tr>
+<tr>
+<td>AI-extracted</td>
+<td>30 days</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-ioc-confidence-scoring">7.3 IOC Confidence Scoring<a class="headerlink" href="#73-ioc-confidence-scoring" title="Permanent link">&para;</a></h3>
+<p>Not all IOCs are equal. Confidence scores affect the resulting alert severity:</p>
+<table>
+<thead>
+<tr>
+<th>Confidence</th>
+<th>Description</th>
+<th>Alert Severity Modifier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>Confirmed malicious (vetted by analyst)</td>
+<td>+2 severity levels</td>
+</tr>
+<tr>
+<td>80</td>
+<td>High confidence (multiple sources)</td>
+<td>+1 severity level</td>
+</tr>
+<tr>
+<td>60</td>
+<td>Medium confidence (single source)</td>
+<td>No change</td>
+</tr>
+<tr>
+<td>40</td>
+<td>Low confidence (automated, unvetted)</td>
+<td>-1 severity level</td>
+</tr>
+<tr>
+<td>20</td>
+<td>Informational (reputation feed)</td>
+<td>Alert only if other indicators</td>
+</tr>
+</tbody>
+</table>
+<h3 id="74-ioc-deconfliction">7.4 IOC Deconfliction<a class="headerlink" href="#74-ioc-deconfliction" title="Permanent link">&para;</a></h3>
+<p>IOCs that match trusted/known-good IP ranges or domains are suppressed. Configurable allowlist:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nt">ioc_allowlist</span><span class="p">:</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">ip_ranges</span><span class="p">:</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.0.0.0/8</span><span class="w">       </span><span class="c1"># RFC 1918</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">172.16.0.0/12</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.0.0/16</span>
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a><span class="w">  </span><span class="nt">domains</span><span class="p">:</span>
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"*.internal.corp"</span>
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"*.amazonaws.com"</span><span class="w">  </span><span class="c1"># if using AWS</span>
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a><span class="w">  </span><span class="nt">hashes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</code></pre></div>
+<hr />
+<h2 id="8-ml-anomaly-detection">8. ML Anomaly Detection<a class="headerlink" href="#8-ml-anomaly-detection" title="Permanent link">&para;</a></h2>
+<h3 id="81-baseline-learning-phase">8.1 Baseline Learning Phase<a class="headerlink" href="#81-baseline-learning-phase" title="Permanent link">&para;</a></h3>
+<p>On first deployment, R3TRIVE enters a 7-day learning phase to establish baseline behavior:</p>
+<ul>
+<li>Process creation frequency by time-of-day</li>
+<li>Network connection destinations by process</li>
+<li>File write patterns by directory</li>
+<li>User login times and source IPs</li>
+<li>Service start/stop frequency</li>
+</ul>
+<p>Learning phase events still generate IOC and rule-based alerts but do not generate anomaly alerts.</p>
+<h3 id="82-anomaly-detection-models">8.2 Anomaly Detection Models<a class="headerlink" href="#82-anomaly-detection-models" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Algorithm</th>
+<th>Feature Set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process anomaly</td>
+<td>Isolation Forest</td>
+<td>CPU, memory, child count, network connections</td>
+</tr>
+<tr>
+<td>Network anomaly</td>
+<td>Statistical (Z-score)</td>
+<td>Bytes sent/recv, connection count, destination entropy</td>
+</tr>
+<tr>
+<td>User behavior</td>
+<td>UEBA (LSTM optional)</td>
+<td>Login time, source IP, access patterns</td>
+</tr>
+<tr>
+<td>File access</td>
+<td>Statistical</td>
+<td>Files per minute, directory entropy, extension mix</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-anomaly-scoring">8.3 Anomaly Scoring<a class="headerlink" href="#83-anomaly-scoring" title="Permanent link">&para;</a></h3>
+<p>Anomaly scores are not reported as binary detections but as risk score contributions that feed into the correlation engine:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>anomaly_contribution = anomaly_score × weight × recency_factor
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>Where:
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  anomaly_score: 0.0–1.0 (model output)
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>  weight: configured per-model (default 0.3–0.7)
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>  recency_factor: 1.0 for last hour, 0.5 for last 24h, 0.1 for older
+</code></pre></div>
+<h3 id="84-model-updates">8.4 Model Updates<a class="headerlink" href="#84-model-updates" title="Permanent link">&para;</a></h3>
+<p>Models are retrained weekly on the retained event baseline. Retraining is resource-throttled (max 10% CPU). Models are persisted in binary format in the R3TRIVE data directory.</p>
+<hr />
+<h2 id="9-alert-lifecycle">9. Alert Lifecycle<a class="headerlink" href="#9-alert-lifecycle" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>Detection (behavioral rule / IOC / YARA match)
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    │
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    ▼
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>Alert Created
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    │  (id, type, severity, confidence, event_id, rule_id, timestamp)
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    │
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    ├──► Storage: written to alerts table
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>    │
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a>    ├──► Correlation Engine: evaluated for incident grouping
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a>    │
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a>    ├──► Real-time output (if monitor mode active)
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a>    │
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>    └──► Plugin notifications (if configured)
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a>Correlation Engine Processing:
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a>    │
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a>    ├── Alert clusters with existing incident → Update incident
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a>    │
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a>    └── Alert starts new pattern → Create incident
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a>
+<a id="__codelineno-18-21" name="__codelineno-18-21" href="#__codelineno-18-21"></a>Analyst Actions on Alert:
+<a id="__codelineno-18-22" name="__codelineno-18-22" href="#__codelineno-18-22"></a>    ├── Acknowledge
+<a id="__codelineno-18-23" name="__codelineno-18-23" href="#__codelineno-18-23"></a>    ├── Investigate (triggers deep investigation workflow)
+<a id="__codelineno-18-24" name="__codelineno-18-24" href="#__codelineno-18-24"></a>    ├── False positive (suppresses rule + similar future alerts)
+<a id="__codelineno-18-25" name="__codelineno-18-25" href="#__codelineno-18-25"></a>    ├── True positive (escalates incident priority)
+<a id="__codelineno-18-26" name="__codelineno-18-26" href="#__codelineno-18-26"></a>    └── Close (marks resolved)
+</code></pre></div>
+<h3 id="91-alert-states">9.1 Alert States<a class="headerlink" href="#91-alert-states" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new</code></td>
+<td>Generated, not yet reviewed</td>
+</tr>
+<tr>
+<td><code>acknowledged</code></td>
+<td>Analyst has seen it</td>
+</tr>
+<tr>
+<td><code>investigating</code></td>
+<td>Under active investigation</td>
+</tr>
+<tr>
+<td><code>true_positive</code></td>
+<td>Confirmed malicious</td>
+</tr>
+<tr>
+<td><code>false_positive</code></td>
+<td>Confirmed benign, rule feedback submitted</td>
+</tr>
+<tr>
+<td><code>closed</code></td>
+<td>Resolved</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-false-positive-reduction">10. False Positive Reduction<a class="headerlink" href="#10-false-positive-reduction" title="Permanent link">&para;</a></h2>
+<h3 id="101-suppression-rules">10.1 Suppression Rules<a class="headerlink" href="#101-suppression-rules" title="Permanent link">&para;</a></h3>
+<p>When an alert is marked as false positive, a suppression rule is automatically generated:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Auto-generated suppression rule</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SUPP-001</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="nt">created</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2024-03-15T14:32:01Z</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="nt">created_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">analyst@corp.com</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="nt">original_rule</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">R3T-042</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a><span class="nt">suppression_criteria</span><span class="p">:</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a><span class="w">  </span><span class="nt">process.path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/bin/myapp</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a><span class="w">  </span><span class="nt">process.parent.path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/sbin/cron</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="w">  </span><span class="nt">network.remote_ip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">203.0.113.10</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a><span class="nt">expires</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2024-06-15T14:32:01Z</span><span class="w">    </span><span class="c1"># 90-day default</span>
+</code></pre></div>
+<p>Suppression rules expire after 90 days and require revalidation.</p>
+<h3 id="102-trusted-process-allowlist">10.2 Trusted Process Allowlist<a class="headerlink" href="#102-trusted-process-allowlist" title="Permanent link">&para;</a></h3>
+<p>A global allowlist of trusted process paths/hashes that reduces alert verbosity:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">trusted_processes</span><span class="p">:</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/usr/bin/apt</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">    </span><span class="nt">operations</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">file.write</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">network.connect</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">    </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="s">"parent.name</span><span class="nv"> </span><span class="s">==</span><span class="nv"> </span><span class="s">'apt-get'"</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">hash_sha256</span><span class="p">:</span><span class="w"> </span><span class="s">"abc123..."</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a><span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"Internal</span><span class="nv"> </span><span class="s">IT</span><span class="nv"> </span><span class="s">tool"</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a><span class="w">    </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="s">"Verified</span><span class="nv"> </span><span class="s">by</span><span class="nv"> </span><span class="s">security</span><span class="nv"> </span><span class="s">team</span><span class="nv"> </span><span class="s">2024-01-15"</span>
+</code></pre></div>
+<h3 id="103-contextual-suppression">10.3 Contextual Suppression<a class="headerlink" href="#103-contextual-suppression" title="Permanent link">&para;</a></h3>
+<p>The system automatically suppresses repeated identical alerts from the same process/host within a configurable window:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="nt">alert_deduplication</span><span class="p">:</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span><span class="nt">window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10m</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span><span class="nt">group_by</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">rule_id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">host_id</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">process.pid</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">  </span><span class="nt">max_per_window</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</code></pre></div>
+<hr />
+<h2 id="11-attck-mapping">11. ATT&amp;CK Mapping<a class="headerlink" href="#11-attck-mapping" title="Permanent link">&para;</a></h2>
+<p>Every alert and incident in R3TRIVE is mapped to MITRE ATT&amp;CK.</p>
+<h3 id="111-coverage-heatmap-generation">11.1 Coverage Heatmap Generation<a class="headerlink" href="#111-coverage-heatmap-generation" title="Permanent link">&para;</a></h3>
+<p>Generate a heatmap of detection coverage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>r3trive<span class="w"> </span>coverage<span class="w"> </span>--output<span class="w"> </span>heatmap.html
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>r3trive<span class="w"> </span>coverage<span class="w"> </span>--format<span class="w"> </span>navigator-json<span class="w"> </span>&gt;<span class="w"> </span>navigator-layer.json
+</code></pre></div>
+<p>The JSON output is compatible with the MITRE ATT&amp;CK Navigator.</p>
+<h3 id="112-coverage-statistics-target">11.2 Coverage Statistics (Target)<a class="headerlink" href="#112-coverage-statistics-target" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ATT&amp;CK Tactic</th>
+<th>Target Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Initial Access</td>
+<td>60%</td>
+</tr>
+<tr>
+<td>Execution</td>
+<td>80%</td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>75%</td>
+</tr>
+<tr>
+<td>Privilege Escalation</td>
+<td>70%</td>
+</tr>
+<tr>
+<td>Defense Evasion</td>
+<td>65%</td>
+</tr>
+<tr>
+<td>Credential Access</td>
+<td>85%</td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td>50%</td>
+</tr>
+<tr>
+<td>Lateral Movement</td>
+<td>70%</td>
+</tr>
+<tr>
+<td>Collection</td>
+<td>60%</td>
+</tr>
+<tr>
+<td>Command and Control</td>
+<td>80%</td>
+</tr>
+<tr>
+<td>Exfiltration</td>
+<td>65%</td>
+</tr>
+<tr>
+<td>Impact</td>
+<td>75%</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-detection-rule-library">12. Detection Rule Library<a class="headerlink" href="#12-detection-rule-library" title="Permanent link">&para;</a></h2>
+<h3 id="121-built-in-rule-counts-target-v10">12.1 Built-in Rule Counts (Target v1.0)<a class="headerlink" href="#121-built-in-rule-counts-target-v10" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Behavioral</th>
+<th>IOC</th>
+<th>YARA</th>
+<th>Sigma</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process execution</td>
+<td>45</td>
+<td>—</td>
+<td>80</td>
+<td>200</td>
+<td>325</td>
+</tr>
+<tr>
+<td>Credential access</td>
+<td>25</td>
+<td>50</td>
+<td>100</td>
+<td>150</td>
+<td>325</td>
+</tr>
+<tr>
+<td>Persistence</td>
+<td>30</td>
+<td>—</td>
+<td>60</td>
+<td>180</td>
+<td>270</td>
+</tr>
+<tr>
+<td>Lateral movement</td>
+<td>20</td>
+<td>100</td>
+<td>40</td>
+<td>120</td>
+<td>280</td>
+</tr>
+<tr>
+<td>Defense evasion</td>
+<td>35</td>
+<td>—</td>
+<td>80</td>
+<td>200</td>
+<td>315</td>
+</tr>
+<tr>
+<td>Ransomware</td>
+<td>15</td>
+<td>200</td>
+<td>200</td>
+<td>50</td>
+<td>465</td>
+</tr>
+<tr>
+<td>C2 communication</td>
+<td>20</td>
+<td>500</td>
+<td>50</td>
+<td>100</td>
+<td>670</td>
+</tr>
+<tr>
+<td>Exfiltration</td>
+<td>15</td>
+<td>100</td>
+<td>30</td>
+<td>80</td>
+<td>225</td>
+</tr>
+<tr>
+<td>Discovery</td>
+<td>10</td>
+<td>—</td>
+<td>20</td>
+<td>100</td>
+<td>130</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>215</strong></td>
+<td><strong>950</strong></td>
+<td><strong>660</strong></td>
+<td><strong>1,180</strong></td>
+<td><strong>3,005</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="122-rule-update-cadence">12.2 Rule Update Cadence<a class="headerlink" href="#122-rule-update-cadence" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Rule Type</th>
+<th>Update Frequency</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Behavioral</td>
+<td>Monthly</td>
+<td>R3TRIVE team</td>
+</tr>
+<tr>
+<td>YARA</td>
+<td>Weekly</td>
+<td>Community + R3TRIVE</td>
+</tr>
+<tr>
+<td>Sigma</td>
+<td>Daily (auto-sync)</td>
+<td>SigmaHQ</td>
+</tr>
+<tr>
+<td>IOC</td>
+<td>Daily / Real-time</td>
+<td>Threat feed subscriptions</td>
+</tr>
+<tr>
+<td>Suppression</td>
+<td>Analyst-driven</td>
+<td>Auto-generated from FP feedback</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>End of DETECTION_ENGINE_SPEC.md</em>
+<em>Related: RULE_ENGINE_SPEC.md, SYSTEM_ARCHITECTURE.md, THREAT_MODEL.md</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 R3TRIVE Project &mdash; Made with Material for MkDocs
+
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/thrive-spectrexq/r3trive" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.action.edit"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
