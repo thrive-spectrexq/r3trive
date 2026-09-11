@@ -47,14 +47,15 @@ func TestPipelineExecution(t *testing.T) {
 	var mu sync.Mutex
 	var collectedEvents []event.Event
 
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
 	p.OnEvent(func(evt event.Event) {
 		mu.Lock()
 		collectedEvents = append(collectedEvents, evt)
 		mu.Unlock()
+		cancel()
 	})
-
-	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
-	defer cancel()
 
 	if err := p.Start(ctx); err != nil {
 		t.Fatalf("pipeline returned error: %v", err)

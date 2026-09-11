@@ -20,7 +20,9 @@ func QueryIOCs(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(iocs)
+		if err := json.NewEncoder(w).Encode(iocs); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -42,6 +44,8 @@ func AddIOC(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(ioc)
+		if err := json.NewEncoder(w).Encode(ioc); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }

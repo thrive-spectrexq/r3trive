@@ -577,9 +577,15 @@ func (s *Store) GetRule(ctx context.Context, id string) (storage.StoredRule, err
 		return storage.StoredRule{}, fmt.Errorf("sqlite: scanning rule: %w", err)
 	}
 	r.Enabled = enabledInt == 1
-	if desc.Valid { r.Description = desc.String }
-	if tactic.Valid { r.ATTACKTactic = tactic.String }
-	if technique.Valid { r.ATTACKTechnique = technique.String }
+	if desc.Valid {
+		r.Description = desc.String
+	}
+	if tactic.Valid {
+		r.ATTACKTactic = tactic.String
+	}
+	if technique.Valid {
+		r.ATTACKTechnique = technique.String
+	}
 	return r, nil
 }
 
@@ -603,9 +609,15 @@ func (s *Store) ListRules(ctx context.Context, enabledOnly bool) ([]storage.Stor
 			return nil, fmt.Errorf("sqlite: scan rule: %w", err)
 		}
 		r.Enabled = enabledInt == 1
-		if desc.Valid { r.Description = desc.String }
-		if tactic.Valid { r.ATTACKTactic = tactic.String }
-		if technique.Valid { r.ATTACKTechnique = technique.String }
+		if desc.Valid {
+			r.Description = desc.String
+		}
+		if tactic.Valid {
+			r.ATTACKTactic = tactic.String
+		}
+		if technique.Valid {
+			r.ATTACKTechnique = technique.String
+		}
 		rules = append(rules, r)
 	}
 	return rules, rows.Err()

@@ -43,17 +43,17 @@ type Host struct {
 
 // StoredRule represents a persisted correlation rule.
 type StoredRule struct {
-	ID               string    `json:"id"`
-	Name             string    `json:"name"`
-	Description      string    `json:"description,omitempty"`
-	Severity         string    `json:"severity"`
-	Confidence       float64   `json:"confidence"`
-	Enabled          bool      `json:"enabled"`
-	Conditions       string    `json:"conditions"`
-	ATTACKTactic     string    `json:"attack_tactic,omitempty"`
-	ATTACKTechnique  string    `json:"attack_technique,omitempty"`
-	CreatedAt        time.Time `json:"created_at"`
-	UpdatedAt        time.Time `json:"updated_at"`
+	ID              string    `json:"id"`
+	Name            string    `json:"name"`
+	Description     string    `json:"description,omitempty"`
+	Severity        string    `json:"severity"`
+	Confidence      float64   `json:"confidence"`
+	Enabled         bool      `json:"enabled"`
+	Conditions      string    `json:"conditions"`
+	ATTACKTactic    string    `json:"attack_tactic,omitempty"`
+	ATTACKTechnique string    `json:"attack_technique,omitempty"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 // IOCEntry represents an Indicator of Compromise.

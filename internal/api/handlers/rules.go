@@ -20,7 +20,9 @@ func ListRules(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(rules)
+		if err := json.NewEncoder(w).Encode(rules); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -42,7 +44,9 @@ func CreateRule(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(rule)
+		if err := json.NewEncoder(w).Encode(rule); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -62,7 +66,9 @@ func UpdateRule(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(rule)
+		if err := json.NewEncoder(w).Encode(rule); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 

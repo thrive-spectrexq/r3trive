@@ -1,0 +1,78 @@
+site_name: R3TRIVE
+site_description: Endpoint detection, threat hunting and automated defense.
+site_author: R3TRIVE Contributors
+site_url: https://thrive-spectrexq.github.io/r3trive/
+repo_url: https://github.com/thrive-spectrexq/r3trive
+repo_name: thrive-spectrexq/r3trive
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - def_list
+  - toc:
+      permalink: true
+
+nav:
+  - Overview: index.md
+  - Architecture: system_architecture.md
+  - Threat Model: threat_model.md
+  - Detection Engine: detection_engine.md
+  - Rule Engine: rule_engine.md
+  - AI Analyst: ai_analyst.md
+  - Database Schema: database_schema.md
+  - Plugin SDK: plugin_sdk.md
+  - SOC Workflow: soc_workflow.md
+  - API Reference: api_reference.md
+  - Contributing: contributing.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/thrive-spectrexq/r3trive
+
+copyright: >
+  Copyright &copy; 2026 R3TRIVE Project &mdash; Made with Material for MkDocs

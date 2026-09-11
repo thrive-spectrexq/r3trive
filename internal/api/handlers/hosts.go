@@ -19,7 +19,9 @@ func ListHosts(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(hosts)
+		if err := json.NewEncoder(w).Encode(hosts); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -34,7 +36,9 @@ func GetHost(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(host)
+		if err := json.NewEncoder(w).Encode(host); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
 
@@ -56,6 +60,8 @@ func RegisterHost(store storage.Store) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(host)
+		if err := json.NewEncoder(w).Encode(host); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }

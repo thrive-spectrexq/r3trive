@@ -40,10 +40,12 @@ func ExecuteAction(store storage.Store) http.HandlerFunc {
 		// Return accepted - actual execution would be handled by the response engine
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(map[string]any{
+		if err := json.NewEncoder(w).Encode(map[string]any{
 			"status":  "accepted",
 			"action":  req.Action,
 			"dry_run": req.DryRun,
-		})
+		}); err != nil {
+			slog.Error("failed to encode response", "error", err)
+		}
 	}
 }
