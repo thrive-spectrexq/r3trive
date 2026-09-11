@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"time"
 
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
@@ -68,6 +69,11 @@ func (e *Engine) Execute(ctx context.Context, action ActionType, params map[stri
 		return ActionResult{}, fmt.Errorf("unknown action type: %s", action)
 	}
 
+	// Validate parameters before dry-run check so invalid inputs are always rejected
+	if err := e.validateParams(action, params); err != nil {
+		return ActionResult{}, err
+	}
+
 	if e.dryRun {
 		slog.Info("dry-run: would execute action", "action", action, "params", params)
 		return ActionResult{
@@ -86,6 +92,52 @@ func (e *Engine) Execute(ctx context.Context, action ActionType, params map[stri
 
 	slog.Info("action executed", "action", action, "success", result.Success)
 	return result, nil
+}
+
+// validateParams validates the parameters for a given action type without executing.
+func (e *Engine) validateParams(action ActionType, params map[string]any) error {
+	switch action {
+	case ActionKillProcess:
+		pidVal, ok := params["pid"]
+		if !ok {
+			return fmt.Errorf("missing pid parameter")
+		}
+		var pid int
+		switch v := pidVal.(type) {
+		case int:
+			pid = v
+		case float64:
+			pid = int(v)
+		case int64:
+			pid = int(v)
+		default:
+			return fmt.Errorf("invalid pid type: %T", pidVal)
+		}
+		if pid <= 0 {
+			return fmt.Errorf("invalid pid: %d (must be positive)", pid)
+		}
+	case ActionBlockIP:
+		ipVal, ok := params["ip"]
+		if !ok {
+			return fmt.Errorf("missing ip parameter")
+		}
+		ip, ok := ipVal.(string)
+		if !ok {
+			return fmt.Errorf("invalid ip type: %T", ipVal)
+		}
+		if net.ParseIP(ip) == nil {
+			return fmt.Errorf("invalid IP address: %q", ip)
+		}
+	case ActionQuarantine:
+		pathVal, ok := params["path"]
+		if !ok {
+			return fmt.Errorf("missing path parameter")
+		}
+		if _, ok := pathVal.(string); !ok {
+			return fmt.Errorf("invalid path type: %T", pathVal)
+		}
+	}
+	return nil
 }
 
 // RespondToIncident evaluates an incident and executes appropriate responses.
@@ -172,6 +224,10 @@ func (e *Engine) killProcess(ctx context.Context, params map[string]any) (Action
 		pid = int(v)
 	default:
 		return ActionResult{}, fmt.Errorf("invalid pid type: %T", pidVal)
+	}
+
+	if pid <= 0 {
+		return ActionResult{}, fmt.Errorf("invalid pid: %d (must be positive)", pid)
 	}
 
 	err := sysKillProcess(ctx, pid)

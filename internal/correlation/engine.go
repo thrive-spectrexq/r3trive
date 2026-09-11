@@ -9,6 +9,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"reflect"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -163,69 +166,82 @@ func (e *Engine) matchCondition(cond Condition, evt event.Event) bool {
 			}
 		}
 		return false
+	case "regex":
+		matched, err := regexp.MatchString(cond.Value, value)
+		if err != nil {
+			slog.Warn("invalid regex in rule condition",
+				"pattern", cond.Value, "error", err)
+			return false
+		}
+		return matched
 	default:
 		return false
 	}
 }
 
-// extractField retrieves a field value from an event by dotted path.
+// extractField resolves a dotted field path (e.g. "data.process.name")
+// by walking the Event struct tree via reflection.
 func extractField(field string, evt event.Event) string {
-	switch field {
-	case "type":
-		return string(evt.Type)
-	case "severity":
-		return string(evt.Severity)
-	case "sensor":
-		return evt.Sensor
-	case "data.process.name":
-		if evt.Data.Process != nil {
-			return evt.Data.Process.Name
+	parts := strings.Split(field, ".")
+	v := reflect.ValueOf(evt)
+
+	for _, part := range parts {
+		v = resolveStructField(v, part)
+		if !v.IsValid() {
+			return ""
 		}
-	case "data.process.path":
-		if evt.Data.Process != nil {
-			return evt.Data.Process.Path
-		}
-	case "data.process.cmdline":
-		if evt.Data.Process != nil {
-			return evt.Data.Process.CmdLine
-		}
-	case "data.process.user":
-		if evt.Data.Process != nil {
-			return evt.Data.Process.User
-		}
-	case "data.process.parent.name":
-		if evt.Data.Process != nil && evt.Data.Process.Parent != nil {
-			return evt.Data.Process.Parent.Name
-		}
-	case "data.network.dst_ip":
-		if evt.Data.Network != nil {
-			return evt.Data.Network.DstIP
-		}
-	case "data.network.process_name":
-		if evt.Data.Network != nil {
-			return evt.Data.Network.ProcessName
-		}
-	case "data.file.path":
-		if evt.Data.File != nil {
-			return evt.Data.File.Path
-		}
-	case "data.registry.key":
-		if evt.Data.Registry != nil {
-			return evt.Data.Registry.Key
+		// Dereference pointers
+		if v.Kind() == reflect.Ptr {
+			if v.IsNil() {
+				return ""
+			}
+			v = v.Elem()
 		}
 	}
-	return ""
+
+	if !v.IsValid() {
+		return ""
+	}
+
+	return fmt.Sprintf("%v", v.Interface())
+}
+
+// resolveStructField finds a struct field by its JSON tag or Go field name (case-insensitive).
+func resolveStructField(v reflect.Value, name string) reflect.Value {
+	// Dereference pointers first
+	for v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return reflect.Value{}
+		}
+		v = v.Elem()
+	}
+
+	if v.Kind() != reflect.Struct {
+		return reflect.Value{}
+	}
+
+	t := v.Type()
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+
+		// Check JSON tag first
+		jsonTag := f.Tag.Get("json")
+		if jsonTag != "" {
+			tagName := strings.Split(jsonTag, ",")[0]
+			if tagName == name {
+				return v.Field(i)
+			}
+		}
+
+		// Fallback to field name (case-insensitive)
+		if strings.EqualFold(f.Name, name) {
+			return v.Field(i)
+		}
+	}
+
+	return reflect.Value{}
 }
 
 func containsStr(s, substr string) bool {
-	return len(s) >= len(substr) && searchStr(s, substr)
-}
-
-func searchStr(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
+	return strings.Contains(s, substr)
 }

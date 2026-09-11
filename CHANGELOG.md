@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.4] - 2026-09-11
+
+### Added
+- **REST API Endpoints (`/hosts`, `/rules`, `/iocs`, `/response`)**: Added full CRUD API handlers for host registration, correlation rule management, IOC querying, and response action execution via REST API.
+- **Database Schema Migration (`002_hosts_rules_iocs.sql`)**: Added `hosts`, `rules`, `playbooks`, and `ioc_entries` tables with proper indexes and foreign key constraints.
+- **Storage Interface Expansion**: Extended `Store` interface with `SaveHost`, `GetHost`, `ListHosts`, `SaveRule`, `GetRule`, `ListRules`, `DeleteRule`, `SaveIOC`, and `QueryIOCs` methods, with full SQLite implementations.
+- **Regex Correlation Operator**: Added `regex` operator support to the correlation engine condition matcher, enabling regex-based pattern matching in detection rules.
+- **Reflection-Based Field Resolver**: Replaced hardcoded `extractField` switch statement with a generic reflection-based dotted-path resolver that walks any `Event` struct tree via JSON tags.
+- **Comprehensive Test Coverage**: Added 25+ new test cases covering regex matching (valid/invalid/no-match), all correlation operators (`contains`, `oneOf`, unknown), field extraction via reflection, PID validation, IP validation, quarantine edge cases, and unknown action handling.
+
+### Fixed & Security Hardening
+- **Correlation Engine Bug (`regex` operator)**: Fixed silent failure where rules using `operator: regex` would never trigger because the `matchCondition` switch statement was missing the `regex` case.
+- **PID Validation**: Added positive integer validation before executing `sysKillProcess` — negative and zero PIDs are now rejected with clear error messages.
+- **IP Address Validation**: Added `net.ParseIP` validation in both Windows (`netsh`) and POSIX (`iptables`) IP blocking actions to prevent malformed addresses from reaching system commands.
+- **Quarantine Permissions Hardening**: Changed Windows quarantine `icacls` permission failure from a silent warning to a returned error, preventing false-positive quarantine reports when file permissions cannot be secured.
+- **String Search Simplification**: Replaced custom `containsStr`/`searchStr` functions with stdlib `strings.Contains`.
+
+---
+
 ## [0.1.3] - 2026-08-22
 
 ### Added

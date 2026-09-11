@@ -88,6 +88,28 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 				r.Get("/{id}", handlers.GetIncident(store))
 				r.Put("/{id}/status", handlers.UpdateIncidentStatus(store))
 			})
+
+			r.Route("/hosts", func(r chi.Router) {
+				r.Get("/", handlers.ListHosts(store))
+				r.Get("/{id}", handlers.GetHost(store))
+				r.Post("/", handlers.RegisterHost(store))
+			})
+
+			r.Route("/rules", func(r chi.Router) {
+				r.Get("/", handlers.ListRules(store))
+				r.Post("/", handlers.CreateRule(store))
+				r.Put("/{id}", handlers.UpdateRule(store))
+				r.Delete("/{id}", handlers.DeleteRule(store))
+			})
+
+			r.Route("/iocs", func(r chi.Router) {
+				r.Get("/", handlers.QueryIOCs(store))
+				r.Post("/", handlers.AddIOC(store))
+			})
+
+			r.Route("/response", func(r chi.Router) {
+				r.Post("/execute", handlers.ExecuteAction(store))
+			})
 		})
 	})
 

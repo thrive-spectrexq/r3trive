@@ -22,6 +22,9 @@ import (
 //go:embed migrations/001_initial.sql
 var migrationSQL string
 
+//go:embed migrations/002_hosts_rules_iocs.sql
+var migrationSQL2 string
+
 // Store implements storage.Store using SQLite.
 type Store struct {
 	db *sql.DB
@@ -64,6 +67,10 @@ func New(dsn string) (*Store, error) {
 	if _, err := db.Exec(migrationSQL); err != nil {
 		_ = db.Close()
 		return nil, fmt.Errorf("sqlite: running migrations: %w", err)
+	}
+	if _, err := db.Exec(migrationSQL2); err != nil {
+		_ = db.Close()
+		return nil, fmt.Errorf("sqlite: running migrations (002): %w", err)
 	}
 
 	slog.Info("sqlite store initialized", "path", dsn)
@@ -483,4 +490,180 @@ func (s *Store) Close() error {
 		return s.db.Close()
 	}
 	return nil
+}
+
+func (s *Store) SaveHost(ctx context.Context, host storage.Host) error {
+	tagsJSON, _ := json.Marshal(host.Tags)
+	_, err := s.db.ExecContext(ctx,
+		`INSERT OR REPLACE INTO hosts (id, hostname, os, arch, ip_address, last_seen, agent_ver, status, tags, created_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		host.ID, host.Hostname, host.OS, host.Arch, host.IPAddress, host.LastSeen, host.AgentVer, host.Status, string(tagsJSON), host.CreatedAt,
+	)
+	if err != nil {
+		return fmt.Errorf("sqlite: saving host: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) GetHost(ctx context.Context, id string) (storage.Host, error) {
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, hostname, os, arch, ip_address, last_seen, agent_ver, status, tags, created_at FROM hosts WHERE id = ?`, id)
+
+	var h storage.Host
+	var tagsJSON sql.NullString
+	err := row.Scan(&h.ID, &h.Hostname, &h.OS, &h.Arch, &h.IPAddress, &h.LastSeen, &h.AgentVer, &h.Status, &tagsJSON, &h.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return storage.Host{}, fmt.Errorf("host not found: %s", id)
+		}
+		return storage.Host{}, fmt.Errorf("sqlite: scanning host: %w", err)
+	}
+	if tagsJSON.Valid {
+		_ = json.Unmarshal([]byte(tagsJSON.String), &h.Tags)
+	}
+	return h, nil
+}
+
+func (s *Store) ListHosts(ctx context.Context) ([]storage.Host, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT id, hostname, os, arch, ip_address, last_seen, agent_ver, status, tags, created_at FROM hosts`)
+	if err != nil {
+		return nil, fmt.Errorf("sqlite: list hosts: %w", err)
+	}
+	defer rows.Close()
+
+	var hosts []storage.Host
+	for rows.Next() {
+		var h storage.Host
+		var tagsJSON sql.NullString
+		if err := rows.Scan(&h.ID, &h.Hostname, &h.OS, &h.Arch, &h.IPAddress, &h.LastSeen, &h.AgentVer, &h.Status, &tagsJSON, &h.CreatedAt); err != nil {
+			return nil, fmt.Errorf("sqlite: scan host: %w", err)
+		}
+		if tagsJSON.Valid {
+			_ = json.Unmarshal([]byte(tagsJSON.String), &h.Tags)
+		}
+		hosts = append(hosts, h)
+	}
+	return hosts, rows.Err()
+}
+
+func (s *Store) SaveRule(ctx context.Context, rule storage.StoredRule) error {
+	var enabledInt int
+	if rule.Enabled {
+		enabledInt = 1
+	}
+	_, err := s.db.ExecContext(ctx,
+		`INSERT OR REPLACE INTO rules (id, name, description, severity, confidence, enabled, conditions, attack_tactic, attack_technique, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		rule.ID, rule.Name, rule.Description, rule.Severity, rule.Confidence, enabledInt, rule.Conditions, rule.ATTACKTactic, rule.ATTACKTechnique, rule.CreatedAt, rule.UpdatedAt,
+	)
+	if err != nil {
+		return fmt.Errorf("sqlite: saving rule: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) GetRule(ctx context.Context, id string) (storage.StoredRule, error) {
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, name, description, severity, confidence, enabled, conditions, attack_tactic, attack_technique, created_at, updated_at FROM rules WHERE id = ?`, id)
+
+	var r storage.StoredRule
+	var enabledInt int
+	var desc, tactic, technique sql.NullString
+	err := row.Scan(&r.ID, &r.Name, &desc, &r.Severity, &r.Confidence, &enabledInt, &r.Conditions, &tactic, &technique, &r.CreatedAt, &r.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return storage.StoredRule{}, fmt.Errorf("rule not found: %s", id)
+		}
+		return storage.StoredRule{}, fmt.Errorf("sqlite: scanning rule: %w", err)
+	}
+	r.Enabled = enabledInt == 1
+	if desc.Valid { r.Description = desc.String }
+	if tactic.Valid { r.ATTACKTactic = tactic.String }
+	if technique.Valid { r.ATTACKTechnique = technique.String }
+	return r, nil
+}
+
+func (s *Store) ListRules(ctx context.Context, enabledOnly bool) ([]storage.StoredRule, error) {
+	query := `SELECT id, name, description, severity, confidence, enabled, conditions, attack_tactic, attack_technique, created_at, updated_at FROM rules`
+	if enabledOnly {
+		query += ` WHERE enabled = 1`
+	}
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("sqlite: list rules: %w", err)
+	}
+	defer rows.Close()
+
+	var rules []storage.StoredRule
+	for rows.Next() {
+		var r storage.StoredRule
+		var enabledInt int
+		var desc, tactic, technique sql.NullString
+		if err := rows.Scan(&r.ID, &r.Name, &desc, &r.Severity, &r.Confidence, &enabledInt, &r.Conditions, &tactic, &technique, &r.CreatedAt, &r.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("sqlite: scan rule: %w", err)
+		}
+		r.Enabled = enabledInt == 1
+		if desc.Valid { r.Description = desc.String }
+		if tactic.Valid { r.ATTACKTactic = tactic.String }
+		if technique.Valid { r.ATTACKTechnique = technique.String }
+		rules = append(rules, r)
+	}
+	return rules, rows.Err()
+}
+
+func (s *Store) DeleteRule(ctx context.Context, id string) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM rules WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("sqlite: deleting rule: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) SaveIOC(ctx context.Context, ioc storage.IOCEntry) error {
+	tagsJSON, _ := json.Marshal(ioc.Tags)
+	_, err := s.db.ExecContext(ctx,
+		`INSERT OR REPLACE INTO ioc_entries (id, type, value, source, severity, tags, first_seen, last_seen, created_at)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		ioc.ID, ioc.Type, ioc.Value, ioc.Source, ioc.Severity, string(tagsJSON), ioc.FirstSeen, ioc.LastSeen, ioc.CreatedAt,
+	)
+	if err != nil {
+		return fmt.Errorf("sqlite: saving ioc: %w", err)
+	}
+	return nil
+}
+
+func (s *Store) QueryIOCs(ctx context.Context, iocType string, value string) ([]storage.IOCEntry, error) {
+	query := `SELECT id, type, value, source, severity, tags, first_seen, last_seen, created_at FROM ioc_entries WHERE 1=1`
+	var args []any
+	if iocType != "" {
+		query += ` AND type = ?`
+		args = append(args, iocType)
+	}
+	if value != "" {
+		query += ` AND value = ?`
+		args = append(args, value)
+	}
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("sqlite: query iocs: %w", err)
+	}
+	defer rows.Close()
+
+	var iocs []storage.IOCEntry
+	for rows.Next() {
+		var ioc storage.IOCEntry
+		var tagsJSON, source sql.NullString
+		if err := rows.Scan(&ioc.ID, &ioc.Type, &ioc.Value, &source, &ioc.Severity, &tagsJSON, &ioc.FirstSeen, &ioc.LastSeen, &ioc.CreatedAt); err != nil {
+			return nil, fmt.Errorf("sqlite: scan ioc: %w", err)
+		}
+		if tagsJSON.Valid {
+			_ = json.Unmarshal([]byte(tagsJSON.String), &ioc.Tags)
+		}
+		if source.Valid {
+			ioc.Source = source.String
+		}
+		iocs = append(iocs, ioc)
+	}
+	return iocs, rows.Err()
 }

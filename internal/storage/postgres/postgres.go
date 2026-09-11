@@ -510,4 +510,40 @@ func (s *Store) UpdateIncidentStatus(ctx context.Context, id string, status even
 	return err
 }
 
+func (s *Store) SaveHost(ctx context.Context, host storage.Host) error {
+	return fmt.Errorf("postgres: SaveHost not implemented")
+}
+
+func (s *Store) GetHost(ctx context.Context, id string) (storage.Host, error) {
+	return storage.Host{}, fmt.Errorf("postgres: GetHost not implemented")
+}
+
+func (s *Store) ListHosts(ctx context.Context) ([]storage.Host, error) {
+	return nil, fmt.Errorf("postgres: ListHosts not implemented")
+}
+
+func (s *Store) SaveRule(ctx context.Context, rule storage.StoredRule) error {
+	return fmt.Errorf("postgres: SaveRule not implemented")
+}
+
+func (s *Store) GetRule(ctx context.Context, id string) (storage.StoredRule, error) {
+	return storage.StoredRule{}, fmt.Errorf("postgres: GetRule not implemented")
+}
+
+func (s *Store) ListRules(ctx context.Context, enabledOnly bool) ([]storage.StoredRule, error) {
+	return nil, fmt.Errorf("postgres: ListRules not implemented")
+}
+
+func (s *Store) DeleteRule(ctx context.Context, id string) error {
+	return fmt.Errorf("postgres: DeleteRule not implemented")
+}
+
+func (s *Store) SaveIOC(ctx context.Context, ioc storage.IOCEntry) error {
+	return fmt.Errorf("postgres: SaveIOC not implemented")
+}
+
+func (s *Store) QueryIOCs(ctx context.Context, iocType string, value string) ([]storage.IOCEntry, error) {
+	return nil, fmt.Errorf("postgres: QueryIOCs not implemented")
+}
+
 var _ storage.Store = (*Store)(nil)

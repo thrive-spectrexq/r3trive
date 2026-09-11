@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,6 +23,9 @@ func sysKillProcess(ctx context.Context, pid int) error {
 }
 
 func sysBlockIP(ctx context.Context, ip string) error {
+	if net.ParseIP(ip) == nil {
+		return fmt.Errorf("invalid IP address: %q", ip)
+	}
 	slog.Info("executing Windows Firewall block", "ip", ip)
 	ruleName := fmt.Sprintf("R3TRIVE-BLOCK-%s", ip)
 
@@ -64,8 +68,7 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 	// Remove permissions (icacls to deny everything or just restrict to SYSTEM)
 	cmd := exec.CommandContext(ctx, "icacls", destPath, "/inheritance:r", "/grant:r", "SYSTEM:(F)")
 	if out, err := cmd.CombinedOutput(); err != nil {
-		slog.Warn("failed to secure quarantined file permissions", "error", err, "output", string(out))
-		// We still moved it, so it's partially successful
+		return fmt.Errorf("quarantined file moved but permissions not secured: %w (output: %s)", err, string(out))
 	}
 
 	return nil

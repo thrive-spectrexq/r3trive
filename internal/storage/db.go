@@ -27,6 +27,48 @@ type EventQuery struct {
 	Offset int
 }
 
+// Host represents a managed endpoint.
+type Host struct {
+	ID        string    `json:"id"`
+	Hostname  string    `json:"hostname"`
+	OS        string    `json:"os"`
+	Arch      string    `json:"arch"`
+	IPAddress string    `json:"ip_address,omitempty"`
+	LastSeen  time.Time `json:"last_seen,omitempty"`
+	AgentVer  string    `json:"agent_ver,omitempty"`
+	Status    string    `json:"status"`
+	Tags      []string  `json:"tags,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// StoredRule represents a persisted correlation rule.
+type StoredRule struct {
+	ID               string    `json:"id"`
+	Name             string    `json:"name"`
+	Description      string    `json:"description,omitempty"`
+	Severity         string    `json:"severity"`
+	Confidence       float64   `json:"confidence"`
+	Enabled          bool      `json:"enabled"`
+	Conditions       string    `json:"conditions"`
+	ATTACKTactic     string    `json:"attack_tactic,omitempty"`
+	ATTACKTechnique  string    `json:"attack_technique,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+// IOCEntry represents an Indicator of Compromise.
+type IOCEntry struct {
+	ID        string    `json:"id"`
+	Type      string    `json:"type"`
+	Value     string    `json:"value"`
+	Source    string    `json:"source,omitempty"`
+	Severity  string    `json:"severity"`
+	Tags      []string  `json:"tags,omitempty"`
+	FirstSeen time.Time `json:"first_seen,omitempty"`
+	LastSeen  time.Time `json:"last_seen,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // Store is the interface for persistent event storage backends.
 type Store interface {
 	// SaveEvent persists a single event.
@@ -55,6 +97,21 @@ type Store interface {
 
 	// UpdateIncidentStatus updates the status of an existing incident.
 	UpdateIncidentStatus(ctx context.Context, id string, status event.IncidentStatus) error
+
+	// Host management
+	SaveHost(ctx context.Context, host Host) error
+	GetHost(ctx context.Context, id string) (Host, error)
+	ListHosts(ctx context.Context) ([]Host, error)
+
+	// Rule management
+	SaveRule(ctx context.Context, rule StoredRule) error
+	GetRule(ctx context.Context, id string) (StoredRule, error)
+	ListRules(ctx context.Context, enabledOnly bool) ([]StoredRule, error)
+	DeleteRule(ctx context.Context, id string) error
+
+	// IOC management
+	SaveIOC(ctx context.Context, ioc IOCEntry) error
+	QueryIOCs(ctx context.Context, iocType string, value string) ([]IOCEntry, error)
 
 	// Close releases all resources held by the store.
 	Close() error

@@ -24,8 +24,8 @@ func sysKillProcess(ctx context.Context, pid int) error {
 }
 
 func sysBlockIP(ctx context.Context, ip string) error {
-	if parsedIP := net.ParseIP(ip); parsedIP == nil {
-		return fmt.Errorf("invalid IP address for blocking: %q", ip)
+	if net.ParseIP(ip) == nil {
+		return fmt.Errorf("invalid IP address: %q", ip)
 	}
 	slog.Info("executing iptables block", "ip", ip)
 	cmd := exec.CommandContext(ctx, "iptables", "-A", "INPUT", "-s", ip, "-j", "DROP") // #nosec G204
