@@ -17,10 +17,11 @@ import (
 
 // ServerConfig holds the configuration for the API server.
 type ServerConfig struct {
-	Addr    string
-	APIKey  string
-	TLSCert string
-	TLSKey  string
+	Addr           string
+	APIKey         string
+	TLSCert        string
+	TLSKey         string
+	ResponseEngine handlers.ActionExecutor
 }
 
 // Server represents the REST API server.
@@ -108,7 +109,7 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 			})
 
 			r.Route("/response", func(r chi.Router) {
-				r.Post("/execute", handlers.ExecuteAction(store))
+				r.Post("/execute", handlers.ExecuteAction(store, cfg.ResponseEngine))
 			})
 		})
 	})

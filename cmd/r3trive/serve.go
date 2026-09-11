@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/thrive-spectrexq/r3trive/internal/api"
+	"github.com/thrive-spectrexq/r3trive/internal/response"
 	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 )
 
@@ -18,6 +19,7 @@ var (
 	serveAPIKey  string
 	serveTLSCert string
 	serveTLSKey  string
+	serveDryRun  bool
 )
 
 func newServeCmd() *cobra.Command {
@@ -36,11 +38,14 @@ func newServeCmd() *cobra.Command {
 			}
 			defer store.Close()
 
+			respEngine := response.New(serveDryRun)
+
 			serverConfig := api.ServerConfig{
-				Addr:    serveAddr,
-				APIKey:  serveAPIKey,
-				TLSCert: serveTLSCert,
-				TLSKey:  serveTLSKey,
+				Addr:           serveAddr,
+				APIKey:         serveAPIKey,
+				TLSCert:        serveTLSCert,
+				TLSKey:         serveTLSKey,
+				ResponseEngine: respEngine,
 			}
 
 			srv := api.NewServer(serverConfig, store)
@@ -77,6 +82,7 @@ func newServeCmd() *cobra.Command {
 	cmd.Flags().StringVar(&serveAPIKey, "api-key", "", "API key for authentication")
 	cmd.Flags().StringVar(&serveTLSCert, "tls-cert", "", "Path to TLS certificate file")
 	cmd.Flags().StringVar(&serveTLSKey, "tls-key", "", "Path to TLS key file")
+	cmd.Flags().BoolVar(&serveDryRun, "dry-run", true, "Run response actions in dry-run mode")
 
 	return cmd
 }

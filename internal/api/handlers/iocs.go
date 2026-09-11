@@ -19,6 +19,9 @@ func QueryIOCs(store storage.Store) http.HandlerFunc {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
+		if iocs == nil {
+			iocs = []storage.IOCEntry{}
+		}
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(iocs); err != nil {
 			slog.Error("failed to encode response", "error", err)

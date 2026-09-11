@@ -1,12 +1,19 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 
+	"github.com/thrive-spectrexq/r3trive/internal/response"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 )
+
+// ActionExecutor executes a containment or remediation response action.
+type ActionExecutor interface {
+	Execute(ctx context.Context, action response.ActionType, params map[string]any) (response.ActionResult, error)
+}
 
 // ExecuteActionRequest is the request body for executing a response action.
 type ExecuteActionRequest struct {
@@ -16,10 +23,9 @@ type ExecuteActionRequest struct {
 }
 
 // ExecuteAction triggers a response action via the API.
-// Note: This handler accepts the store for consistency but the actual
-// response engine integration would be wired in the server setup.
-// For now, it validates the request and returns a structured response.
-func ExecuteAction(store storage.Store) http.HandlerFunc {
+// If executor is provided, the action is executed and the result returned.
+// Otherwise, the action is validated and an accepted status is returned.
+func ExecuteAction(store storage.Store, executor ActionExecutor) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req ExecuteActionRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -37,7 +43,31 @@ func ExecuteAction(store storage.Store) http.HandlerFunc {
 			"params", req.Params,
 		)
 
-		// Return accepted - actual execution would be handled by the response engine
+		if executor != nil {
+			res, err := executor.Execute(r.Context(), response.ActionType(req.Action), req.Params)
+			if err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				_ = json.NewEncoder(w).Encode(map[string]any{
+					"error":  err.Error(),
+					"action": req.Action,
+				})
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			if err := json.NewEncoder(w).Encode(map[string]any{
+				"status": "executed",
+				"action": req.Action,
+				"result": res,
+			}); err != nil {
+				slog.Error("failed to encode response", "error", err)
+			}
+			return
+		}
+
+		// Return accepted - placeholder when no executor is wired
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusAccepted)
 		if err := json.NewEncoder(w).Encode(map[string]any{

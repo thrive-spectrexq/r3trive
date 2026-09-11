@@ -21,10 +21,11 @@ import (
 // Engine is the correlation engine that evaluates events against rules
 // and produces alerts and incidents.
 type Engine struct {
-	mu      sync.RWMutex
-	rules   []Rule
-	state   map[string][]event.Event // Maps RuleID to matched events
-	alertCh chan event.Alert
+	mu         sync.RWMutex
+	rules      []Rule
+	state      map[string][]event.Event // Maps RuleID to matched events
+	alertCh    chan event.Alert
+	regexCache map[string]*regexp.Regexp
 }
 
 // Rule represents a behavioral detection rule.
@@ -54,15 +55,33 @@ type Condition struct {
 // New creates a new correlation engine.
 func New() *Engine {
 	return &Engine{
-		state:   make(map[string][]event.Event),
-		alertCh: make(chan event.Alert, 100),
+		state:      make(map[string][]event.Event),
+		alertCh:    make(chan event.Alert, 100),
+		regexCache: make(map[string]*regexp.Regexp),
 	}
 }
 
-// LoadRules adds detection rules to the engine.
+// LoadRules adds detection rules to the engine and precompiles any regex conditions.
 func (e *Engine) LoadRules(rules []Rule) {
 	e.mu.Lock()
 	defer e.mu.Unlock()
+
+	for _, rule := range rules {
+		for _, cond := range rule.Conditions {
+			if cond.Operator == "regex" && cond.Value != "" {
+				if _, exists := e.regexCache[cond.Value]; !exists {
+					re, err := regexp.Compile(cond.Value)
+					if err != nil {
+						slog.Warn("invalid regex pattern in rule condition",
+							"rule_id", rule.ID, "pattern", cond.Value, "error", err)
+					} else {
+						e.regexCache[cond.Value] = re
+					}
+				}
+			}
+		}
+	}
+
 	e.rules = append(e.rules, rules...)
 	slog.Info("correlation rules loaded", "count", len(rules), "total", len(e.rules))
 }
@@ -167,13 +186,18 @@ func (e *Engine) matchCondition(cond Condition, evt event.Event) bool {
 		}
 		return false
 	case "regex":
-		matched, err := regexp.MatchString(cond.Value, value)
-		if err != nil {
-			slog.Warn("invalid regex in rule condition",
-				"pattern", cond.Value, "error", err)
-			return false
+		re, ok := e.regexCache[cond.Value]
+		if !ok {
+			var err error
+			re, err = regexp.Compile(cond.Value)
+			if err != nil {
+				slog.Warn("invalid regex in rule condition",
+					"pattern", cond.Value, "error", err)
+				return false
+			}
+			e.regexCache[cond.Value] = re
 		}
-		return matched
+		return re.MatchString(value)
 	default:
 		return false
 	}

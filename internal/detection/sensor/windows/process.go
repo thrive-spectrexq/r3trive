@@ -5,233 +5,216 @@ package windows
 import (
 	"context"
 	"fmt"
-	"os"
-	"strings"
+	"log/slog"
 	"sync"
+	"sync/atomic"
+	"syscall"
 	"time"
+	"unsafe"
 
-	"github.com/0xrawsec/golang-etw/etw"
-	"github.com/google/uuid"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
-const (
-	KernelProcessProviderGUID = "{22fb2cd6-0e7b-422b-a0c7-2fad1fd0e716}"
-	ProcessSensorName         = "WindowsProcessSensor"
-)
-
-// ProcessSensor implements the sensor.Sensor interface using ETW.
+// ProcessSensor implements a native Windows process monitoring sensor via Toolhelp32 snapshots.
 type ProcessSensor struct {
-	session  *etw.RealTimeSession
-	consumer *etw.Consumer
-	health   sensor.SensorHealth
-	mu       sync.RWMutex
-	cancel   context.CancelFunc
+	mu              sync.RWMutex
+	knownPIDs       map[uint32]string
+	pollInterval    time.Duration
+	eventsCollected atomic.Int64
+	errorCount      atomic.Int64
+	lastEventTime   time.Time
 }
 
-// NewProcessSensor creates a new ETW-based process sensor.
+// NewProcessSensor creates a new Windows process sensor with default 1-second polling.
 func NewProcessSensor() *ProcessSensor {
+	return NewProcessSensorWithInterval(1 * time.Second)
+}
+
+// NewProcessSensorWithInterval creates a Windows process sensor with a configurable polling interval.
+func NewProcessSensorWithInterval(interval time.Duration) *ProcessSensor {
+	if interval <= 0 {
+		interval = 1 * time.Second
+	}
 	return &ProcessSensor{
-		health: sensor.SensorHealth{
-			Healthy: true,
-			Status:  "Initialized",
-		},
+		knownPIDs:    make(map[uint32]string),
+		pollInterval: interval,
 	}
 }
 
-// Name returns the sensor's unique identifier.
+// Name returns the sensor identifier.
 func (s *ProcessSensor) Name() string {
-	return ProcessSensorName
+	return "windows_process_sensor"
 }
 
-// Platform returns the supported platforms.
+// Platform returns the supported platform.
 func (s *ProcessSensor) Platform() []sensor.Platform {
 	return []sensor.Platform{sensor.PlatformWindows}
 }
 
-// Health returns the current health status.
-func (s *ProcessSensor) Health() sensor.SensorHealth {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	return s.health
+// Type returns the event category.
+func (s *ProcessSensor) Type() string {
+	return "process"
 }
 
-// updateHealth updates the sensor's health status.
-func (s *ProcessSensor) updateHealth(err error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if err != nil {
-		s.health.Healthy = false
-		s.health.Status = err.Error()
-		s.health.ErrorCount++
-	} else {
-		s.health.Healthy = true
-		s.health.Status = "Running"
-		s.health.EventsCollected++
-		s.health.LastEventTime = time.Now().UTC().Format(time.RFC3339)
+// Health returns current sensor diagnostics.
+func (s *ProcessSensor) Health() sensor.SensorHealth {
+	s.mu.RLock()
+	lastTime := s.lastEventTime
+	s.mu.RUnlock()
+
+	lastTimeStr := ""
+	if !lastTime.IsZero() {
+		lastTimeStr = lastTime.UTC().Format(time.RFC3339)
+	}
+
+	return sensor.SensorHealth{
+		Healthy:         true,
+		Status:          "operational",
+		EventsCollected: s.eventsCollected.Load(),
+		LastEventTime:   lastTimeStr,
+		ErrorCount:      s.errorCount.Load(),
 	}
 }
 
-// Start begins collecting ETW process events.
-func (s *ProcessSensor) Start(ctx context.Context, ch chan<- event.Event) error {
-	ctx, cancel := context.WithCancel(ctx)
-	s.cancel = cancel
+// Start polls the Windows process list and emits ProcessCreate events.
+func (s *ProcessSensor) Start(ctx context.Context, out chan<- event.Event) error {
+	slog.Info("starting Windows native process sensor (Toolhelp32)")
 
-	sessionName := fmt.Sprintf("R3TRIVE-Process-%s", uuid.New().String()[:8])
-	session := etw.NewRealTimeSession(sessionName)
-	s.session = session
+	// Initial baseline snapshot to populate known PIDs without emitting flood of events
+	s.populateInitialSnapshot()
 
-	s.consumer = etw.NewRealTimeConsumer(ctx)
-	s.consumer.FromSessions(s.session)
+	ticker := time.NewTicker(s.pollInterval)
+	defer ticker.Stop()
 
-	s.consumer.EventCallback = func(e *etw.Event) error {
-		// Event ID 1: ProcessStart, Event ID 2: ProcessStop
-		var eventType event.EventType
-		switch e.System.EventID {
-		case 1:
-			eventType = event.ProcessCreate
-		case 2:
-			eventType = event.ProcessExit
-		default:
+	for {
+		select {
+		case <-ctx.Done():
+			slog.Info("stopping Windows native process sensor")
 			return nil
+		case <-ticker.C:
+			s.pollProcesses(ctx, out)
+		}
+	}
+}
+
+// populateInitialSnapshot records current processes to avoid generating false creation events for pre-existing processes.
+func (s *ProcessSensor) populateInitialSnapshot() {
+	handle, err := syscall.CreateToolhelp32Snapshot(syscall.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		s.errorCount.Add(1)
+		slog.Error("failed to create initial toolhelp snapshot", "error", err)
+		return
+	}
+	defer func() { _ = syscall.CloseHandle(handle) }()
+
+	var entry syscall.ProcessEntry32
+	entry.Size = uint32(unsafe.Sizeof(entry))
+
+	if err := syscall.Process32First(handle, &entry); err != nil {
+		return
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for {
+		exeName := syscall.UTF16ToString(entry.ExeFile[:])
+		s.knownPIDs[entry.ProcessID] = exeName
+		if err := syscall.Process32Next(handle, &entry); err != nil {
+			break
+		}
+	}
+}
+
+// pollProcesses takes a snapshot and checks for newly created processes.
+func (s *ProcessSensor) pollProcesses(ctx context.Context, out chan<- event.Event) {
+	handle, err := syscall.CreateToolhelp32Snapshot(syscall.TH32CS_SNAPPROCESS, 0)
+	if err != nil {
+		s.errorCount.Add(1)
+		slog.Error("failed to create toolhelp snapshot", "error", err)
+		return
+	}
+	defer func() { _ = syscall.CloseHandle(handle) }()
+
+	var entry syscall.ProcessEntry32
+	entry.Size = uint32(unsafe.Sizeof(entry))
+
+	if err := syscall.Process32First(handle, &entry); err != nil {
+		return
+	}
+
+	currentPIDs := make(map[uint32]bool)
+	var newProcesses []syscall.ProcessEntry32
+
+	s.mu.Lock()
+	for {
+		pid := entry.ProcessID
+		currentPIDs[pid] = true
+		exeName := syscall.UTF16ToString(entry.ExeFile[:])
+
+		if _, exists := s.knownPIDs[pid]; !exists {
+			s.knownPIDs[pid] = exeName
+			newProcesses = append(newProcesses, entry)
 		}
 
-		pid, _ := e.GetProperty("ProcessID")
-		ppid, _ := e.GetProperty("ParentProcessID")
-		imageName, _ := e.GetProperty("ImageName")
-		cmdline, _ := e.GetProperty("CommandLine")
+		if err := syscall.Process32Next(handle, &entry); err != nil {
+			break
+		}
+	}
 
-		// Safely extract string values
-		path := fmt.Sprintf("%v", imageName)
-		name := extractNameFromPath(path)
-		cmd := fmt.Sprintf("%v", cmdline)
+	// Evict terminated processes
+	for pid := range s.knownPIDs {
+		if !currentPIDs[pid] {
+			delete(s.knownPIDs, pid)
+		}
+	}
+	s.mu.Unlock()
 
-		// Create the common event
-		ev := event.Event{
-			ID:        fmt.Sprintf("evt_%s", uuid.New().String()),
-			Timestamp: e.System.TimeCreated.SystemTime.UTC(),
-			Host: event.HostInfo{
-				Hostname: getHostname(),
-				OS:       "windows",
-			},
-			Type:     eventType,
-			Severity: event.SeverityLow, // Upgraded by correlation
-			Sensor:   s.Name(),
+	// Emit events for new processes
+	for _, proc := range newProcesses {
+		exeName := syscall.UTF16ToString(proc.ExeFile[:])
+		now := time.Now().UTC()
+
+		s.mu.Lock()
+		parentName := s.knownPIDs[proc.ParentProcessID]
+		s.lastEventTime = now
+		s.mu.Unlock()
+
+		s.eventsCollected.Add(1)
+
+		evt := event.Event{
+			ID:        fmt.Sprintf("winproc_%d_%d", proc.ProcessID, now.UnixNano()),
+			Timestamp: now,
+			Type:      event.ProcessCreate,
+			Severity:  event.SeverityLow,
+			Sensor:    s.Name(),
 			Data: event.EventData{
 				Process: &event.ProcessData{
-					PID:     toInt(pid),
-					PPID:    toInt(ppid),
-					Name:    name,
-					Path:    path,
-					CmdLine: cmd,
+					PID:     int(proc.ProcessID),
+					PPID:    int(proc.ParentProcessID),
+					Name:    exeName,
+					Path:    exeName,
+					CmdLine: exeName,
+					Parent: &event.ParentProcess{
+						PID:  int(proc.ParentProcessID),
+						Name: parentName,
+					},
 				},
 			},
 		}
 
 		select {
-		case ch <- ev:
-			s.updateHealth(nil)
 		case <-ctx.Done():
-			return ctx.Err()
+			return
+		case out <- evt:
 		}
-		return nil
 	}
-
-	provider, err := etw.ParseProvider(strings.Trim(KernelProcessProviderGUID, "{}"))
-	if err != nil {
-		s.updateHealth(err)
-		return fmt.Errorf("failed to parse etw provider: %w", err)
-	}
-	if err := s.session.EnableProvider(provider); err != nil {
-		s.updateHealth(err)
-		return fmt.Errorf("failed to enable provider: %w", err)
-	}
-
-	// Start the session (blocks until stopped)
-	go func() {
-		err := s.session.Start()
-		if err != nil {
-			s.updateHealth(err)
-		}
-	}()
-
-	// Start consumer
-	go func() {
-		if err := s.consumer.Start(); err != nil {
-			s.updateHealth(err)
-		}
-	}()
-
-	// Wait for context cancellation
-	<-ctx.Done()
-	return s.Stop()
 }
 
-// Stop stops the ETW session.
+// Stop halts the sensor.
 func (s *ProcessSensor) Stop() error {
-	if s.cancel != nil {
-		s.cancel()
-	}
-	if s.consumer != nil {
-		if err := s.consumer.Stop(); err != nil {
-			s.updateHealth(err)
-		}
-	}
-	if s.session != nil {
-		if err := s.session.Stop(); err != nil {
-			s.updateHealth(err)
-			return err
-		}
-	}
-	s.mu.Lock()
-	s.health.Healthy = false
-	s.health.Status = "Stopped"
-	s.mu.Unlock()
 	return nil
 }
 
-// Helpers
-
-func toInt(v interface{}) int {
-	switch val := v.(type) {
-	case int:
-		return val
-	case int8:
-		return int(val)
-	case int16:
-		return int(val)
-	case int32:
-		return int(val)
-	case int64:
-		return int(val)
-	case uint:
-		return int(val)
-	case uint8:
-		return int(val)
-	case uint16:
-		return int(val)
-	case uint32:
-		return int(val)
-	case uint64:
-		return int(val)
-	default:
-		return 0
-	}
-}
-
-func extractNameFromPath(path string) string {
-	parts := strings.Split(strings.ReplaceAll(path, "/", "\\"), "\\")
-	if len(parts) > 0 {
-		return parts[len(parts)-1]
-	}
-	return path
-}
-
-func getHostname() string {
-	name, err := os.Hostname()
-	if err != nil {
-		return "unknown"
-	}
-	return name
-}
+var _ sensor.Sensor = (*ProcessSensor)(nil)

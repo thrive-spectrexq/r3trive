@@ -18,6 +18,9 @@ func ListHosts(store storage.Store) http.HandlerFunc {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
+		if hosts == nil {
+			hosts = []storage.Host{}
+		}
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(hosts); err != nil {
 			slog.Error("failed to encode response", "error", err)
