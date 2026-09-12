@@ -41,7 +41,7 @@ func getRunningProcesses() ([]ProcessInfo, error) {
 	cmd := exec.Command("ps", "-axo", "pid,comm")
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	var procs []ProcessInfo
