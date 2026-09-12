@@ -17,10 +17,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v7
+      uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v7
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
         cache: true
@@ -74,16 +74,17 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
-    - uses: actions/setup-go@v7
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
         go-version: '1.25.x'
         cache: true
     - name: Install libyara-dev
       run: sudo apt-get update && sudo apt-get install -y libyara-dev pkg-config
-    - name: Install golangci-lint
-      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     - name: Run golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: latest
+        args: --timeout=5m
       env:
         CGO_ENABLED: "1"
-      run: $(go env GOPATH)/bin/golangci-lint run --timeout=5m
