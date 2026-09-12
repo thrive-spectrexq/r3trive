@@ -52,7 +52,7 @@ func runPluginsList(cmd *cobra.Command, args []string) error {
 		headers = append(headers, "API_VER", "DESCRIPTION")
 	}
 
-	var rows [][]string
+	rows := make([][]string, 0, len(allPlugins))
 	for _, p := range allPlugins {
 		meta := p.Metadata()
 		row := []string{

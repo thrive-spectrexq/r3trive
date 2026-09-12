@@ -82,8 +82,8 @@ func TestWindowsFileSensor_NotificationParsing(t *testing.T) {
 
 	// Helper to encode a FILE_NOTIFY_INFORMATION record
 	encodeRecord := func(nextOffset uint32, action uint32, name string) []byte {
-		utf16Chars := syscall.StringToUTF16(name)
-		// StringToUTF16 includes terminating NULL, we want length in bytes of the name without NULL
+		utf16Chars, _ := syscall.UTF16FromString(name)
+		// UTF16FromString includes terminating NULL, we want length in bytes of the name without NULL
 		nameBytes := make([]byte, (len(utf16Chars)-1)*2)
 		for i := 0; i < len(utf16Chars)-1; i++ {
 			binary.LittleEndian.PutUint16(nameBytes[i*2:i*2+2], utf16Chars[i])
@@ -130,7 +130,7 @@ func TestWindowsFileSensor_NotificationParsing(t *testing.T) {
 	s.parseAndEmitEvents(ctx, tmpDir, buf, "localhost", ch)
 	close(ch)
 
-	var events []event.Event
+	events := make([]event.Event, 0, 5)
 	for ev := range ch {
 		events = append(events, ev)
 	}

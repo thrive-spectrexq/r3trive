@@ -56,6 +56,7 @@ func TestProcessAlert_NewIncident(t *testing.T) {
 
 	if inc == nil {
 		t.Fatal("expected non-nil incident")
+		return
 	}
 
 	if inc.ID == "" {

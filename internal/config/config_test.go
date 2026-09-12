@@ -10,6 +10,7 @@ func TestDefaultConfig(t *testing.T) {
 	cfg := Default()
 	if cfg == nil {
 		t.Fatal("Default() returned nil")
+		return
 	}
 
 	if cfg.LogLevel != "info" {

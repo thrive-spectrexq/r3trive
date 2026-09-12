@@ -48,8 +48,10 @@ func (m *mockStore) QueryEvents(ctx context.Context, query storage.EventQuery) (
 	}
 	return m.events, nil
 }
-func (m *mockStore) SaveAlert(ctx context.Context, alert event.Alert) error       { return m.saveErr }
-func (m *mockStore) SaveIncident(ctx context.Context, incident event.Incident) error { return m.saveErr }
+func (m *mockStore) SaveAlert(ctx context.Context, alert event.Alert) error { return m.saveErr }
+func (m *mockStore) SaveIncident(ctx context.Context, incident event.Incident) error {
+	return m.saveErr
+}
 func (m *mockStore) GetIncident(ctx context.Context, id string) (event.Incident, error) {
 	if m.singleIncErr != nil {
 		return event.Incident{}, m.singleIncErr
@@ -91,7 +93,7 @@ func (m *mockStore) ListRules(ctx context.Context, enabledOnly bool) ([]storage.
 	}
 	return m.rules, nil
 }
-func (m *mockStore) DeleteRule(ctx context.Context, id string) error { return m.deleteErr }
+func (m *mockStore) DeleteRule(ctx context.Context, id string) error         { return m.deleteErr }
 func (m *mockStore) SaveIOC(ctx context.Context, ioc storage.IOCEntry) error { return m.saveErr }
 func (m *mockStore) QueryIOCs(ctx context.Context, iocType string, value string) ([]storage.IOCEntry, error) {
 	if m.saveErr != nil {

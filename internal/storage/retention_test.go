@@ -22,7 +22,7 @@ func (m *mockRetentionStore) SaveEvents(ctx context.Context, events []event.Even
 func (m *mockRetentionStore) QueryEvents(ctx context.Context, query EventQuery) ([]event.Event, error) {
 	return m.events, nil
 }
-func (m *mockRetentionStore) SaveAlert(ctx context.Context, alert event.Alert) error       { return nil }
+func (m *mockRetentionStore) SaveAlert(ctx context.Context, alert event.Alert) error { return nil }
 func (m *mockRetentionStore) SaveIncident(ctx context.Context, incident event.Incident) error {
 	return nil
 }
@@ -35,9 +35,11 @@ func (m *mockRetentionStore) QueryIncidents(ctx context.Context, statuses []even
 func (m *mockRetentionStore) UpdateIncidentStatus(ctx context.Context, id string, status event.IncidentStatus) error {
 	return nil
 }
-func (m *mockRetentionStore) SaveHost(ctx context.Context, host Host) error      { return nil }
-func (m *mockRetentionStore) GetHost(ctx context.Context, id string) (Host, error) { return Host{}, nil }
-func (m *mockRetentionStore) ListHosts(ctx context.Context) ([]Host, error)      { return nil, nil }
+func (m *mockRetentionStore) SaveHost(ctx context.Context, host Host) error { return nil }
+func (m *mockRetentionStore) GetHost(ctx context.Context, id string) (Host, error) {
+	return Host{}, nil
+}
+func (m *mockRetentionStore) ListHosts(ctx context.Context) ([]Host, error)       { return nil, nil }
 func (m *mockRetentionStore) SaveRule(ctx context.Context, rule StoredRule) error { return nil }
 func (m *mockRetentionStore) GetRule(ctx context.Context, id string) (StoredRule, error) {
 	return StoredRule{}, nil

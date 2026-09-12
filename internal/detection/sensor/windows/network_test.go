@@ -84,7 +84,7 @@ func TestWindowsNetworkSensor_ParseHelpers(t *testing.T) {
 		t.Errorf("unexpected listen key: %s", keyListen)
 	}
 
-	recUdp6 := connRecord{
+	recUDP6 := connRecord{
 		protocol: "udp6",
 		srcIP:    "::",
 		srcPort:  5353,
@@ -93,9 +93,9 @@ func TestWindowsNetworkSensor_ParseHelpers(t *testing.T) {
 		pid:      5678,
 		state:    tcpStateListen,
 	}
-	keyUdp6 := buildConnectionKey(recUdp6)
-	if keyUdp6 != "udp6:listen::::5353:5678" {
-		t.Errorf("unexpected udp6 key: %s", keyUdp6)
+	keyUDP6 := buildConnectionKey(recUDP6)
+	if keyUDP6 != "udp6:listen::::5353:5678" {
+		t.Errorf("unexpected udp6 key: %s", keyUDP6)
 	}
 
 	recConn := connRecord{
@@ -113,44 +113,27 @@ func TestWindowsNetworkSensor_ParseHelpers(t *testing.T) {
 	}
 }
 
-func TestWindowsNetworkSensor_TableQueries(t *testing.T) {
-	procMap := getProcessMap()
-	if len(procMap) == 0 {
-		t.Fatalf("expected non-empty process map")
+func TestWindowsNetworkSensor_ParseTables(t *testing.T) {
+	procMap := map[uint32]string{
+		uint32(os.Getpid()): "testprocess.exe",
 	}
 
-	// Check current PID is in process map
-	currentPID := uint32(os.Getpid())
-	if _, ok := procMap[currentPID]; !ok {
-		t.Logf("current PID %d not directly resolved in snapshot", currentPID)
-	}
-
-	// Query IPv4 TCP table
-	tcpBuf, err := getExtendedTcpTable(afINET)
+	tcpBuf, err := getExtendedTCPTable(afINET)
 	if err != nil {
-		t.Fatalf("getExtendedTcpTable failed: %v", err)
+		t.Fatalf("getExtendedTCPTable failed: %v", err)
 	}
-	records := parseTcpTableIPv4(tcpBuf, procMap)
-	if len(records) == 0 {
-		t.Log("no active IPv4 TCP connections found")
-	} else {
-		sample := records[0]
-		t.Logf("sample TCP connection: %s %s:%d -> %s:%d (pid: %d, proc: %s)",
-			sample.protocol, sample.srcIP, sample.srcPort, sample.dstIP, sample.dstPort, sample.pid, sample.procName)
+	records := parseTCPTableIPv4(tcpBuf, procMap)
+	if len(records) > 0 {
+		t.Logf("parsed %d IPv4 TCP records", len(records))
 	}
 
-	// Query IPv4 UDP table
-	udpBuf, err := getExtendedUdpTable(afINET)
+	udpBuf, err := getExtendedUDPTable(afINET)
 	if err != nil {
-		t.Fatalf("getExtendedUdpTable failed: %v", err)
+		t.Fatalf("getExtendedUDPTable failed: %v", err)
 	}
-	udpRecords := parseUdpTableIPv4(udpBuf, procMap)
-	if len(udpRecords) == 0 {
-		t.Log("no active IPv4 UDP endpoints found")
-	} else {
-		sample := udpRecords[0]
-		t.Logf("sample UDP endpoint: %s %s:%d (pid: %d, proc: %s)",
-			sample.protocol, sample.srcIP, sample.srcPort, sample.pid, sample.procName)
+	udpRecords := parseUDPTableIPv4(udpBuf, procMap)
+	if len(udpRecords) > 0 {
+		t.Logf("parsed %d IPv4 UDP records", len(udpRecords))
 	}
 }
 

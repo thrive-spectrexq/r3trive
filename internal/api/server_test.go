@@ -20,7 +20,7 @@ func (d *dummyStore) SaveEvents(ctx context.Context, events []event.Event) error
 func (d *dummyStore) QueryEvents(ctx context.Context, query storage.EventQuery) ([]event.Event, error) {
 	return nil, nil
 }
-func (d *dummyStore) SaveAlert(ctx context.Context, alert event.Alert) error       { return nil }
+func (d *dummyStore) SaveAlert(ctx context.Context, alert event.Alert) error          { return nil }
 func (d *dummyStore) SaveIncident(ctx context.Context, incident event.Incident) error { return nil }
 func (d *dummyStore) GetIncident(ctx context.Context, id string) (event.Incident, error) {
 	return event.Incident{}, nil
@@ -35,7 +35,7 @@ func (d *dummyStore) SaveHost(ctx context.Context, host storage.Host) error { re
 func (d *dummyStore) GetHost(ctx context.Context, id string) (storage.Host, error) {
 	return storage.Host{}, nil
 }
-func (d *dummyStore) ListHosts(ctx context.Context) ([]storage.Host, error) { return nil, nil }
+func (d *dummyStore) ListHosts(ctx context.Context) ([]storage.Host, error)       { return nil, nil }
 func (d *dummyStore) SaveRule(ctx context.Context, rule storage.StoredRule) error { return nil }
 func (d *dummyStore) GetRule(ctx context.Context, id string) (storage.StoredRule, error) {
 	return storage.StoredRule{}, nil
@@ -43,7 +43,7 @@ func (d *dummyStore) GetRule(ctx context.Context, id string) (storage.StoredRule
 func (d *dummyStore) ListRules(ctx context.Context, enabledOnly bool) ([]storage.StoredRule, error) {
 	return nil, nil
 }
-func (d *dummyStore) DeleteRule(ctx context.Context, id string) error { return nil }
+func (d *dummyStore) DeleteRule(ctx context.Context, id string) error         { return nil }
 func (d *dummyStore) SaveIOC(ctx context.Context, ioc storage.IOCEntry) error { return nil }
 func (d *dummyStore) QueryIOCs(ctx context.Context, iocType string, value string) ([]storage.IOCEntry, error) {
 	return nil, nil
@@ -59,6 +59,7 @@ func TestNewServerRoutes(t *testing.T) {
 	server := NewServer(cfg, &dummyStore{})
 	if server == nil {
 		t.Fatal("NewServer returned nil")
+		return
 	}
 
 	// 1. Check Swagger route

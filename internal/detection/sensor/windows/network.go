@@ -44,11 +44,11 @@ const (
 
 var (
 	modIphlpapi             = syscall.NewLazyDLL("iphlpapi.dll")
-	procGetExtendedTcpTable = modIphlpapi.NewProc("GetExtendedTcpTable")
-	procGetExtendedUdpTable = modIphlpapi.NewProc("GetExtendedUdpTable")
+	procGetExtendedTCPTable = modIphlpapi.NewProc("GetExtendedTcpTable")
+	procGetExtendedUDPTable = modIphlpapi.NewProc("GetExtendedUdpTable")
 )
 
-type mibTcpRowOwnerPID struct {
+type mibTCPRowOwnerPID struct {
 	State      uint32
 	LocalAddr  uint32
 	LocalPort  uint32
@@ -57,26 +57,26 @@ type mibTcpRowOwnerPID struct {
 	OwningPid  uint32
 }
 
-type mibUdpRowOwnerPID struct {
+type mibUDPRowOwnerPID struct {
 	LocalAddr uint32
 	LocalPort uint32
 	OwningPid uint32
 }
 
-type mibTcp6RowOwnerPID struct {
+type mibTCP6RowOwnerPID struct {
 	LocalAddr     [16]byte
-	LocalScopeId  uint32
+	LocalScopeID  uint32
 	LocalPort     uint32
 	RemoteAddr    [16]byte
-	RemoteScopeId uint32
+	RemoteScopeID uint32
 	RemotePort    uint32
 	State         uint32
 	OwningPid     uint32
 }
 
-type mibUdp6RowOwnerPID struct {
+type mibUDP6RowOwnerPID struct {
 	LocalAddr    [16]byte
-	LocalScopeId uint32
+	LocalScopeID uint32
 	LocalPort    uint32
 	OwningPid    uint32
 }
@@ -302,33 +302,33 @@ func (s *NetworkSensor) collectCurrentConnections() ([]connRecord, error) {
 	var allRecords []connRecord
 
 	// TCP IPv4
-	tcp4Buf, err := getExtendedTcpTable(afINET)
+	tcp4Buf, err := getExtendedTCPTable(afINET)
 	if err == nil {
-		allRecords = append(allRecords, parseTcpTableIPv4(tcp4Buf, procMap)...)
+		allRecords = append(allRecords, parseTCPTableIPv4(tcp4Buf, procMap)...)
 	} else {
 		slog.Debug("failed to query TCP IPv4 table", "error", err)
 	}
 
 	// TCP IPv6
-	tcp6Buf, err := getExtendedTcpTable(afINET6)
+	tcp6Buf, err := getExtendedTCPTable(afINET6)
 	if err == nil {
-		allRecords = append(allRecords, parseTcpTableIPv6(tcp6Buf, procMap)...)
+		allRecords = append(allRecords, parseTCPTableIPv6(tcp6Buf, procMap)...)
 	} else {
 		slog.Debug("failed to query TCP IPv6 table", "error", err)
 	}
 
 	// UDP IPv4
-	udp4Buf, err := getExtendedUdpTable(afINET)
+	udp4Buf, err := getExtendedUDPTable(afINET)
 	if err == nil {
-		allRecords = append(allRecords, parseUdpTableIPv4(udp4Buf, procMap)...)
+		allRecords = append(allRecords, parseUDPTableIPv4(udp4Buf, procMap)...)
 	} else {
 		slog.Debug("failed to query UDP IPv4 table", "error", err)
 	}
 
 	// UDP IPv6
-	udp6Buf, err := getExtendedUdpTable(afINET6)
+	udp6Buf, err := getExtendedUDPTable(afINET6)
 	if err == nil {
-		allRecords = append(allRecords, parseUdpTableIPv6(udp6Buf, procMap)...)
+		allRecords = append(allRecords, parseUDPTableIPv6(udp6Buf, procMap)...)
 	} else {
 		slog.Debug("failed to query UDP IPv6 table", "error", err)
 	}
@@ -336,9 +336,9 @@ func (s *NetworkSensor) collectCurrentConnections() ([]connRecord, error) {
 	return allRecords, nil
 }
 
-func getExtendedTcpTable(family uint32) ([]byte, error) {
+func getExtendedTCPTable(family uint32) ([]byte, error) {
 	var size uint32
-	ret, _, _ := procGetExtendedTcpTable.Call(
+	ret, _, _ := procGetExtendedTCPTable.Call(
 		0,
 		uintptr(unsafe.Pointer(&size)),
 		0,
@@ -355,7 +355,7 @@ func getExtendedTcpTable(family uint32) ([]byte, error) {
 
 	for attempts := 0; attempts < 3; attempts++ {
 		buf := make([]byte, size)
-		ret, _, _ = procGetExtendedTcpTable.Call(
+		ret, _, _ = procGetExtendedTCPTable.Call(
 			uintptr(unsafe.Pointer(&buf[0])),
 			uintptr(unsafe.Pointer(&size)),
 			0,
@@ -377,9 +377,9 @@ func getExtendedTcpTable(family uint32) ([]byte, error) {
 	return nil, fmt.Errorf("GetExtendedTcpTable failed after buffer retries")
 }
 
-func getExtendedUdpTable(family uint32) ([]byte, error) {
+func getExtendedUDPTable(family uint32) ([]byte, error) {
 	var size uint32
-	ret, _, _ := procGetExtendedUdpTable.Call(
+	ret, _, _ := procGetExtendedUDPTable.Call(
 		0,
 		uintptr(unsafe.Pointer(&size)),
 		0,
@@ -396,7 +396,7 @@ func getExtendedUdpTable(family uint32) ([]byte, error) {
 
 	for attempts := 0; attempts < 3; attempts++ {
 		buf := make([]byte, size)
-		ret, _, _ = procGetExtendedUdpTable.Call(
+		ret, _, _ = procGetExtendedUDPTable.Call(
 			uintptr(unsafe.Pointer(&buf[0])),
 			uintptr(unsafe.Pointer(&size)),
 			0,
@@ -418,12 +418,12 @@ func getExtendedUdpTable(family uint32) ([]byte, error) {
 	return nil, fmt.Errorf("GetExtendedUdpTable failed after buffer retries")
 }
 
-func parseTcpTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
+func parseTCPTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
 	if len(buf) < 4 {
 		return nil
 	}
 	numEntries := int(binary.LittleEndian.Uint32(buf[:4]))
-	rowSize := int(unsafe.Sizeof(mibTcpRowOwnerPID{}))
+	rowSize := int(unsafe.Sizeof(mibTCPRowOwnerPID{}))
 	if len(buf) < 4+numEntries*rowSize {
 		return nil
 	}
@@ -431,7 +431,7 @@ func parseTcpTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
 	records := make([]connRecord, 0, numEntries)
 	for i := 0; i < numEntries; i++ {
 		offset := 4 + i*rowSize
-		row := (*mibTcpRowOwnerPID)(unsafe.Pointer(&buf[offset]))
+		row := (*mibTCPRowOwnerPID)(unsafe.Pointer(&buf[offset]))
 		records = append(records, connRecord{
 			protocol: "tcp",
 			srcIP:    parseIPv4(row.LocalAddr),
@@ -446,12 +446,12 @@ func parseTcpTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
 	return records
 }
 
-func parseTcpTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
+func parseTCPTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
 	if len(buf) < 4 {
 		return nil
 	}
 	numEntries := int(binary.LittleEndian.Uint32(buf[:4]))
-	rowSize := int(unsafe.Sizeof(mibTcp6RowOwnerPID{}))
+	rowSize := int(unsafe.Sizeof(mibTCP6RowOwnerPID{}))
 	if len(buf) < 4+numEntries*rowSize {
 		return nil
 	}
@@ -459,7 +459,7 @@ func parseTcpTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
 	records := make([]connRecord, 0, numEntries)
 	for i := 0; i < numEntries; i++ {
 		offset := 4 + i*rowSize
-		row := (*mibTcp6RowOwnerPID)(unsafe.Pointer(&buf[offset]))
+		row := (*mibTCP6RowOwnerPID)(unsafe.Pointer(&buf[offset]))
 		records = append(records, connRecord{
 			protocol: "tcp6",
 			srcIP:    net.IP(row.LocalAddr[:]).String(),
@@ -474,12 +474,12 @@ func parseTcpTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
 	return records
 }
 
-func parseUdpTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
+func parseUDPTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
 	if len(buf) < 4 {
 		return nil
 	}
 	numEntries := int(binary.LittleEndian.Uint32(buf[:4]))
-	rowSize := int(unsafe.Sizeof(mibUdpRowOwnerPID{}))
+	rowSize := int(unsafe.Sizeof(mibUDPRowOwnerPID{}))
 	if len(buf) < 4+numEntries*rowSize {
 		return nil
 	}
@@ -487,7 +487,7 @@ func parseUdpTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
 	records := make([]connRecord, 0, numEntries)
 	for i := 0; i < numEntries; i++ {
 		offset := 4 + i*rowSize
-		row := (*mibUdpRowOwnerPID)(unsafe.Pointer(&buf[offset]))
+		row := (*mibUDPRowOwnerPID)(unsafe.Pointer(&buf[offset]))
 		records = append(records, connRecord{
 			protocol: "udp",
 			srcIP:    parseIPv4(row.LocalAddr),
@@ -502,12 +502,12 @@ func parseUdpTableIPv4(buf []byte, procMap map[uint32]string) []connRecord {
 	return records
 }
 
-func parseUdpTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
+func parseUDPTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
 	if len(buf) < 4 {
 		return nil
 	}
 	numEntries := int(binary.LittleEndian.Uint32(buf[:4]))
-	rowSize := int(unsafe.Sizeof(mibUdp6RowOwnerPID{}))
+	rowSize := int(unsafe.Sizeof(mibUDP6RowOwnerPID{}))
 	if len(buf) < 4+numEntries*rowSize {
 		return nil
 	}
@@ -515,7 +515,7 @@ func parseUdpTableIPv6(buf []byte, procMap map[uint32]string) []connRecord {
 	records := make([]connRecord, 0, numEntries)
 	for i := 0; i < numEntries; i++ {
 		offset := 4 + i*rowSize
-		row := (*mibUdp6RowOwnerPID)(unsafe.Pointer(&buf[offset]))
+		row := (*mibUDP6RowOwnerPID)(unsafe.Pointer(&buf[offset]))
 		records = append(records, connRecord{
 			protocol: "udp6",
 			srcIP:    net.IP(row.LocalAddr[:]).String(),

@@ -5,6 +5,7 @@ package windows
 import (
 	"context"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -134,8 +135,8 @@ func (s *FileSensor) Start(ctx context.Context, ch chan<- event.Event) error {
 	ctx, cancel := context.WithCancel(ctx)
 	s.running.Store(true)
 
-	var openedHandles []syscall.Handle
-	var activePaths []string
+	openedHandles := make([]syscall.Handle, 0, len(s.paths))
+	activePaths := make([]string, 0, len(s.paths))
 
 	s.mu.Lock()
 	s.cancel = cancel
@@ -185,7 +186,7 @@ func (s *FileSensor) Stop() error {
 	}
 
 	for _, h := range handles {
-		procCancelIoEx.Call(uintptr(h), 0)
+		_, _, _ = procCancelIoEx.Call(uintptr(h), 0)
 		_ = syscall.CloseHandle(h)
 	}
 
@@ -265,7 +266,7 @@ func (s *FileSensor) watchDirectory(ctx context.Context, dir string, handle sysc
 
 		if err != nil {
 			// If operation was aborted due to sensor stop or context cancellation, exit cleanly
-			if !s.running.Load() || ctx.Err() != nil || err == errOperationAborted || err == errInvalidHandle {
+			if !s.running.Load() || ctx.Err() != nil || errors.Is(err, errOperationAborted) || errors.Is(err, errInvalidHandle) {
 				return
 			}
 			s.errorCount.Add(1)

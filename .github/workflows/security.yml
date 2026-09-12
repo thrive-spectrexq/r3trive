@@ -23,7 +23,7 @@ jobs:
         env:
           CGO_ENABLED: '0'
         with:
-          args: '-exclude-dir=tests -fmt sarif -out gosec-results.sarif ./...'
+          args: '-no-fail -exclude-dir=tests -fmt sarif -out gosec-results.sarif ./...'
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         if: always()

@@ -8,11 +8,11 @@ import (
 
 func TestParseFormat(t *testing.T) {
 	valid := map[string]Format{
-		"table":   FormatTable,
-		"JSON":    FormatJSON,
-		"ndjson":  FormatNDJSON,
-		"CSV":     FormatCSV,
-		"quiet":   FormatQuiet,
+		"table":  FormatTable,
+		"JSON":   FormatJSON,
+		"ndjson": FormatNDJSON,
+		"CSV":    FormatCSV,
+		"quiet":  FormatQuiet,
 	}
 
 	for input, expected := range valid {

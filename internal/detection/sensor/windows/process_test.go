@@ -67,9 +67,7 @@ func TestWindowsProcessSensor_Lifecycle(t *testing.T) {
 
 	// Drain any collected events
 	close(ch)
-	var events []event.Event
-	for e := range ch {
-		events = append(events, e)
+	for range ch {
 	}
 
 	h := s.Health()

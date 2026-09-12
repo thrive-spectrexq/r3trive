@@ -137,10 +137,16 @@ func TestAlertAndIncident(t *testing.T) {
 		},
 	}
 
-	if incident.Status != IncidentStatusOpen {
-		t.Errorf("expected open incident status, got %s", incident.Status)
+	if incident.Status != IncidentStatusOpen || incident.ID != "inc-001" || incident.Severity != SeverityCritical || incident.RiskScore != 90 {
+		t.Errorf("unexpected incident metadata: %+v", incident)
 	}
-	if len(incident.Alerts) != 1 {
-		t.Errorf("expected 1 alert in incident, got %d", len(incident.Alerts))
+	if incident.Title != "C2 Beaconing Campaign" || incident.Description != "Multi-stage beaconing detected" {
+		t.Errorf("unexpected incident description: %+v", incident)
+	}
+	if len(incident.Alerts) != 1 || len(incident.HostIDs) != 1 || len(incident.ATTACKMap) != 1 {
+		t.Errorf("expected 1 alert, hostID, and attack map entry in incident, got %+v", incident)
+	}
+	if incident.CreatedAt.IsZero() || incident.UpdatedAt.IsZero() {
+		t.Errorf("expected non-zero timestamps on incident")
 	}
 }
