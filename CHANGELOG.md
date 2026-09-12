@@ -11,6 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.7] - 2026-09-12
+
+### Added
+- **Statistical & Heuristic Anomaly Detectors**: Implemented C2 Beaconing detection via Coefficient of Variation (CV < 0.15), DNS Tunneling detection using subdomain Shannon entropy (> 3.8 bits/byte) and query volume spikes, Ransomware behavioral burst detection (> 7.2 bits/byte across sliding modification windows), streaming Isolation Forest online anomaly scoring, and UEBA baseline profiling for user/process activity.
+- **Platform Sensor Completeness**:
+  - **Native Windows Service Sensor**: Implemented native Service Control Manager polling (`OpenSCManager`, `EnumServicesStatusEx`) emitting `event.ServiceCreate`, `event.ServiceStart`, and `event.ServiceStop`.
+  - **Linux eBPF CO-RE Hardening & systemd Watcher**: Added kernel BTF discovery (`/sys/kernel/btf/vmlinux`) with automatic `/proc` polling fallback for kernels < 5.4, and systemd service state tracking.
+  - **macOS Endpoint Security Framework**: Implemented ESF-aligned process, file, and network sensor abstractions with user-space sysctl/lsof/kqueue fallbacks.
+- **Correlation & Attack Chain Validation**: Implemented MITRE ATT&CK kill-chain progression validation, consistent hash rings for distributed routing, and SHA-256 alert deduplication fingerprinting.
+- **Plugin Ecosystem**: Formalized versioned Go Plugin SDK (`CurrentAPIVersion = "1.0.0"`) and implemented six builtin integration plugins: Splunk HEC forwarder, Elasticsearch bulk indexer, Jira issue creator, PagerDuty v2 event trigger, VirusTotal reputation checker, and MISP threat sharing client.
+- **AI Action Recommendation Engine**: Added `ActionRecommender` providing automated confidence scoring, prerequisite verification, and paired rollback actions for incident remediation.
+- **OpenAPI 3.0 & Swagger UI**: Embedded OpenAPI 3.0 specification served at `/api/v1/openapi.json` with interactive Swagger UI served at `/swagger`.
+- **Database Retention & Archival**: Added background data lifecycle manager with compressed JSONL gzip archival for audit compliance.
+- **Anti-Tamper & Security Hardening**: Added memory wiping primitives (`ZeroBytes`), anti-swapping RAM locking (`VirtualLock` on Windows, `unix.Mlock` on POSIX), and binary self-integrity SHA-256 checksum verification.
+- **Regression Suite & High-Throughput Benchmarks**: Added detection rule regression test suite, regex precompilation benchmark, and high-rate event pipeline load benchmark (16M+ burst events/sec at 80.41 ns/op, 0 allocs/op).
+- **Documentation & Verification**: Added `docs/troubleshooting.md`, `docs/plugin_tutorial.md`, and automated CI documentation drift checking script `scripts/verify_docs_drift.ps1`.
+
+### Changed & Security Upgrades
+- **Dependency Upgrades**:
+  - Upgraded `google.golang.org/grpc` from 1.83.1 to 1.83.2, resolving high-severity advisory GHSA-2v4p-qf9q-27wj (Dependabot Alert #2).
+  - Upgraded OpenTelemetry SDK to 1.46.0.
+  - Upgraded GitHub CodeQL Action to 4.37.9.
+  - Configured Dependabot grouping and conventional commit prefixes (`chore(deps)`).
+- **Static Analysis & Gosec Compliance**: Resolved Gosec G404 non-crypto random findings, G304 file path sanitation, and errorlint compliance.
+
+---
+
 ## [0.1.6] - 2026-09-12
 
 ### Added

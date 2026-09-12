@@ -413,7 +413,7 @@ Response:
     "os": "windows",
     "arch": "amd64",
     "ip_address": "192.168.1.50",
-    "agent_ver": "v0.1.6",
+    "agent_ver": "v0.1.7",
     "status": "online",
     "tags": ["workstation", "finance"],
     "last_seen": "2026-09-12T01:00:00Z",
@@ -444,7 +444,7 @@ Request:
   "os": "windows",
   "arch": "amd64",
   "ip_address": "192.168.1.50",
-  "agent_ver": "v0.1.6",
+  "agent_ver": "v0.1.7",
   "status": "online",
   "tags": ["workstation", "finance"]
 }
