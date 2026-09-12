@@ -1,7 +1,7 @@
 package security_test
 
 import (
-	"path/filepath"
+	"path"
 	"strings"
 	"testing"
 
@@ -9,9 +9,11 @@ import (
 	"github.com/thrive-spectrexq/r3trive/pkg/rule"
 )
 
-// normalizePath resolves directory traversal and slash variations.
+// normalizePath resolves directory traversal and slash variations cross-platform.
 func normalizePath(p string) string {
-	cleaned := filepath.Clean(p)
+	// Standardize on forward slash before path cleaning so backslashes are resolved across Unix and Windows
+	p = strings.ReplaceAll(p, `\`, "/")
+	cleaned := path.Clean(p)
 	return strings.ToLower(cleaned)
 }
 
@@ -22,11 +24,11 @@ func TestPathTraversalEvasion(t *testing.T) {
 	}{
 		{
 			input:    `C:\Windows\System32\..\System32\cmd.exe`,
-			expected: `c:\windows\system32\cmd.exe`,
+			expected: `c:/windows/system32/cmd.exe`,
 		},
 		{
 			input:    `C:\Windows\.\System32\powershell.exe`,
-			expected: `c:\windows\system32\powershell.exe`,
+			expected: `c:/windows/system32/powershell.exe`,
 		},
 		{
 			input:    `/bin/../bin/sh`,
@@ -36,11 +38,9 @@ func TestPathTraversalEvasion(t *testing.T) {
 
 	for _, tc := range cases {
 		norm := normalizePath(tc.input)
-		// On windows vs posix, check separator normalized
-		normClean := strings.ReplaceAll(norm, "/", `\`)
-		expectedClean := strings.ReplaceAll(tc.expected, "/", `\`)
-		if !strings.EqualFold(normClean, expectedClean) {
-			t.Errorf("path normalization failed for %s: got %s, want %s", tc.input, normClean, expectedClean)
+		expectedClean := strings.ToLower(strings.ReplaceAll(tc.expected, `\`, "/"))
+		if norm != expectedClean {
+			t.Errorf("path normalization failed for %s: got %s, want %s", tc.input, norm, expectedClean)
 		}
 	}
 }
@@ -93,8 +93,12 @@ func TestCaseInsensitiveProcessMatching(t *testing.T) {
 		},
 	}
 
-	if evt.Data.Process == nil {
-		t.Fatalf("missing process data")
+	if evt.Type != event.ProcessCreate || evt.Data.Process == nil {
+		t.Fatalf("missing process data or invalid type")
+	}
+
+	if r.ID != "TEST-EVASION-01" || r.Name == "" || r.Severity != "critical" {
+		t.Fatalf("invalid rule metadata")
 	}
 
 	procName := evt.Data.Process.Name

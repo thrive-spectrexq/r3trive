@@ -31,7 +31,7 @@ func buildTree(data []Point, currentDepth int, maxDepth int) *iNode {
 	}
 
 	numFeatures := len(data[0])
-	splitFeature := rand.Intn(numFeatures)
+	splitFeature := rand.Intn(numFeatures) // #nosec G404
 
 	minVal := data[0][splitFeature]
 	maxVal := data[0][splitFeature]
@@ -48,7 +48,7 @@ func buildTree(data []Point, currentDepth int, maxDepth int) *iNode {
 		return &iNode{size: len(data), isLeaf: true}
 	}
 
-	splitVal := minVal + rand.Float64()*(maxVal-minVal)
+	splitVal := minVal + rand.Float64()*(maxVal-minVal) // #nosec G404
 
 	var leftData, rightData []Point
 	for _, p := range data {
@@ -103,12 +103,12 @@ func cFactor(n int) float64 {
 
 // IsolationForest encapsulates an ensemble of isolation trees for anomaly scoring.
 type IsolationForest struct {
-	trees      []*IsolationTree
-	numTrees   int
-	subsample  int
-	training   []Point
-	isTrained  bool
-	mu         sync.RWMutex
+	trees     []*IsolationTree
+	numTrees  int
+	subsample int
+	training  []Point
+	isTrained bool
+	mu        sync.RWMutex
 }
 
 // NewIsolationForest creates an Isolation Forest model.
@@ -150,7 +150,7 @@ func samplePoints(data []Point, n int) []Point {
 	if len(data) <= n {
 		return data
 	}
-	perm := rand.Perm(len(data))
+	perm := rand.Perm(len(data)) // #nosec G404
 	sample := make([]Point, n)
 	for i := 0; i < n; i++ {
 		sample[i] = data[perm[i]]

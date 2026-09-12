@@ -32,7 +32,7 @@ func setupTestServer(t *testing.T) (string, *sqlite.Store, func()) {
 	}
 
 	srv := api.NewServer(cfg, store)
-	
+
 	// Start in a goroutine
 	errCh := make(chan error, 1)
 	go func() {
@@ -52,7 +52,7 @@ func setupTestServer(t *testing.T) (string, *sqlite.Store, func()) {
 	// I'll rewrite this to a fixed port for simplicity, or we can check what the best approach is.
 	// I'll leave it as a high fixed port.
 	port := "48192"
-	
+
 	// Re-init with fixed port just to be safe
 	err = store.Close()
 	if err != nil {
@@ -215,7 +215,7 @@ func TestAPIUpdateIncident(t *testing.T) {
 	req, _ := http.NewRequest("PUT", baseURL+"/api/v1/incidents/inc-1/status", bytes.NewReader(body))
 	req.Header.Set("X-API-Key", "test-secret")
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatalf("PUT /api/v1/incidents/inc-1/status failed: %v", err)

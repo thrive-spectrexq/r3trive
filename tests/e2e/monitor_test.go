@@ -53,7 +53,7 @@ func TestE2EMonitorFlow(t *testing.T) {
 		APIKey: "test-api-key",
 	}
 	srv := api.NewServer(apiCfg, store)
-	
+
 	go func() {
 		_ = srv.Start()
 	}()
@@ -90,7 +90,7 @@ func TestE2EMonitorFlow(t *testing.T) {
 	// Since we just need to verify it returns events, we can parse as a map or slice
 	var responseData map[string]interface{}
 	var events []event.Event
-	
+
 	err = json.Unmarshal(body, &responseData)
 	if err == nil {
 		if data, ok := responseData["data"]; ok {
@@ -106,7 +106,7 @@ func TestE2EMonitorFlow(t *testing.T) {
 	if len(body) < 10 {
 		t.Fatalf("Response body too short: %s", string(body))
 	}
-	
+
 	// Print successful response for debug
 	t.Logf("Got %d bytes response from API", len(body))
 }

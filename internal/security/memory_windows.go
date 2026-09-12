@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	modkernel32      = syscall.NewLazyDLL("kernel32.dll")
+	modkernel32       = syscall.NewLazyDLL("kernel32.dll")
 	procVirtualLock   = modkernel32.NewProc("VirtualLock")
 	procVirtualUnlock = modkernel32.NewProc("VirtualUnlock")
 )

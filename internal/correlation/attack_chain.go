@@ -30,12 +30,12 @@ var TacticOrder = map[string]int{
 
 // AttackStage represents an individual progression milestone in an incident.
 type AttackStage struct {
-	Index       int      `json:"index"`
-	Tactic      string   `json:"tactic"`
-	TechniqueID string   `json:"technique_id"`
-	RuleName    string   `json:"rule_name"`
-	RiskScore   int      `json:"risk_score"`
-	Timestamp   string   `json:"timestamp"`
+	Index       int    `json:"index"`
+	Tactic      string `json:"tactic"`
+	TechniqueID string `json:"technique_id"`
+	RuleName    string `json:"rule_name"`
+	RiskScore   int    `json:"risk_score"`
+	Timestamp   string `json:"timestamp"`
 }
 
 // AttackChainReport contains the chronological progression validation of an incident.

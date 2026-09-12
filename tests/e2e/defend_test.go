@@ -46,7 +46,7 @@ func TestE2EDefendFlow(t *testing.T) {
 		APIKey: "test-api-key",
 	}
 	srv := api.NewServer(apiCfg, store)
-	
+
 	go func() {
 		_ = srv.Start()
 	}()
@@ -58,7 +58,7 @@ func TestE2EDefendFlow(t *testing.T) {
 	// 4. Update incident status
 	payload := map[string]string{"status": string(event.IncidentStatusContained)}
 	bodyBytes, _ := json.Marshal(payload)
-	
+
 	req, err := http.NewRequest("PUT", "http://127.0.0.1:18083/api/v1/incidents/inc-defend-1/status", bytes.NewBuffer(bodyBytes))
 	if err != nil {
 		t.Fatalf("Failed to create request: %v", err)

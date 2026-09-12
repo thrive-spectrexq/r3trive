@@ -24,11 +24,11 @@ func AlertFingerprint(hostID, ruleID, primaryEntity string) string {
 
 // ConsistentHashRing implements consistent hashing with virtual nodes for distributed event routing.
 type ConsistentHashRing struct {
-	vnodes   int
-	ring     []uint64
-	nodeMap  map[uint64]string
-	nodes    map[string]bool
-	mu       sync.RWMutex
+	vnodes  int
+	ring    []uint64
+	nodeMap map[uint64]string
+	nodes   map[string]bool
+	mu      sync.RWMutex
 }
 
 // NewConsistentHashRing creates a ring with virtual node replication factor.

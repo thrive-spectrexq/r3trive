@@ -78,13 +78,13 @@ type RansomwareAlert struct {
 }
 
 var knownRansomwareExts = map[string]bool{
-	".locked":    true,
-	".crypto":    true,
-	".enc":       true,
-	".lockbit":   true,
-	".blackcat":  true,
-	".crypted":   true,
-	".wnry":      true,
+	".locked":   true,
+	".crypto":   true,
+	".enc":      true,
+	".lockbit":  true,
+	".blackcat": true,
+	".crypted":  true,
+	".wnry":     true,
 }
 
 // RecordMutation logs a file modification event for a process and evaluates whether it breaches ransomware heuristics.

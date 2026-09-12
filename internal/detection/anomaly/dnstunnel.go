@@ -49,11 +49,11 @@ func NewDNSTunnelDetector(entropyThreshold float64) *DNSTunnelDetector {
 
 // DNSAnalysisResult contains the metrics from evaluating a DNS query.
 type DNSAnalysisResult struct {
-	Domain           string  `json:"domain"`
-	Subdomain        string  `json:"subdomain"`
-	Entropy          float64 `json:"entropy"`
-	QueryRatePerMin  int     `json:"query_rate_per_min"`
-	IsTunnelSuspect  bool    `json:"is_tunnel_suspect"`
+	Domain          string  `json:"domain"`
+	Subdomain       string  `json:"subdomain"`
+	Entropy         float64 `json:"entropy"`
+	QueryRatePerMin int     `json:"query_rate_per_min"`
+	IsTunnelSuspect bool    `json:"is_tunnel_suspect"`
 }
 
 // EvaluateQuery analyzes a FQDN for tunneling indicators.

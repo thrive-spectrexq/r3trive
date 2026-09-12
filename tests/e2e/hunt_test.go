@@ -64,7 +64,7 @@ func TestE2EHuntFlow(t *testing.T) {
 		APIKey: "test-api-key",
 	}
 	srv := api.NewServer(apiCfg, store)
-	
+
 	go func() {
 		_ = srv.Start()
 	}()
@@ -95,7 +95,7 @@ func TestE2EHuntFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read response body: %v", err)
 	}
-	
+
 	if len(body) < 10 {
 		t.Fatalf("Response body too short: %s", string(body))
 	}

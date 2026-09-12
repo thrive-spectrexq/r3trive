@@ -57,9 +57,9 @@ func (m *RetentionManager) ExecutePurgeCycle(ctx context.Context) (PurgeStats, e
 	}
 
 	archiveName := fmt.Sprintf("r3trive_archive_%s.jsonl.gz", cutoff.Format("20060102_150405"))
-	archivePath := filepath.Join(m.archiveDir, archiveName)
+	archivePath := filepath.Clean(filepath.Join(m.archiveDir, archiveName))
 
-	f, err := os.Create(archivePath)
+	f, err := os.Create(archivePath) // #nosec G304
 	if err != nil {
 		return PurgeStats{}, fmt.Errorf("failed to create archive file: %w", err)
 	}

@@ -7,21 +7,21 @@ import (
 
 // EntityProfile tracks normal behavior baselines for a host or user entity.
 type EntityProfile struct {
-	EntityID         string
+	EntityID          string
 	ObservedProcesses map[string]int
-	OutboundDestIPs  map[string]int
-	TotalEvents      int64
-	FirstSeen        time.Time
-	LastSeen         time.Time
+	OutboundDestIPs   map[string]int
+	TotalEvents       int64
+	FirstSeen         time.Time
+	LastSeen          time.Time
 }
 
 // BaselineManager coordinates UEBA baseline learning and anomaly thresholding.
 type BaselineManager struct {
-	profiles        map[string]*EntityProfile
-	forest          *IsolationForest
-	learningPeriod  time.Duration
-	startTime       time.Time
-	mu              sync.RWMutex
+	profiles       map[string]*EntityProfile
+	forest         *IsolationForest
+	learningPeriod time.Duration
+	startTime      time.Time
+	mu             sync.RWMutex
 }
 
 // NewBaselineManager creates a UEBA baseline manager with a defined learning duration.

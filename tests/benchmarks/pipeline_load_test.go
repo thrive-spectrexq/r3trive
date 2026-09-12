@@ -13,9 +13,9 @@ import (
 func BenchmarkCorrelationThroughput(b *testing.B) {
 	rules := []correlation.Rule{
 		{
-			ID:          "BENCH-001",
-			Name:        "Process Monitoring",
-			Severity:    "high",
+			ID:       "BENCH-001",
+			Name:     "Process Monitoring",
+			Severity: "high",
 			Conditions: []correlation.Condition{
 				{
 					Field:    "data.process.name",
@@ -25,9 +25,9 @@ func BenchmarkCorrelationThroughput(b *testing.B) {
 			},
 		},
 		{
-			ID:          "BENCH-002",
-			Name:        "Regex Check",
-			Severity:    "medium",
+			ID:       "BENCH-002",
+			Name:     "Regex Check",
+			Severity: "medium",
 			Conditions: []correlation.Condition{
 				{
 					Field:    "data.process.cmdline",
