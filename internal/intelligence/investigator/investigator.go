@@ -114,11 +114,29 @@ func (inv *Investigator) InvestigateBinary(ctx context.Context, filePath string)
 	strContent := string(content)
 	lowerContent := strings.ToLower(strContent)
 
-	if strings.Contains(lowerContent, "185.220.101.47") || strings.Contains(lowerContent, ".onion") || strings.Contains(lowerContent, "tor") {
+	// Check against stored IOC indicators if store is available
+	if inv.store != nil {
+		if iocs, err := inv.store.QueryIOCs(ctx, "", ""); err == nil {
+			for _, ioc := range iocs {
+				if ioc.Value != "" && strings.Contains(lowerContent, strings.ToLower(ioc.Value)) {
+					riskPoints += 45
+					report.Findings = append(report.Findings, Finding{
+						Severity: event.SeverityCritical,
+						Message:  fmt.Sprintf("Known threat intelligence indicator match (%s: %s)", ioc.Type, ioc.Value),
+					})
+					report.ATTACKTechniques = append(report.ATTACKTechniques, event.ATTACKMapping{
+						Tactic: "Command and Control", Technique: "T1071.001", Name: "Application Layer Protocol",
+					})
+				}
+			}
+		}
+	}
+
+	if strings.Contains(lowerContent, ".onion") || strings.Contains(lowerContent, "torproject.org") || strings.Contains(lowerContent, "185.220.101.47") {
 		riskPoints += 40
 		report.Findings = append(report.Findings, Finding{
 			Severity: event.SeverityCritical,
-			Message:  "Network beaconing indicator detected (Tor exit node / C2 domain)",
+			Message:  "Network beaconing indicator detected (Tor exit node / darknet routing)",
 		})
 		report.ATTACKTechniques = append(report.ATTACKTechniques, event.ATTACKMapping{
 			Tactic: "Command and Control", Technique: "T1071.001", Name: "Application Layer Protocol: Web Protocols",
@@ -180,24 +198,29 @@ func (inv *Investigator) InvestigateProcess(ctx context.Context, pid int) (*Inve
 		ATTACKTechniques: make([]event.ATTACKMapping, 0),
 	}
 
-	riskPoints := 50 // Base investigation baseline for running process audit
+	riskPoints := 0
 
 	// Scan process memory with YARA
 	matches, err := inv.yaraScanner.ScanProcessMemory(ctx, pid)
 	if err == nil && len(matches) > 0 {
 		for _, m := range matches {
-			riskPoints += 35
+			riskPoints += 40
 			report.Findings = append(report.Findings, Finding{
 				Severity: event.SeverityCritical,
 				Message:  fmt.Sprintf("Memory YARA match: %s", m.Rule),
 			})
+			report.ATTACKTechniques = append(report.ATTACKTechniques, event.ATTACKMapping{
+				Tactic: "Execution", Technique: "T1059", Name: "Command and Scripting Interpreter",
+			})
 		}
 	}
 
-	report.Findings = append(report.Findings, Finding{
-		Severity: event.SeverityMedium,
-		Message:  fmt.Sprintf("Process PID %d inspected", pid),
-	})
+	if len(report.Findings) == 0 {
+		report.Findings = append(report.Findings, Finding{
+			Severity: event.SeverityLow,
+			Message:  fmt.Sprintf("Process PID %d inspected (no anomalies detected)", pid),
+		})
+	}
 
 	if riskPoints > 100 {
 		riskPoints = 100

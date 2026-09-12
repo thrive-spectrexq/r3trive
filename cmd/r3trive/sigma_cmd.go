@@ -1,14 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/thrive-spectrexq/r3trive/internal/intelligence/hunter"
 	"github.com/thrive-spectrexq/r3trive/internal/output"
-	"github.com/thrive-spectrexq/r3trive/pkg/sigma"
 )
 
 var (
@@ -43,85 +43,40 @@ func runSigmaHunt(cmd *cobra.Command, args []string) error {
 	fmt.Println("═══════════════════════════════════════════")
 	fmt.Println()
 
-	entries, err := os.ReadDir(sigmaRulesetDir)
+	ctx := context.Background()
+	h := hunter.New(nil)
+	res, err := h.Hunt(ctx, hunter.HuntOptions{
+		Ruleset: sigmaRulesetDir,
+	})
 	if err != nil {
-		if os.IsNotExist(err) {
-			fmt.Printf("Ruleset directory '%s' does not exist.\n", sigmaRulesetDir)
-			return nil
-		}
-		return fmt.Errorf("reading sigma rules directory: %w", err)
-	}
-
-	type SigmaMatch struct {
-		ID          string   `json:"id"`
-		Title       string   `json:"title"`
-		Level       string   `json:"level"`
-		Logsource   string   `json:"logsource"`
-		Description string   `json:"description"`
-		File        string   `json:"file"`
-		Tags        []string `json:"tags"`
-	}
-
-	matches := make([]SigmaMatch, 0, len(entries))
-
-	for _, entry := range entries {
-		if entry.IsDir() || (!strings.HasSuffix(entry.Name(), ".yml") && !strings.HasSuffix(entry.Name(), ".yaml")) {
-			continue
-		}
-
-		filePath := filepath.Join(sigmaRulesetDir, entry.Name())
-		rule, parseErr := sigma.ParseRuleFile(filePath)
-		if parseErr != nil {
-			continue
-		}
-
-		logsrc := ""
-		if rule.Logsource != nil {
-			if category, ok := rule.Logsource["category"]; ok {
-				logsrc = category
-			} else if product, ok := rule.Logsource["product"]; ok {
-				logsrc = product
-			}
-		}
-
-		matches = append(matches, SigmaMatch{
-			ID:          rule.ID,
-			Title:       rule.Title,
-			Level:       rule.Level,
-			Logsource:   logsrc,
-			Description: rule.Description,
-			File:        filePath,
-			Tags:        rule.Tags,
-		})
+		return fmt.Errorf("sigma hunt failed: %w", err)
 	}
 
 	outFmt, _ := output.ParseFormat(sigmaOutputFmt)
 	formatter := output.NewFormatter(os.Stdout, outFmt)
 
 	if outFmt == output.FormatJSON || outFmt == output.FormatNDJSON {
-		return formatter.WriteObject(matches)
+		return formatter.WriteObject(res)
 	}
 
-	fmt.Printf("Loaded and evaluated %d Sigma rules.\n\n", len(matches))
-	if len(matches) == 0 {
-		fmt.Println("No Sigma rules matched.")
+	fmt.Printf("Evaluated Sigma rules across active system processes (Total scanned: %d, Matches: %d)\n\n",
+		res.TotalScanned, res.MatchesCount)
+
+	if len(res.Findings) == 0 {
+		fmt.Println("No Sigma rule violations detected on current host.")
 		return nil
 	}
 
-	fmt.Printf("%-10s %-30s %-15s %s\n", "LEVEL", "RULE TITLE", "LOGSOURCE", "FILE")
+	fmt.Printf("%-10s %-30s %-15s %s\n", "LEVEL", "RULE TITLE", "TECHNIQUE", "ARTIFACT")
 	fmt.Println("──────────────────────────────────────────────────────────────────────────────────")
 
-	for _, m := range matches {
-		level := strings.ToUpper(m.Level)
-		if level == "" {
-			level = "MEDIUM"
-		}
-		logsrc := m.Logsource
-		if logsrc == "" {
-			logsrc = "process_creation"
-		}
+	for _, f := range res.Findings {
 		fmt.Printf("%-10s %-30s %-15s %s\n",
-			level, truncateString(m.Title, 30), truncateString(logsrc, 15), m.File)
+			strings.ToUpper(string(f.Severity)),
+			truncateString(f.RuleName, 30),
+			truncateString(f.Technique, 15),
+			f.Artifact,
+		)
 	}
 
 	return nil

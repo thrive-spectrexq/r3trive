@@ -10,7 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/thrive-spectrexq/r3trive/internal/correlation"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/yara"
+	intsigma "github.com/thrive-spectrexq/r3trive/internal/intelligence/sigma"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 	"github.com/thrive-spectrexq/r3trive/pkg/sigma"
 )
@@ -22,6 +24,7 @@ type HuntOptions struct {
 	TargetDir string
 	OutputFmt string
 	MaxDepth  int
+	Processes []ProcessInfo
 }
 
 // Finding represents a single detection or artifact hit during a threat hunt.
@@ -78,12 +81,10 @@ func (h *Hunter) Hunt(ctx context.Context, opts HuntOptions) (*HuntResult, error
 	// 1. Scan running process memory / process list for suspicious techniques
 	h.huntProcesses(ctx, opts, result)
 
-	// 2. Scan disk files using YARA rules if a target directory or default rules exist
-	targetDir := opts.TargetDir
-	if targetDir == "" {
-		targetDir = os.TempDir()
+	// 2. Scan disk files using YARA rules if a target directory is specified
+	if opts.TargetDir != "" {
+		h.huntYara(ctx, opts.TargetDir, opts, result)
 	}
-	h.huntYara(ctx, targetDir, opts, result)
 
 	// 3. Scan Sigma rules if a ruleset is provided
 	if opts.Ruleset != "" {
@@ -113,21 +114,42 @@ func (h *Hunter) huntProcesses(ctx context.Context, opts HuntOptions, result *Hu
 		{"chisel.exe", "T1090", event.SeverityHigh, "Chisel TCP/UDP Tunneling tool"},
 	}
 
-	for _, proc := range suspiciousProcesses {
-		result.TotalScanned++
-		if opts.Technique != "" && !strings.HasPrefix(proc.Technique, opts.Technique) {
-			continue
+	procs := opts.Processes
+	if len(procs) == 0 {
+		running, err := getRunningProcesses()
+		if err == nil {
+			procs = running
 		}
+	}
 
-		result.Findings = append(result.Findings, Finding{
-			Category:    "Process",
-			RuleID:      fmt.Sprintf("HUNT-PROC-%s", proc.Technique),
-			RuleName:    fmt.Sprintf("Suspicious Binary Pattern: %s", proc.Name),
-			Severity:    proc.Severity,
-			Technique:   proc.Technique,
-			Artifact:    proc.Name,
-			Description: proc.Desc,
-		})
+	for _, p := range procs {
+		result.TotalScanned++
+		pName := strings.ToLower(p.Name)
+		pBase := strings.TrimSuffix(pName, ".exe")
+
+		for _, susp := range suspiciousProcesses {
+			if opts.Technique != "" && !strings.HasPrefix(susp.Technique, opts.Technique) {
+				continue
+			}
+
+			suspBase := strings.TrimSuffix(strings.ToLower(susp.Name), ".exe")
+			if pName == strings.ToLower(susp.Name) || pBase == suspBase {
+				result.Findings = append(result.Findings, Finding{
+					Category:    "Process",
+					RuleID:      fmt.Sprintf("HUNT-PROC-%s", susp.Technique),
+					RuleName:    fmt.Sprintf("Suspicious Running Process: %s", p.Name),
+					Severity:    susp.Severity,
+					Technique:   susp.Technique,
+					Artifact:    fmt.Sprintf("PID:%d (%s)", p.PID, p.Name),
+					Description: fmt.Sprintf("%s (matched suspicious process signature)", susp.Desc),
+					Details: map[string]any{
+						"pid":  p.PID,
+						"ppid": p.PPID,
+						"name": p.Name,
+					},
+				})
+			}
+		}
 	}
 }
 
@@ -179,6 +201,15 @@ func (h *Hunter) huntSigma(rulesetDir string, opts HuntOptions, result *HuntResu
 		return
 	}
 
+	transpiler := intsigma.NewTranspiler()
+	procs := opts.Processes
+	if len(procs) == 0 {
+		running, err := getRunningProcesses()
+		if err == nil {
+			procs = running
+		}
+	}
+
 	for _, entry := range entries {
 		if entry.IsDir() || (!strings.HasSuffix(entry.Name(), ".yml") && !strings.HasSuffix(entry.Name(), ".yaml")) {
 			continue
@@ -190,38 +221,50 @@ func (h *Hunter) huntSigma(rulesetDir string, opts HuntOptions, result *HuntResu
 			continue
 		}
 
-		result.TotalScanned++
-		matchedTech := ""
-		for _, tag := range sigRule.Tags {
-			if strings.HasPrefix(tag, "attack.t") {
-				matchedTech = strings.ToUpper(strings.TrimPrefix(tag, "attack."))
-			}
+		corrRule, err := transpiler.Transpile(sigRule)
+		if err != nil {
+			continue
 		}
+
+		result.TotalScanned++
+		matchedTech := corrRule.ATTACKTechnique
 
 		if opts.Technique != "" && matchedTech != "" && !strings.HasPrefix(matchedTech, opts.Technique) {
 			continue
 		}
 
-		sev := event.SeverityMedium
-		switch strings.ToLower(sigRule.Level) {
-		case "critical":
-			sev = event.SeverityCritical
-		case "high":
-			sev = event.SeverityHigh
-		case "medium":
-			sev = event.SeverityMedium
-		case "low":
-			sev = event.SeverityLow
-		}
+		engine := correlation.New()
+		engine.LoadRules([]correlation.Rule{*corrRule})
 
-		result.Findings = append(result.Findings, Finding{
-			Category:    "Sigma",
-			RuleID:      sigRule.ID,
-			RuleName:    sigRule.Title,
-			Severity:    sev,
-			Technique:   matchedTech,
-			Artifact:    rulePath,
-			Description: sigRule.Description,
-		})
+		ctx := context.Background()
+		for _, p := range procs {
+			evt := event.Event{
+				ID:        fmt.Sprintf("evt-hunt-%d", p.PID),
+				Timestamp: time.Now().UTC(),
+				Type:      event.ProcessCreate,
+				Data: event.EventData{
+					Process: &event.ProcessData{
+						PID:     p.PID,
+						PPID:    p.PPID,
+						Name:    p.Name,
+						Path:    p.Name,
+						CmdLine: p.CmdLine,
+					},
+				},
+			}
+
+			alerts := engine.Evaluate(ctx, evt)
+			for _, alert := range alerts {
+				result.Findings = append(result.Findings, Finding{
+					Category:    "Sigma",
+					RuleID:      sigRule.ID,
+					RuleName:    sigRule.Title,
+					Severity:    alert.Severity,
+					Technique:   matchedTech,
+					Artifact:    fmt.Sprintf("PID:%d (%s)", p.PID, p.Name),
+					Description: fmt.Sprintf("%s (matched on %s)", sigRule.Description, p.Name),
+				})
+			}
+		}
 	}
 }
