@@ -1,7 +1,8 @@
 # R3TRIVE
 
-> **Endpoint detection, threat hunting and automated defense.**
+> **Endpoint detection, threat hunting and automated defense.** — `v0.1.5`
 
+[![Version](https://img.shields.io/badge/version-v0.1.5-blue.svg)](https://github.com/thrive-spectrexq/r3trive/releases/tag/v0.1.5)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![Go Version](https://img.shields.io/badge/go-1.22+-00ADD8.svg)](https://golang.org/)

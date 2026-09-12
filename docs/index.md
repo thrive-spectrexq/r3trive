@@ -1,6 +1,6 @@
 # R3TRIVE Documentation
 
-> **Endpoint detection, threat hunting and automated defense at scale.**
+> **Endpoint detection, threat hunting and automated defense at scale.** — `v0.1.5`
 
 Welcome to the official documentation for **R3TRIVE**.
 
