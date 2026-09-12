@@ -1,6 +1,7 @@
 package security
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -26,7 +27,7 @@ func TestMemoryLocking(t *testing.T) {
 	copy(buf, []byte("sensitive_encryption_key_material"))
 
 	// Empty buffer should return error
-	if err := LockBuffer(nil); err != ErrEmptyBuffer {
+	if err := LockBuffer(nil); !errors.Is(err, ErrEmptyBuffer) {
 		t.Fatalf("expected ErrEmptyBuffer on nil, got: %v", err)
 	}
 
