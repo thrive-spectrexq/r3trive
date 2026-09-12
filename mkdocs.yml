@@ -65,6 +65,8 @@ nav:
   - AI Analyst: ai_analyst.md
   - Database Schema: database_schema.md
   - Plugin SDK: plugin_sdk.md
+  - Plugin Tutorial: plugin_tutorial.md
+  - Troubleshooting: troubleshooting.md
   - SOC Workflow: soc_workflow.md
   - API Reference: api_reference.md
   - Contributing: contributing.md

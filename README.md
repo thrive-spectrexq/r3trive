@@ -5,7 +5,7 @@
 [![Version](https://img.shields.io/badge/version-v0.1.7-blue.svg)](https://github.com/thrive-spectrexq/r3trive/releases/tag/v0.1.7)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
-[![Go Version](https://img.shields.io/badge/go-1.22+-00ADD8.svg)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/go-1.25+-00ADD8.svg)](https://golang.org/)
 [![Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows%20%7C%20macos-lightgrey)]()
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-v14-red)]()
 [![OpenTelemetry](https://img.shields.io/badge/telemetry-OpenTelemetry-blueviolet)]()
