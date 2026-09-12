@@ -16,6 +16,7 @@ func initNativeSensors(cfg *config.Config) ([]sensor.Sensor, error) {
 	sensors = append(sensors, windows.NewNetworkSensor())
 	sensors = append(sensors, windows.NewFileSensor())
 	sensors = append(sensors, windows.NewRegistrySensor())
+	sensors = append(sensors, windows.NewServiceSensor())
 
 	return sensors, nil
 }

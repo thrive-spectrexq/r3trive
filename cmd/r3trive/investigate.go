@@ -11,7 +11,6 @@ import (
 	"github.com/thrive-spectrexq/r3trive/internal/intelligence/investigator"
 	"github.com/thrive-spectrexq/r3trive/internal/output"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
-	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 )
 
 var (
@@ -40,10 +39,10 @@ func runInvestigate(cmd *cobra.Command, args []string) error {
 	ctx := context.Background()
 
 	var store storage.Store
-	if cfg != nil && cfg.Storage.Driver == "sqlite" {
-		sqliteStore, err := sqlite.New(cfg.Storage.DSN)
+	if cfg != nil {
+		s, err := newStoreFromConfig(cfg)
 		if err == nil {
-			store = sqliteStore
+			store = s
 			defer store.Close()
 		}
 	}

@@ -14,5 +14,6 @@ func initNativeSensors(cfg *config.Config) ([]sensor.Sensor, error) {
 	sensors = append(sensors, linux.NewProcessSensor())
 	sensors = append(sensors, linux.NewFileSensor())
 	sensors = append(sensors, linux.NewNetworkSensor())
+	sensors = append(sensors, linux.NewServiceSensor())
 	return sensors, nil
 }

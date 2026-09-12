@@ -11,7 +11,7 @@ func TestRootCmdStructure(t *testing.T) {
 	subcommands := []string{
 		"version", "init", "monitor", "audit", "config", "ask",
 		"generate-rule", "defend", "explain", "summarize",
-		"hunt", "investigate", "yara", "sigma", "attack-chain", "serve",
+		"hunt", "investigate", "yara", "sigma", "attack-chain", "serve", "plugins",
 	}
 
 	rootCmd.AddCommand(
@@ -31,6 +31,7 @@ func TestRootCmdStructure(t *testing.T) {
 		newSigmaCmd(),
 		newAttackChainCmd(),
 		newServeCmd(),
+		newPluginsCmd(),
 	)
 
 	for _, sub := range subcommands {
@@ -51,5 +52,18 @@ func TestVersionCmdExecution(t *testing.T) {
 
 	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("version command failed: %v", err)
+	}
+}
+
+func TestPluginsCmdExecution(t *testing.T) {
+	rootCmd := newRootCmd()
+	rootCmd.AddCommand(newPluginsCmd())
+
+	var out bytes.Buffer
+	rootCmd.SetOut(&out)
+	rootCmd.SetArgs([]string{"plugins", "list", "--verbose"})
+
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("plugins list command failed: %v", err)
 	}
 }

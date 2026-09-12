@@ -47,6 +47,7 @@ func main() {
 		newSigmaCmd(),
 		newAttackChainCmd(),
 		newServeCmd(),
+		newPluginsCmd(),
 	)
 
 	if err := rootCmd.Execute(); err != nil {

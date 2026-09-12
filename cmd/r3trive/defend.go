@@ -13,7 +13,6 @@ import (
 	"github.com/thrive-spectrexq/r3trive/internal/response"
 	"github.com/thrive-spectrexq/r3trive/internal/response/playbook"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
-	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
@@ -61,22 +60,15 @@ func runDefend(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 
 	// Initialize storage
-	var store storage.Store
-	var err error
-	switch cfg.Storage.Driver {
-	case "sqlite":
-		store, err = sqlite.New(cfg.Storage.DSN)
-		if err != nil {
-			return fmt.Errorf("initializing storage: %w", err)
-		}
-		defer func() {
-			if closeErr := store.Close(); closeErr != nil {
-				slog.Error("closing storage", "error", closeErr)
-			}
-		}()
-	default:
-		return fmt.Errorf("unsupported storage driver: %s", cfg.Storage.Driver)
+	store, err := newStoreFromConfig(cfg)
+	if err != nil {
+		return fmt.Errorf("initializing storage: %w", err)
 	}
+	defer func() {
+		if closeErr := store.Close(); closeErr != nil {
+			slog.Error("closing storage", "error", closeErr)
+		}
+	}()
 
 	// Initialize response engine & playbook engine
 	dryRun := defendMode != "active"

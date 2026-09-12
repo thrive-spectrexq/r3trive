@@ -11,7 +11,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thrive-spectrexq/r3trive/internal/api"
 	"github.com/thrive-spectrexq/r3trive/internal/response"
-	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 )
 
 var (
@@ -27,24 +26,36 @@ func newServeCmd() *cobra.Command {
 		Use:   "serve",
 		Short: "Start the R3TRIVE REST API server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			dbPath := "r3trive.db"
-			if cfg != nil && cfg.Storage.DSN != "" {
-				dbPath = cfg.Storage.DSN
-			}
-
-			store, err := sqlite.New(dbPath)
+			store, err := newStoreFromConfig(cfg)
 			if err != nil {
 				return err
 			}
 			defer store.Close()
 
+			addr := serveAddr
+			if addr == ":8080" && cfg != nil && cfg.API.Addr != "" {
+				addr = cfg.API.Addr
+			}
+			apiKey := serveAPIKey
+			if apiKey == "" && cfg != nil && cfg.API.APIKey != "" {
+				apiKey = cfg.API.APIKey
+			}
+			tlsCert := serveTLSCert
+			if tlsCert == "" && cfg != nil && cfg.API.TLSCert != "" {
+				tlsCert = cfg.API.TLSCert
+			}
+			tlsKey := serveTLSKey
+			if tlsKey == "" && cfg != nil && cfg.API.TLSKey != "" {
+				tlsKey = cfg.API.TLSKey
+			}
+
 			respEngine := response.New(serveDryRun)
 
 			serverConfig := api.ServerConfig{
-				Addr:           serveAddr,
-				APIKey:         serveAPIKey,
-				TLSCert:        serveTLSCert,
-				TLSKey:         serveTLSKey,
+				Addr:           addr,
+				APIKey:         apiKey,
+				TLSCert:        tlsCert,
+				TLSKey:         tlsKey,
 				ResponseEngine: respEngine,
 			}
 

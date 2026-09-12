@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thrive-spectrexq/r3trive/internal/ai"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
-	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 )
 
 func newAskCmd() *cobra.Command {
@@ -92,7 +91,7 @@ func newExplainCmd() *cobra.Command {
 				return fmt.Errorf("AI backend is disabled in config. Run with --config pointing to a valid config")
 			}
 
-			store, err := sqlite.New(cfg.Storage.DSN)
+			store, err := newStoreFromConfig(cfg)
 			if err != nil {
 				return fmt.Errorf("failed to init storage: %w", err)
 			}
@@ -155,7 +154,7 @@ func newSummarizeCmd() *cobra.Command {
 				return fmt.Errorf("invalid timeframe format (use e.g. 1h, 30m): %w", err)
 			}
 
-			store, err := sqlite.New(cfg.Storage.DSN)
+			store, err := newStoreFromConfig(cfg)
 			if err != nil {
 				return fmt.Errorf("failed to init storage: %w", err)
 			}
@@ -201,7 +200,7 @@ func newAttackChainCmd() *cobra.Command {
 			ctx := context.Background()
 			incidentID := args[0]
 
-			store, err := sqlite.New(cfg.Storage.DSN)
+			store, err := newStoreFromConfig(cfg)
 			if err != nil {
 				return fmt.Errorf("failed to init storage: %w", err)
 			}
