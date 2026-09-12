@@ -30,14 +30,14 @@ func newAskCmd() *cobra.Command {
 			}
 
 			question := strings.Join(args, " ")
-			fmt.Printf("🤔 Asking %s (Model: %s)...\n", cfg.AI.Backend, cfg.AI.Model)
+			fmt.Printf("[*] Asking %s (Model: %s)...\n", cfg.AI.Backend, cfg.AI.Model)
 
 			resp, err := aiCmds.Ask(ctx, question)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("\n🤖 AI Analyst Response:")
+			fmt.Println("\nAI Analyst Response:")
 			fmt.Println("--------------------------------------------------")
 			fmt.Println(resp)
 			fmt.Println("--------------------------------------------------")
@@ -64,14 +64,14 @@ func newGenerateRuleCmd() *cobra.Command {
 			}
 
 			scenario := strings.Join(args, " ")
-			fmt.Printf("🛠️ Generating rule using %s (Model: %s)...\n", cfg.AI.Backend, cfg.AI.Model)
+			fmt.Printf("[*] Generating rule using %s (Model: %s)...\n", cfg.AI.Backend, cfg.AI.Model)
 
 			resp, err := aiCmds.GenerateRule(ctx, scenario)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("\n📜 Generated YAML Rule:")
+			fmt.Println("\nGenerated YAML Rule:")
 			fmt.Println("--------------------------------------------------")
 			fmt.Println(resp)
 			fmt.Println("--------------------------------------------------")
@@ -104,7 +104,7 @@ func newExplainCmd() *cobra.Command {
 			}
 
 			id := args[0]
-			fmt.Printf("🔍 Extracting context for %s...\n", id)
+			fmt.Printf("[*] Extracting context for %s...\n", id)
 
 			var resp string
 			if strings.HasPrefix(id, "INC-") {
@@ -112,7 +112,7 @@ func newExplainCmd() *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to fetch incident: %w", err)
 				}
-				fmt.Printf("🤖 Explaining Incident %s (Model: %s)...\n", id, cfg.AI.Model)
+				fmt.Printf("[*] Explaining Incident %s (Model: %s)...\n", id, cfg.AI.Model)
 				resp, err = aiCmds.ExplainIncident(ctx, inc)
 				if err != nil {
 					return err
@@ -122,14 +122,14 @@ func newExplainCmd() *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("failed to fetch event: %w", err)
 				}
-				fmt.Printf("🤖 Explaining Event %s (Model: %s)...\n", id, cfg.AI.Model)
+				fmt.Printf("[*] Explaining Event %s (Model: %s)...\n", id, cfg.AI.Model)
 				resp, err = aiCmds.ExplainEvent(ctx, evt)
 				if err != nil {
 					return err
 				}
 			}
 
-			fmt.Println("\n🤖 AI Analyst Response:")
+			fmt.Println("\nAI Analyst Response:")
 			fmt.Println("--------------------------------------------------")
 			fmt.Println(resp)
 			fmt.Println("--------------------------------------------------")
@@ -166,7 +166,7 @@ func newSummarizeCmd() *cobra.Command {
 				return fmt.Errorf("failed to init AI: %w", err)
 			}
 
-			fmt.Printf("📊 Fetching activity for the last %s...\n", args[0])
+			fmt.Printf("[*] Fetching activity for the last %s...\n", args[0])
 			since := time.Now().Add(-duration)
 
 			events, err := store.QueryEvents(ctx, storage.EventQuery{
@@ -177,13 +177,13 @@ func newSummarizeCmd() *cobra.Command {
 				return fmt.Errorf("failed to query events: %w", err)
 			}
 
-			fmt.Printf("🤖 Summarizing %d events (Model: %s)...\n", len(events), cfg.AI.Model)
+			fmt.Printf("[*] Summarizing %d events (Model: %s)...\n", len(events), cfg.AI.Model)
 			resp, err := aiCmds.Summarize(ctx, events)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("\n🤖 AI Summary:")
+			fmt.Println("\nAI Summary:")
 			fmt.Println("--------------------------------------------------")
 			fmt.Println(resp)
 			fmt.Println("--------------------------------------------------")
@@ -244,7 +244,7 @@ func newAttackChainCmd() *cobra.Command {
 				if err == nil {
 					resp, err := aiCmds.ExplainIncident(ctx, inc)
 					if err == nil {
-						fmt.Println("🤖 AI Analyst Reconstruction:")
+						fmt.Println("AI Analyst Reconstruction:")
 						fmt.Println("--------------------------------------------------")
 						fmt.Println(resp)
 						fmt.Println("--------------------------------------------------")

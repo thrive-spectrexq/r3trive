@@ -121,7 +121,7 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 		FlushInterval:  time.Duration(cfg.Storage.FlushIntervalMs) * time.Millisecond,
 	})
 
-	// Setup correlation engine
+	// Setup correlation engine & incident aggregator
 	corrEngine := correlation.New()
 	rules, err := correlation.LoadRulesFromDirectory("rules/behavioral")
 	if err == nil {
@@ -129,6 +129,8 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	} else {
 		slog.Warn("could not load correlation rules", "error", err)
 	}
+
+	aggregator := correlation.NewIncidentAggregator(store, correlation.DefaultAggregatorConfig())
 
 	// Setup output
 	outFmt, _ := output.ParseFormat(cfg.OutputFmt)
@@ -140,8 +142,16 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 		// Evaluate event against rules
 		alerts := corrEngine.Evaluate(ctx, evt)
 		for _, alert := range alerts {
-			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %d)\n",
-				alert.Message, alert.RuleName, alert.Severity, alert.RiskScore)
+			inc, err := aggregator.ProcessAlert(ctx, alert)
+			if err != nil {
+				slog.Error("failed to correlate alert into incident", "alert_id", alert.ID, "error", err)
+			}
+			incID := "N/A"
+			if inc != nil {
+				incID = inc.ID
+			}
+			fmt.Printf("\n[!] ALERT TRIGGERED: %s (Rule: %s, Sev: %s, Score: %d, Incident: %s)\n",
+				alert.Message, alert.RuleName, alert.Severity, alert.RiskScore, incID)
 		}
 
 		if severityRank(evt.Severity) < severityRank(minSeverity) {
