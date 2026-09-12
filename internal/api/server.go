@@ -22,6 +22,9 @@ type ServerConfig struct {
 	TLSCert        string
 	TLSKey         string
 	ResponseEngine handlers.ActionExecutor
+	RateLimit      int
+	MaxBodyBytes   int64
+	CORSOrigins    []string
 }
 
 // Server represents the REST API server.
@@ -54,12 +57,49 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Basic CORS
+	// Rate limiting middleware
+	rateLimit := cfg.RateLimit
+	if rateLimit <= 0 {
+		rateLimit = 100
+	}
+	r.Use(apimiddleware.RateLimit(rateLimit))
+
+	// Request size limit middleware
+	maxBody := cfg.MaxBodyBytes
+	if maxBody <= 0 {
+		maxBody = 1048576 // 1MB default
+	}
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
+			r.Body = http.MaxBytesReader(w, r.Body, maxBody)
+			next.ServeHTTP(w, r)
+		})
+	})
+
+	// Configurable CORS middleware
+	allowedOrigins := cfg.CORSOrigins
+	if len(allowedOrigins) == 0 {
+		allowedOrigins = []string{"*"}
+	}
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			isAllowed := false
+			for _, o := range allowedOrigins {
+				if o == "*" || o == origin {
+					isAllowed = true
+					break
+				}
+			}
+			if isAllowed {
+				if origin != "" && allowedOrigins[0] != "*" {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+				} else {
+					w.Header().Set("Access-Control-Allow-Origin", "*")
+				}
+			}
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token, X-API-Key")
+			w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token, X-API-Key, X-Request-Id")
 			if r.Method == "OPTIONS" {
 				return
 			}

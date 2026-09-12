@@ -46,6 +46,12 @@ type APIConfig struct {
 	TLSCert string `yaml:"tls_cert" json:"tls_cert"`
 	// TLSKey is the path to the TLS key file.
 	TLSKey string `yaml:"tls_key" json:"tls_key"`
+	// RateLimit is max requests per minute per IP (0 disables).
+	RateLimit int `yaml:"rate_limit" json:"rate_limit"`
+	// MaxBodyBytes is the maximum allowed request body size in bytes.
+	MaxBodyBytes int64 `yaml:"max_body_bytes" json:"max_body_bytes"`
+	// CORSOrigins lists allowed CORS origins.
+	CORSOrigins []string `yaml:"cors_origins" json:"cors_origins"`
 }
 
 // MonitorConfig holds monitoring-specific configuration.
@@ -136,10 +142,13 @@ func Default() *Config {
 			RingBufferSize: 10000,
 		},
 		API: APIConfig{
-			Addr:    ":8080",
-			APIKey:  "",
-			TLSCert: "",
-			TLSKey:  "",
+			Addr:         ":8080",
+			APIKey:       "",
+			TLSCert:      "",
+			TLSKey:       "",
+			RateLimit:    100,
+			MaxBodyBytes: 1048576, // 1MB
+			CORSOrigins:  []string{"*"},
 		},
 	}
 }

@@ -51,12 +51,30 @@ func newServeCmd() *cobra.Command {
 
 			respEngine := response.New(serveDryRun)
 
+			rateLimit := 100
+			var maxBodyBytes int64 = 1048576
+			corsOrigins := []string{"*"}
+			if cfg != nil {
+				if cfg.API.RateLimit > 0 {
+					rateLimit = cfg.API.RateLimit
+				}
+				if cfg.API.MaxBodyBytes > 0 {
+					maxBodyBytes = cfg.API.MaxBodyBytes
+				}
+				if len(cfg.API.CORSOrigins) > 0 {
+					corsOrigins = cfg.API.CORSOrigins
+				}
+			}
+
 			serverConfig := api.ServerConfig{
 				Addr:           addr,
 				APIKey:         apiKey,
 				TLSCert:        tlsCert,
 				TLSKey:         tlsKey,
 				ResponseEngine: respEngine,
+				RateLimit:      rateLimit,
+				MaxBodyBytes:   maxBodyBytes,
+				CORSOrigins:    corsOrigins,
 			}
 
 			srv := api.NewServer(serverConfig, store)
