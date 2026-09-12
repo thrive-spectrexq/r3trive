@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.6] - 2026-09-12
+
+### Added
+- **Native Windows Network Sensor**: Implemented unprivileged TCP and UDP connection monitoring in `internal/detection/sensor/windows/network.go` using pure Go standard library `syscall` with `iphlpapi.dll` (`GetExtendedTcpTable`, `GetExtendedUdpTable`). Emits `event.NetworkConnect` and `event.NetworkListen` events with process IDs, local/remote IP addresses, and ports without requiring Administrator/ETW privileges.
+- **Native Windows File Sensor**: Implemented unprivileged filesystem change monitoring in `internal/detection/sensor/windows/file.go` using Win32 directory change notifications (`ReadDirectoryChangesW`) to observe critical paths (`C:\Windows\System32`, `C:\Users\Public`, `C:\ProgramData`). Emits `event.FileCreate`, `event.FileModify`, and `event.FileDelete` events.
+- **Real-Time Incident Aggregator**: Implemented `IncidentAggregator` in `internal/correlation/aggregator.go` with sliding temporal correlation windows (15-minute default). Groups alerts by composite keys (`host_id + primary_entity`), dynamically recalculates risk scores via `CalculateIncidentScore`, escalates incident severity when alert counts surge, merges deduplicated ATT&CK technique sets, and persists incidents to SQLite/PostgreSQL.
+- **Automated Alert Persistence in Monitor Pipeline**: Connected alert handling in `internal/detection/pipeline/pipeline.go` directly to persistent storage, ensuring alerts and correlated incidents are queryable across restarts and via REST API.
+
+### Improved & Documentation
+- **Comprehensive Documentation Suite Overhaul**: Updated and synchronized all technical specifications and MkDocs pages across `SYSTEM_ARCHITECTURE.md`, `DETECTION_ENGINE_SPEC.md`, `RULE_ENGINE_SPEC.md`, `DATABASE_SCHEMA.md`, `SOC_WORKFLOW.md`, `API_REFERENCE.md`, `CONTRIBUTING.md`, and `README.md`.
+- **API & CLI Documentation Alignment**: Fully documented `002_hosts_rules_iocs.sql` database migration, condition operators & reflection field lookup, unprivileged Win32 sensors, `ActionExecutor`, automated defense daemon (`r3trive defend`), proactive threat hunting (`r3trive hunt`, `r3trive investigate`), and AI Analyst subcommands.
+- **Documentation Web Application**: Verified seamless cross-linking and zero broken paths for GitHub Pages deployment.
+
+---
+
 ## [0.1.5] - 2026-09-12
 
 ### Added
