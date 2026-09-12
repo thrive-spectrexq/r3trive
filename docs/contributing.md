@@ -192,10 +192,11 @@ make build TAGS="mock_sensors"
 #### Windows
 
 ```powershell
-# Install MSYS2 for Make support
-# Install Windows SDK for ETW bindings
+# Build native binary with pure Go Win32 sensors (Toolhelp32, IP Helper, ReadDirectoryChangesW)
+go build -o dist/r3trive.exe ./cmd/r3trive
 
-make build TAGS="windows_etw"
+# Run unprivileged monitoring
+./dist/r3trive.exe monitor --output table
 ```
 
 ### 4.4 Environment Variables
@@ -237,22 +238,24 @@ r3trive/
 │
 ├── cmd/r3trive/               # CLI entry point (cobra commands)
 │   ├── main.go
-│   ├── monitor.go
-│   ├── hunt.go
-│   ├── investigate.go
-│   ├── defend.go
-│   ├── audit.go
-│   ├── ai.go                  # explain, summarize, generate-rule, ask
-│   ├── yara.go
-│   ├── sigma.go
-│   └── ...
+│   ├── monitor.go             # Endpoint telemetry collection daemon
+│   ├── hunt.go                # Threat hunting engine
+│   ├── investigate.go         # Process, binary, and incident analysis
+│   ├── defend.go              # Automated response engine
+│   ├── audit.go               # Security baseline audit
+│   ├── ai.go                  # explain, summarize, generate-rule, ask, attack-chain
+│   ├── serve.go               # REST API HTTP/HTTPS server
+│   ├── yara_cmd.go            # YARA scanning and validation
+│   ├── sigma_cmd.go           # Sigma conversion and hunting
+│   ├── config_cmd.go          # Configuration management
+│   └── version.go             # Version and build info
 │
 ├── internal/                  # Non-exported packages (core logic)
 │   ├── detection/             # Detection Core
 │   │   ├── sensor/            # Platform-specific sensors
-│   │   │   ├── linux/         # eBPF sensors
-│   │   │   ├── windows/       # ETW sensors
-│   │   │   └── macos/         # ESF sensors
+│   │   │   ├── linux/         # eBPF sensors (/proc fallback)
+│   │   │   ├── windows/       # Pure Go Win32 sensors (Toolhelp32, iphlpapi, ReadDirectoryChangesW)
+│   │   │   └── macos/         # ESF sensors (audit fallback)
 │   │   ├── normalizer/        # Event normalization
 │   │   ├── enricher/          # Event enrichment
 │   │   └── pipeline/          # Event pipeline orchestration

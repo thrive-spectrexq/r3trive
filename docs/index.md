@@ -29,7 +29,7 @@ R3TRIVE is a cross-platform cybersecurity platform built for **defensive securit
 
 ```mermaid
 graph TD
-    A[Sensors: Windows ETW / Linux / MacOS] --> B[Event Pipeline & Ring Buffer]
+    A[Sensors: Windows Win32 / Linux eBPF / macOS ESF] --> B[Event Pipeline & Ring Buffer]
     B --> C[Correlation Engine & ATT&CK Mapping]
     C --> D[Response Core: Automated Defense]
     C --> E[AI Security Analyst]

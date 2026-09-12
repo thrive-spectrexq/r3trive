@@ -247,8 +247,47 @@ response:
       severity: critical
   notify:
     - channel: pagerduty
-    - channel: slack
+### 3.3 Condition Operators & Dynamic Field Resolution
+
+The R3TRIVE correlation engine evaluates rules against incoming events using structured condition definitions:
+
+```yaml
+conditions:
+  - field: data.process.name
+    operator: eq
+    value: powershell.exe
+  - field: data.process.cmdline
+    operator: regex
+    value: "(?i)(-enc|-encodedcommand)"
+  - field: data.process.parent.name
+    operator: oneOf
+    values: ["winword.exe", "excel.exe", "outlook.exe"]
 ```
+
+#### Supported Condition Operators
+
+| Operator | Syntax | Description | Performance Optimization |
+|---|---|---|---|
+| `eq` | `operator: eq`<br>`value: "powershell.exe"` | Exact case-sensitive equality match against string representation of field. | Direct string equality check. |
+| `contains` | `operator: contains`<br>`value: "-enc"` | Substring containment search within target field value. | Standard library `strings.Contains`. |
+| `regex` | `operator: regex`<br>`value: "(?i)(mimikatz\|procdump)"` | Regular expression pattern matching against target field. | **Pre-compiled at startup**: Patterns are compiled once upon rule loading and cached in `regexCache` to avoid re-compilation in the event pipeline. |
+| `oneOf` | `operator: oneOf`<br>`values: ["cmd.exe", "powershell.exe"]` | Membership check against a list of acceptable values. | Slice evaluation. |
+
+#### Reflection-Based Dynamic Field Resolution
+
+Event fields are addressed using dot-separated JSON paths. The engine uses reflection and struct JSON tags to dynamically traverse nested fields in the event hierarchy:
+
+- `type`: Top-level event type (e.g., `process.create`, `network.connect`, `file.modify`)
+- `severity`: Event severity level (`low`, `medium`, `high`, `critical`)
+- `sensor`: Name of reporting sensor
+- `host.id` / `host.hostname`: Originating host identifiers
+- `data.process.name`, `data.process.path`, `data.process.cmdline`, `data.process.user`
+- `data.process.parent.name`, `data.process.parent.pid`, `data.process.parent.path`
+- `data.network.protocol`, `data.network.src_ip`, `data.network.dst_ip`, `data.network.dst_port`
+- `data.file.path`, `data.file.name`, `data.file.size`, `data.file.old_path`
+- `data.registry.key`, `data.registry.value_name`, `data.registry.value`
+
+If any pointer intermediate in the path is `nil`, the field resolver safely returns an empty string without panicking.
 
 ---
 

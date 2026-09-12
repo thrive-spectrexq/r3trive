@@ -106,10 +106,11 @@ r3trive audit --output audit-report.html
 Natural-language incident explanation, rule generation, and attack chain reconstruction.
 
 ```bash
-r3trive explain incident.json
-r3trive summarize --last 24h
-r3trive generate-rule --from incident.json
+r3trive explain INC-20240315-001
+r3trive summarize 24h
+r3trive generate-rule "powershell spawned by office dumping lsass"
 r3trive ask "What lateral movement techniques were used in INC-20240315-001?"
+r3trive attack-chain INC-20240315-001
 ```
 
 ### YARA & Sigma Integration
@@ -210,7 +211,7 @@ r3trive hunt
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
+Full architecture detail: [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md) (or view online at [thrive-spectrexq.github.io/r3trive](https://thrive-spectrexq.github.io/r3trive/))
 
 ---
 
@@ -244,17 +245,19 @@ Full architecture detail: [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)
 
 ## Documentation
 
+Full documentation is published to GitHub Pages: **[thrive-spectrexq.github.io/r3trive](https://thrive-spectrexq.github.io/r3trive/)**
+
 | Document | Description |
 |---|---|
-| [SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md) | Full component design and data flows |
-| [THREAT_MODEL.md](docs/THREAT_MODEL.md) | Threat actors, attack surfaces, mitigations |
-| [DETECTION_ENGINE_SPEC.md](docs/DETECTION_ENGINE_SPEC.md) | Behavioral detection internals |
-| [PLUGIN_SDK.md](docs/PLUGIN_SDK.md) | Integration and plugin development |
-| [API_REFERENCE.md](docs/API_REFERENCE.md) | REST API and gRPC reference |
-| [RULE_ENGINE_SPEC.md](docs/RULE_ENGINE_SPEC.md) | Rule language and authoring guide |
-| [AI_ANALYST_SPEC.md](docs/AI_ANALYST_SPEC.md) | AI layer architecture and prompting |
-| [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) | Full schema reference |
-| [SOC_WORKFLOW.md](docs/SOC_WORKFLOW.md) | SOC integration and triage playbooks |
+| [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md) | Full component design and data flows |
+| [THREAT_MODEL.md](THREAT_MODEL.md) | Threat actors, attack surfaces, mitigations |
+| [DETECTION_ENGINE_SPEC.md](DETECTION_ENGINE_SPEC.md) | Behavioral detection internals |
+| [PLUGIN_SDK.md](PLUGIN_SDK.md) | Integration and plugin development |
+| [API_REFERENCE.md](API_REFERENCE.md) | REST API and gRPC reference |
+| [RULE_ENGINE_SPEC.md](RULE_ENGINE_SPEC.md) | Rule language and authoring guide |
+| [AI_ANALYST_SPEC.md](AI_ANALYST_SPEC.md) | AI layer architecture and prompting |
+| [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) | Full schema reference |
+| [SOC_WORKFLOW.md](SOC_WORKFLOW.md) | SOC integration and triage playbooks |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 
 ---

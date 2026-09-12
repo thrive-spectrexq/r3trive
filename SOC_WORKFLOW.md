@@ -217,18 +217,19 @@ r3trive incident update <incident_id> \
 # Reconstruct the attack chain
 r3trive attack-chain <incident_id>
 
-# Identify scope — what else was affected?
-r3trive hunt \
-  --ioc "185.220.101.47" \
-  --ioc "invoice.docm" \
-  --since "2h ago"
+# Identify scope — hunt across running processes and host binaries
+r3trive hunt --technique T1003 --output table
+r3trive hunt --dir "C:\Windows\Temp" --output json
 
-# Collect forensic evidence before containment
-r3trive investigate <incident_id> --collect-evidence
+# Forensic investigation of specific binary, process, or stored incident
+r3trive investigate /path/to/suspicious_file.exe
+r3trive investigate --pid <pid>
+r3trive investigate --incident <incident_id>
 
-# AI-assisted analysis
-r3trive ask "What was the attacker's likely objective based on INC-20240315-001?" \
-  --incident <incident_id>
+# AI-assisted analysis and contextual explanations
+r3trive ask "What was the attacker's likely objective based on INC-20240315-001?"
+r3trive explain <incident_id>
+r3trive summarize 2h
 ```
 
 **Determine scope:**
@@ -242,20 +243,36 @@ r3trive ask "What was the attacker's likely objective based on INC-20240315-001?
 **Tier 3 / Responder Actions:**
 
 ```bash
-# Isolate affected host (blocks all network except R3TRIVE C2 channel)
-r3trive respond --action isolate_host --host <host_id> --incident <incident_id>
+# Automated defense daemon (evaluates open incidents and executes playbooks above threshold)
+r3trive defend --mode active --threshold 80 --daemon
 
-# Kill malicious processes
-r3trive respond --action kill_process --pid <pid> --host <host_id>
+# Dry-run automated defense daemon (simulate containment actions without modifying state)
+r3trive defend --mode passive --threshold 75
 
-# Block C2 IP across all endpoints
-r3trive respond --action block_ip --ip 185.220.101.47 --scope fleet
+# Targeted containment execution via REST API (POST /api/v1/response/execute):
+# 1. Terminate malicious process
+curl -X POST http://localhost:8080/api/v1/response/execute \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "kill_process", "target": "<pid>", "dry_run": false}'
 
-# Disable compromised account
-r3trive respond --action disable_account --user "DOMAIN\\jsmith"
+# 2. Block C2 IP address
+curl -X POST http://localhost:8080/api/v1/response/execute \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "block_ip", "target": "185.220.101.47", "dry_run": false}'
 
-# Reset all active sessions (via plugin)
-r3trive respond --plugin-action ad.force_logoff --user "DOMAIN\\jsmith"
+# 3. Quarantine malicious dropped file
+curl -X POST http://localhost:8080/api/v1/response/execute \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "quarantine_file", "target": "C:\\Users\\Public\\loader.exe", "dry_run": false}'
+
+# 4. Isolate compromised host
+curl -X POST http://localhost:8080/api/v1/response/execute \
+  -H "Authorization: Bearer <api_key>" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "isolate_host", "target": "<host_id>", "dry_run": false}'
 ```
 
 Update incident status:
@@ -420,36 +437,36 @@ SCOPE: All Domain Controllers + Finance workstations
 #### 2. Execute the Hunt
 
 ```bash
-# Hunt by ATT&CK technique across fleet
-r3trive hunt \
-  --technique T1003.001 \
-  --scope "tag:domain-controller,tag:finance" \
-  --since 72h
+# Hunt by ATT&CK technique across running processes and binaries
+r3trive hunt --technique T1003 --output table
 
-# Hunt for specific IOC
-r3trive hunt --ioc "domain:evil.example.com" --since 30d
+# Hunt with custom ruleset directory
+r3trive hunt --ruleset ./rules/custom --output json
 
-# Hunt with custom Sigma rule
-r3trive sigma hunt \
-  --rule /rules/custom/apt29_lsass.yml \
-  --since 72h
+# Hunt targeting a specific filesystem directory
+r3trive hunt --dir "C:\Windows\Temp" --output table
 
-# Free-form hunt with YARA
-r3trive yara scan \
-  --dir "C:\\Windows\\Temp" \
-  --scope "tag:domain-controller" \
-  --recursive
+# Hunt using Sigma rules
+r3trive sigma hunt --rule ./rules/sigma/proc_creation_win_mimikatz.yml
+
+# Scan files and directories with YARA rules
+r3trive yara scan --dir "C:\Windows\Temp"
 ```
 
 #### 3. Analyze Results
 
 ```bash
-# Get AI analysis of hunt results
-r3trive explain --hunt-id <hunt_id>
+# Reconstruct attack progression across correlated alerts
+r3trive attack-chain <incident_id>
 
-# Ask targeted question about results
-r3trive ask "Were any signed binaries used for LSASS access in this hunt?" \
-  --hunt <hunt_id>
+# AI-assisted incident explanation
+r3trive explain <incident_id>
+
+# Free-form AI analyst investigation query
+r3trive ask "Were any signed binaries or unquoted service paths exploited in this incident?"
+
+# Generate detection rule from threat scenario observed during hunt
+r3trive generate-rule "Detect unquoted service path execution spawned by services.exe"
 ```
 
 #### 4. Document Hunt

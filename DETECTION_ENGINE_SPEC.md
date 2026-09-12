@@ -673,5 +673,77 @@ The JSON output is compatible with the MITRE ATT&CK Navigator.
 
 ---
 
+## 13. Platform Sensor Implementations & Collection Architecture
+
+R3TRIVE implements dedicated, platform-native sensors engineered to minimize system overhead and run without fragile external runtime dependencies.
+
+### 13.1 Windows Sensor Architecture
+
+Windows collection is implemented natively in Go using standard Windows system calls and user-mode Win32 APIs, eliminating the need for custom kernel drivers or elevated administrative privileges for standard endpoint telemetry:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                   Windows User Space                     │
+│                                                          │
+│  ┌────────────────────┐  ┌────────────────────────────┐  │
+│  │   Process Sensor   │  │       Network Sensor       │  │
+│  │ (Toolhelp32 APIs)  │  │ (iphlpapi.dll TCP/UDP Table│  │
+│  └─────────┬──────────┘  └─────────────┬──────────────┘  │
+│            │                           │                 │
+│            ▼                           ▼                 │
+│  ┌────────────────────┐  ┌────────────────────────────┐  │
+│  │    File Sensor     │  │      Registry Sensor       │  │
+│  │(ReadDirectoryChgsW)│  │       (Kernel ETW)         │  │
+│  └─────────┬──────────┘  └─────────────┬──────────────┘  │
+│            │                           │                 │
+│            └─────────────┬─────────────┘                 │
+│                          ▼                               │
+│              Real-Time Event Pipeline                    │
+│            (Enrichment, Ring Buffer)                     │
+│                          │                               │
+│                          ▼                               │
+│               Correlation & Aggregator                   │
+│          (Rule Evaluation, Incident Creation)            │
+└──────────────────────────────────────────────────────────┘
+```
+
+1. **Native Process Sensor (`process.go`)**:
+   - Uses `syscall.CreateToolhelp32Snapshot`, `Process32First`, and `Process32Next`.
+   - On initialization, takes a baseline snapshot of existing processes to avoid event floods.
+   - Periodically polls for new PID entries, resolves parent process names, and emits structured `event.ProcessCreate` events.
+   - Automatically tracks process exits when PIDs disappear from the table.
+
+2. **Native Network Sensor (`network.go`)**:
+   - Enumerates active sockets via `iphlpapi.dll` using `GetExtendedTcpTable` and `GetExtendedUdpTable`.
+   - Full dual-stack support for both IPv4 (`AF_INET`) and IPv6 (`AF_INET6`).
+   - Resolves owning process IDs and correlates binary names via the process table cache.
+   - Emits `event.NetworkConnect` for established sessions and `event.NetworkListen` for open listener ports.
+   - Includes zero-size buffer guards to prevent runtime slice indexing panics on unconfigured interfaces.
+
+3. **Native File Sensor (`file.go`)**:
+   - Monitors filesystem events via `kernel32.dll` `ReadDirectoryChangesW` with asynchronous directory handles.
+   - Default security-critical watch targets: `C:\Windows\System32`, `C:\Users\Public`, `C:\ProgramData`, and temporary directories.
+   - Employs a lookahead notification parser on `FILE_NOTIFY_INFORMATION` buffers:
+     - Intra-directory renames are paired into `event.FileRename` with preserved `old_path`.
+     - Cross-directory moves into watched areas emit `event.FileCreate`.
+     - File deletions or moves out of watched areas emit `event.FileDelete`.
+     - File updates emit `event.FileModify`.
+   - Buffer overflow detection increments error metrics and logs warnings when notifications churn faster than consumption.
+
+4. **Native Registry Sensor (`registry.go`)**:
+   - Integrates with ETW (`Microsoft-Windows-Kernel-Registry`) to capture key creation, value modification, and deletion across critical persistence hives (`Run`, `RunOnce`, Services).
+
+### 13.2 Linux Sensor Architecture
+
+- **eBPF (Modern Kernels 5.4+)**: Utilizes CO-RE probes attached to `sys_enter_execve`, `tcp_connect`, `do_unlinkat`, and `vfs_write` for sub-microsecond event collection.
+- **Userspace Fallback (Legacy/Unprivileged)**: Employs `/proc` filesystem polling alongside `inotify` watches for directory tracking.
+
+### 13.3 macOS Sensor Architecture
+
+- Utilizes Apple's Endpoint Security Framework (ESF) when signed and entitled.
+- Falls back to OpenBSM audit trails and process sampling in developer builds.
+
+---
+
 *End of DETECTION_ENGINE_SPEC.md*
 *Related: RULE_ENGINE_SPEC.md, SYSTEM_ARCHITECTURE.md, THREAT_MODEL.md*

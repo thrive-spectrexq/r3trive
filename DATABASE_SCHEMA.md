@@ -1067,5 +1067,79 @@ Migration conventions:
 
 ---
 
+## 15. Applied Migrations & Embedded SQLite Schema
+
+R3TRIVE embeds SQL migrations inside `internal/storage/sqlite/migrations/` which are executed automatically on database initialization.
+
+### Migration 001: Initial Core Schema (`001_initial.sql`)
+Creates the foundation tables: `events`, `alerts`, `incidents`, and `schema_migrations`.
+
+### Migration 002: Hosts, Rules, Playbooks & IOCs (`002_hosts_rules_iocs.sql`)
+Expands storage capabilities to support endpoint inventory, dynamic correlation rules, automated response playbooks, and threat intelligence feeds.
+
+```sql
+-- 1. Hosts Table
+CREATE TABLE IF NOT EXISTS hosts (
+    id          TEXT PRIMARY KEY,
+    hostname    TEXT NOT NULL,
+    os          TEXT NOT NULL DEFAULT '',
+    arch        TEXT NOT NULL DEFAULT '',
+    ip_address  TEXT,
+    last_seen   DATETIME,
+    agent_ver   TEXT,
+    status      TEXT NOT NULL DEFAULT 'active',
+    tags        TEXT,                             -- JSON array of strings
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_hosts_hostname ON hosts(hostname);
+CREATE INDEX IF NOT EXISTS idx_hosts_status ON hosts(status);
+
+-- 2. Correlation Rules Table
+CREATE TABLE IF NOT EXISTS rules (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    description TEXT,
+    severity    TEXT NOT NULL DEFAULT 'medium',
+    confidence  REAL NOT NULL DEFAULT 0.5,
+    enabled     INTEGER NOT NULL DEFAULT 1,
+    conditions  TEXT NOT NULL,                     -- JSON array of Condition objects
+    attack_tactic    TEXT,
+    attack_technique TEXT,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Automated Playbooks Table
+CREATE TABLE IF NOT EXISTS playbooks (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    description TEXT,
+    trigger     TEXT NOT NULL,                     -- Trigger condition JSON
+    actions     TEXT NOT NULL,                     -- Action steps JSON
+    enabled     INTEGER NOT NULL DEFAULT 1,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. IOC Entries Table
+CREATE TABLE IF NOT EXISTS ioc_entries (
+    id          TEXT PRIMARY KEY,
+    type        TEXT NOT NULL,                     -- ip, domain, hash, url
+    value       TEXT NOT NULL,
+    source      TEXT,
+    severity    TEXT NOT NULL DEFAULT 'medium',
+    tags        TEXT,                             -- JSON array of strings
+    first_seen  DATETIME,
+    last_seen   DATETIME,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(type, value)
+);
+
+CREATE INDEX IF NOT EXISTS idx_ioc_type ON ioc_entries(type);
+CREATE INDEX IF NOT EXISTS idx_ioc_value ON ioc_entries(value);
+```
+
+---
+
 *End of DATABASE_SCHEMA.md*
 *Related: SYSTEM_ARCHITECTURE.md, API_REFERENCE.md*

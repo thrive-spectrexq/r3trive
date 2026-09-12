@@ -313,13 +313,13 @@ type Sensor interface {
 
 ##### Windows Sensors
 
-| Sensor | Mechanism | Events |
-|---|---|---|
-| ProcessSensor | ETW (Event Tracing for Windows) | exec, inject, exit |
-| FileSensor | ETW / USN Journal | create, modify, delete, rename |
-| NetworkSensor | ETW / WFP callbacks | connect, listen, send, recv |
-| RegistrySensor | ETW RegNtSetValue callbacks | read, write, delete |
-| ServiceSensor | Service Control Manager ETW | create, start, stop |
+| Sensor | Mechanism | Events | Privilege Required |
+|---|---|---|---|
+| ProcessSensor | Win32 Toolhelp32 (`CreateToolhelp32Snapshot`, `Process32First/Next`) | exec, exit | Standard (unprivileged) |
+| FileSensor | Win32 `ReadDirectoryChangesW` / directory change notifications | create, modify, delete | Standard (unprivileged) |
+| NetworkSensor | Win32 IP Helper (`iphlpapi.dll` `GetExtendedTcpTable`, `GetExtendedUdpTable`) | connect, listen | Standard (unprivileged) |
+| RegistrySensor | Win32 RegNotifyChangeKeyValue / ETW RegNtSetValue callbacks | read, write, delete | Standard / Elevated |
+| ServiceSensor | Service Control Manager APIs (`OpenSCManager`, `EnumServicesStatusEx`) | create, start, stop | Standard (query) / Admin |
 
 ##### macOS Sensors
 
@@ -378,9 +378,9 @@ Every event produced by any sensor conforms to this schema:
 #### 4.3.3 Event Pipeline
 
 ```
-OS Kernel
+OS Kernel & Subsystems
     │
-    ▼ (eBPF hook / ETW / ESF)
+    ▼ (eBPF hook / Win32 API / ETW / ESF)
 Sensor (platform-specific)
     │
     ▼
@@ -491,6 +491,15 @@ Where:
 - `campaign_multiplier` is 1.0–2.0 based on correlation with other incidents
 - `recency_decay` reduces score for older events (half-life = 24 hours)
 
+#### 4.4.4 Incident Aggregator & Sliding Windows
+
+The `IncidentAggregator` manages the lifecycle of multi-event threat campaigns:
+- **Temporal Grouping**: Alerts are grouped into active incidents by composite keys (`host_id + primary_entity`) across a sliding temporal window (default 15 minutes).
+- **Dynamic Risk Recalculation**: Every new alert integrated into an existing incident triggers a recalculated composite score via `CalculateIncidentScore`. The score takes into account base severity weights, event counts with diminishing scale, and rule confidence metrics.
+- **Severity Escalation**: If incoming related alerts breach escalation thresholds (e.g. cumulative risk score >= 70 for High, >= 90 for Critical), the incident severity is automatically upgraded.
+- **Deduplication & Union**: Tactics, techniques, and affected artifacts (PIDs, file paths, remote endpoints) are merged into deduplicated sets.
+- **Automated State Persistence**: Updates to incidents are atomically persisted to SQLite/PostgreSQL storage to maintain audit fidelity.
+
 ---
 
 ### 4.5 Response Core
@@ -544,9 +553,22 @@ steps:
       body: "{{ $.incident | summarize }}"
 ```
 
-#### 4.5.3 Dry-Run Mode
+#### 4.5.3 Execution Engine & API Integration
 
-All response actions support `--dry-run` flag which logs what actions would be taken without executing them. This is the default in `passive` mode.
+The `ActionExecutor` orchestrates defense actions triggered via:
+- Automated defense daemon (`r3trive defend --mode active --threshold 75`)
+- Threat hunting or investigation sessions (`r3trive investigate --kill-pid <pid>`)
+- Remote REST API endpoints (`POST /api/v1/response/execute`)
+
+The executor performs strict input validation (PID bounds, IP syntax, absolute file paths), verifies process permissions, executes the platform-specific remediation hook, and emits an immutable response execution log.
+
+#### 4.5.4 Dry-Run Simulation Mode
+
+All response actions support the `--dry-run` CLI flag or `"dry_run": true` API parameter. When enabled, actions are simulated:
+- The executor evaluates target validity and permission requirements.
+- Generates the exact command/syscall payload that would execute.
+- Emits structured audit logs with status `simulated` without altering system state.
+This is the default operating posture in `passive` mode.
 
 ---
 
@@ -923,13 +945,13 @@ If correlation engine falls behind:
 
 | OS | Arch | Sensor Method | CGO Required |
 |---|---|---|---|
-| Linux | amd64 | eBPF (primary) | Yes (for eBPF loader) |
-| Linux | arm64 | eBPF (primary) | Yes |
-| Linux | 386 | /proc polling | No |
-| Windows | amd64 | ETW | Yes (windows bindings) |
-| Windows | arm64 | ETW | Yes |
-| macOS | amd64 | Endpoint Security | Yes (ESF requires entitlement) |
-| macOS | arm64 | Endpoint Security | Yes |
+| Linux | amd64 | eBPF (primary) / `/proc` + `inotify` fallback | Yes (for eBPF loader) |
+| Linux | arm64 | eBPF (primary) / `/proc` + `inotify` fallback | Yes |
+| Linux | 386 | `/proc` polling + `inotify` | No |
+| Windows | amd64 | Win32 Toolhelp32, IP Helper (`iphlpapi`), `ReadDirectoryChangesW` | No (pure Go syscall/windows) |
+| Windows | arm64 | Win32 Toolhelp32, IP Helper (`iphlpapi`), `ReadDirectoryChangesW` | No (pure Go syscall/windows) |
+| macOS | amd64 | Endpoint Security Framework / Audit fallback | Yes (ESF requires entitlement) |
+| macOS | arm64 | Endpoint Security Framework / Audit fallback | Yes |
 
 ### 10.2 Platform-Specific Privilege Requirements
 
@@ -937,8 +959,9 @@ If correlation engine falls behind:
 |---|---|---|
 | Linux | `CAP_BPF`, `CAP_PERFMON` | eBPF program loading |
 | Linux | `CAP_SYS_PTRACE` | Process inspection |
-| Windows | Elevated (admin) | ETW session creation |
-| macOS | Full Disk Access + Endpoint Security entitlement | ESF requires apple-signed entitlement or system extension |
+| Windows | Standard user (unprivileged) | Win32 process snapshots, IP Helper network table polling, file directory watching |
+| Windows | Elevated (admin) | Response actions (kill process, block IP, quarantine), ETW kernel trace sessions |
+| macOS | Full Disk Access + Endpoint Security entitlement | ESF requires Apple-signed entitlement or system extension |
 
 ### 10.3 Path Handling
 

@@ -30,11 +30,18 @@ Base URL: `https://localhost:8443/api/v1`
 
 ## 1. API Overview
 
-R3TRIVE exposes a REST API and a WebSocket/SSE streaming API. The REST API is enabled with:
+R3TRIVE exposes a REST API server. The REST API is started with:
 
 ```bash
-r3trive serve --bind 0.0.0.0:8443 --tls
+r3trive serve --addr :8080 --api-key <secret> --dry-run
 ```
+
+Supported flags for `r3trive serve`:
+- `--addr`: Server address and port to listen on (default `:8080`)
+- `--api-key`: API key required for `X-API-Key` or `Authorization: Bearer <key>` authentication
+- `--tls-cert`: Path to TLS certificate file for HTTPS
+- `--tls-key`: Path to TLS private key file
+- `--dry-run`: Run response engine actions in safe dry-run mode (default `true`)
 
 All endpoints return JSON. Timestamps are ISO 8601 with nanosecond precision.
 
@@ -395,25 +402,55 @@ Returns collected evidence artifacts (process dumps, file samples, network captu
 GET /api/v1/hosts
 ```
 
+Returns all registered hosts. When no hosts are present, returns an empty JSON array `[]`.
+
+Response:
+```json
+[
+  {
+    "id": "host-01",
+    "hostname": "workstation-alpha",
+    "os": "windows",
+    "arch": "amd64",
+    "ip_address": "192.168.1.50",
+    "agent_ver": "v0.1.5",
+    "status": "online",
+    "tags": ["workstation", "finance"],
+    "last_seen": "2026-09-12T01:00:00Z",
+    "created_at": "2026-09-12T00:00:00Z"
+  }
+]
+```
+
 ### 6.2 Get Host
 
 ```http
 GET /api/v1/hosts/{host_id}
 ```
 
-Response includes sensor status, active monitoring configuration, recent activity summary, and risk score.
+Response: Returns the single `Host` object matching the specified ID, or 404 Not Found if missing.
 
-### 6.3 Get Host Risk Score
-
-```http
-GET /api/v1/hosts/{host_id}/risk
-```
-
-### 6.4 Get Host Activity Summary
+### 6.3 Register Host
 
 ```http
-GET /api/v1/hosts/{host_id}/summary?period=24h
+POST /api/v1/hosts
 ```
+
+Request:
+```json
+{
+  "id": "host-01",
+  "hostname": "workstation-alpha",
+  "os": "windows",
+  "arch": "amd64",
+  "ip_address": "192.168.1.50",
+  "agent_ver": "v0.1.5",
+  "status": "online",
+  "tags": ["workstation", "finance"]
+}
+```
+
+Response: `201 Created` with the registered host record.
 
 ---
 
@@ -521,36 +558,51 @@ Triggers deep investigation workflow on an existing incident, adding additional 
 ### 9.1 Execute Response Action
 
 ```http
-POST /api/v1/response/actions
+POST /api/v1/response/execute
 ```
+
+Executes containment actions directly via the response engine or returns a dry-run execution plan.
 
 Request:
 ```json
 {
   "action": "kill_process",
-  "host_id": "host_abc123",
   "params": {
     "pid": 4821
   },
-  "incident_id": "INC-20240315-001",
-  "dry_run": false,
-  "note": "Killing malicious process per IR playbook"
+  "dry_run": false
 }
 ```
 
-Response:
+Response (200 OK - Executed):
 ```json
 {
-  "success": true,
-  "data": {
-    "action_id": "act_01HN2X...",
+  "status": "executed",
+  "action": "kill_process",
+  "result": {
     "action": "kill_process",
-    "status": "success",
-    "executed_at": "2024-03-15T14:32:01Z",
-    "executed_by": "analyst@corp.com",
-    "rollback_id": "rb_01HN2X...",
-    "description": "Process 4821 (powershell.exe) terminated successfully"
+    "success": true,
+    "message": "Process 4821 terminated successfully",
+    "timestamp": "2026-09-12T01:00:00Z",
+    "reversible": false
   }
+}
+```
+
+Response (202 Accepted - Queued when no active response engine is attached):
+```json
+{
+  "status": "accepted",
+  "action": "kill_process",
+  "dry_run": true
+}
+```
+
+Response (400 Bad Request - Validation Error):
+```json
+{
+  "error": "invalid pid: 0 (must be positive)",
+  "action": "kill_process"
 }
 ```
 
@@ -594,57 +646,54 @@ Request:
 
 ---
 
-## 10. Intelligence API
+## 10. Intelligence API (IOC Management)
 
-### 10.1 Add IOC
+### 10.1 Query IOCs
 
 ```http
-POST /api/v1/intel/iocs
+GET /api/v1/iocs?type=ip&value=185.220.101.47
+```
+
+Query parameters:
+- `type`: Indicator category (`ip`, `domain`, `hash`, `url`)
+- `value`: Target indicator string to match
+
+Response:
+```json
+[
+  {
+    "id": "ioc-001",
+    "type": "ip",
+    "value": "185.220.101.47",
+    "source": "threat-feed-alienvault",
+    "severity": "high",
+    "tags": ["tor-exit", "c2"],
+    "first_seen": "2026-09-10T12:00:00Z",
+    "last_seen": "2026-09-12T00:00:00Z",
+    "created_at": "2026-09-10T12:00:00Z"
+  }
+]
+```
+
+### 10.2 Add IOC
+
+```http
+POST /api/v1/iocs
 ```
 
 Request:
 ```json
 {
-  "type": "ip",
-  "value": "185.220.101.47",
-  "confidence": 90,
-  "tags": ["tor-exit-node", "c2"],
-  "source": "analyst",
-  "note": "Observed in INC-20240315-001",
-  "ttl_days": 90
+  "id": "ioc-002",
+  "type": "hash",
+  "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "source": "manual",
+  "severity": "critical",
+  "tags": ["malware", "mimikatz"]
 }
 ```
 
-### 10.2 Search IOCs
-
-```http
-GET /api/v1/intel/iocs?type=ip&value=185.220.101.47
-```
-
-### 10.3 Bulk IOC Import
-
-```http
-POST /api/v1/intel/iocs/bulk
-Content-Type: application/json
-
-{
-  "iocs": [ ... ],
-  "source": "misp-export",
-  "default_ttl_days": 30
-}
-```
-
-### 10.4 Check Reputation
-
-```http
-GET /api/v1/intel/reputation?type=ip&value=8.8.8.8
-```
-
-### 10.5 List Threat Feeds
-
-```http
-GET /api/v1/intel/feeds
-```
+Response: `201 Created` with the persisted IOC entry.
 
 ---
 
@@ -654,47 +703,83 @@ GET /api/v1/intel/feeds
 
 ```http
 GET /api/v1/rules
+GET /api/v1/rules?enabled=true
 ```
 
-Query parameters: `type` (behavioral/yara/sigma/correlation), `status` (stable/experimental), `tag`.
+Query parameters:
+- `enabled`: When set to `true`, filters only currently enabled rules.
 
-### 11.2 Get Rule
-
-```http
-GET /api/v1/rules/{rule_id}
+Response:
+```json
+[
+  {
+    "id": "rule-ps-encoded",
+    "name": "Suspicious Encoded PowerShell",
+    "description": "Detects execution of base64-encoded powershell payloads",
+    "severity": "high",
+    "confidence": 0.85,
+    "enabled": true,
+    "conditions": "[{\"field\":\"data.process.name\",\"operator\":\"eq\",\"value\":\"powershell.exe\"},{\"field\":\"data.process.cmdline\",\"operator\":\"regex\",\"value\":\"(?i)(-enc|-encodedcommand)\"}]",
+    "attack_tactic": "Execution",
+    "attack_technique": "T1059.001",
+    "created_at": "2026-09-11T00:00:00Z",
+    "updated_at": "2026-09-11T00:00:00Z"
+  }
+]
 ```
 
-### 11.3 Create Custom Rule
+### 11.2 Create Rule
 
 ```http
 POST /api/v1/rules
 ```
 
-Request: Rule in YAML format (see RULE_ENGINE_SPEC.md).
+Request:
+```json
+{
+  "id": "rule-lsass-dump",
+  "name": "LSASS Memory Dump Attempt",
+  "description": "Detects execution of tools commonly used to dump lsass process memory",
+  "severity": "critical",
+  "confidence": 0.95,
+  "enabled": true,
+  "conditions": "[{\"field\":\"data.process.cmdline\",\"operator\":\"regex\",\"value\":\"(?i)(procdump|comsvcs|lsass)\"}]",
+  "attack_tactic": "CredentialAccess",
+  "attack_technique": "T1003.001"
+}
+```
 
-### 11.4 Update Rule
+Response: `201 Created` with the stored rule.
+
+### 11.3 Update Rule
 
 ```http
 PUT /api/v1/rules/{rule_id}
 ```
 
-### 11.5 Enable/Disable Rule
-
-```http
-PATCH /api/v1/rules/{rule_id}/status
-```
-
+Request:
 ```json
-{ "enabled": false, "reason": "Too many false positives in this environment" }
+{
+  "name": "Updated LSASS Rule",
+  "description": "Updated description with refined regex",
+  "severity": "critical",
+  "confidence": 0.98,
+  "enabled": true,
+  "conditions": "[{\"field\":\"data.process.cmdline\",\"operator\":\"regex\",\"value\":\"(?i)(procdump\\.exe|rundll32.*comsvcs\\.dll)\"}]",
+  "attack_tactic": "CredentialAccess",
+  "attack_technique": "T1003.001"
+}
 ```
 
-### 11.6 Get Rule Statistics
+Response: `200 OK` with updated rule record.
+
+### 11.4 Delete Rule
 
 ```http
-GET /api/v1/rules/{rule_id}/stats
+DELETE /api/v1/rules/{rule_id}
 ```
 
-Returns: hit count, false positive rate, true positive rate, last triggered.
+Response: `204 No Content` upon successful deletion.
 
 ---
 
