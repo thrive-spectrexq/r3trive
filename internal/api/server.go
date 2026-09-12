@@ -67,8 +67,11 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 		})
 	})
 
+	r.Get("/swagger", HandleSwaggerUI)
+
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", handlers.GetHealth(store))
+		r.Get("/openapi.json", HandleOpenAPIJSON)
 
 		r.Group(func(r chi.Router) {
 			// API Key authentication middleware

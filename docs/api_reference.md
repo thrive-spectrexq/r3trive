@@ -138,17 +138,17 @@ Response:
 
 | Endpoint Category | viewer | analyst | responder | admin |
 |---|---|---|---|---|
-| Events (read) | ✓ | ✓ | ✓ | ✓ |
-| Alerts (read) | ✓ | ✓ | ✓ | ✓ |
-| Alerts (update status) | — | ✓ | ✓ | ✓ |
-| Incidents (read) | ✓ | ✓ | ✓ | ✓ |
-| Hunt | — | ✓ | ✓ | ✓ |
-| Investigate | — | ✓ | ✓ | ✓ |
-| Response actions | — | — | ✓ | ✓ |
-| Rules (read) | ✓ | ✓ | ✓ | ✓ |
-| Rules (write) | — | — | — | ✓ |
-| Config | — | — | — | ✓ |
-| User management | — | — | — | ✓ |
+| Events (read) | Yes | Yes | Yes | Yes |
+| Alerts (read) | Yes | Yes | Yes | Yes |
+| Alerts (update status) | No | Yes | Yes | Yes |
+| Incidents (read) | Yes | Yes | Yes | Yes |
+| Hunt | No | Yes | Yes | Yes |
+| Investigate | No | Yes | Yes | Yes |
+| Response actions | No | No | Yes | Yes |
+| Rules (read) | Yes | Yes | Yes | Yes |
+| Rules (write) | No | No | No | Yes |
+| Config | No | No | No | Yes |
+| User management | No | No | No | Yes |
 
 ---
 

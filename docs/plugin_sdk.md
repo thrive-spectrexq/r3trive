@@ -652,12 +652,12 @@ Plugin: SIEM Forwarder v1.2.3
 Publisher: Example Corp (verified)
 
 This plugin requests the following permissions:
-  ✓ read:events      Read normalized event stream
-  ✓ read:alerts      Read generated alerts
-  ✓ read:incidents   Read incident records
+  + read:events      Read normalized event stream
+  + read:alerts      Read generated alerts
+  + read:incidents   Read incident records
 
 Network access:
-  ✓ siem.example.com:514
+  + siem.example.com:514
 
 Approve? [y/N]:
 ```
