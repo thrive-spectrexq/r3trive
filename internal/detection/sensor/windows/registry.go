@@ -51,6 +51,11 @@ func (s *RegistrySensor) Platform() []sensor.Platform {
 	return []sensor.Platform{sensor.PlatformWindows}
 }
 
+// Type returns the event category.
+func (s *RegistrySensor) Type() string {
+	return "registry"
+}
+
 // Health returns the current health status.
 func (s *RegistrySensor) Health() sensor.SensorHealth {
 	s.mu.RLock()
