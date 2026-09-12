@@ -11,6 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.5] - 2026-09-12
+
+### Added
+- **Native Windows Process Sensor**: Implemented native Windows process monitoring in `internal/detection/sensor/windows/process.go` using pure standard library `syscall` Toolhelp32 APIs (`CreateToolhelp32Snapshot`, `Process32First`, `Process32Next`). Features baseline snapshotting to avoid startup floods, differential polling for process creation detection, parent process name resolution, and thread-safe atomic metrics.
+- **Cross-Platform Sensor Compatibility**: Added `internal/detection/sensor/windows/sensor_other.go` with `!windows` build tags to ensure seamless compilation across Linux and macOS environments.
+- **Centralized Windows Sensor Helpers**: Added `internal/detection/sensor/windows/helpers.go` providing shared `getHostname`, `extractNameFromPath`, and `toInt` functions.
+- **Response Action API Execution**: Connected `/api/v1/response/execute` to the response engine via the `ActionExecutor` interface, enabling real and dry-run containment actions (kill process, block IP, quarantine file, isolate host) over authenticated HTTP requests.
+- **CLI Serve Response Integration**: Added `--dry-run` flag (defaulting to true) to `r3trive serve` command to initialize and wire `response.Engine` directly into the HTTP API server.
+- **Documentation Website Deployment**: Added GitHub Pages documentation pipeline (`.github/workflows/docs.yml`) using Material for MkDocs with unified left-sidebar navigation and full project guides.
+
+### Improved & Optimized
+- **Correlation Engine Regex Pre-Compilation**: Added thread-safe regular expression caching to `internal/correlation/engine.go` (`regexCache`). Rule condition regexes are pre-compiled during rule loading rather than recompiled on every incoming event.
+- **REST API JSON Response Consistency**: Fixed handlers for `/hosts`, `/rules`, and `/iocs` to ensure empty query results serialize as empty JSON arrays `[]` instead of `null`.
+- **Test Coverage Expansion**: Added unit and lifecycle tests for Windows process sensor (`process_test.go`) and response action execution HTTP handler (`response_test.go`).
+
+---
+
 ## [0.1.4] - 2026-09-11
 
 ### Added
