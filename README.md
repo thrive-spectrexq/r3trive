@@ -2,7 +2,7 @@
 
 > **Endpoint detection, threat hunting and automated defense.**
 
-[![Version](https://img.shields.io/badge/version-v0.1.7-blue.svg)](https://github.com/thrive-spectrexq/r3trive/releases/tag/v0.1.7)
+[![Version](https://img.shields.io/badge/version-v0.1.8-blue.svg)](https://github.com/thrive-spectrexq/r3trive/releases/tag/v0.1.8)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![Go Version](https://img.shields.io/badge/go-1.25+-00ADD8.svg)](https://golang.org/)

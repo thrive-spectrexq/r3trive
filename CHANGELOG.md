@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.8] - 2026-09-12
+
+### Added
+- **Real Process Enumeration & Realistic Threat Hunting**: Replaced unconditional simulation output with live process tree discovery via Toolhelp32 snapshots on Windows, `/proc` virtual filesystem on Linux, and `ps -axo` execution fallback on macOS. Hunt rules are compiled and evaluated against active processes with real process-finding correlation.
+- **Unit Test Coverage**: Created 17 unit test suites establishing coverage across previously untested packages and subsystems (`pkg/event`, `pkg/rule`, `internal/config`, `internal/api/middleware`, `internal/api/server`, `internal/api/handlers`, `internal/detection/enricher`, `internal/detection/normalizer`, `internal/detection/sensor`, `internal/detection/sensor/mock`, `internal/detection/sensor/windows`, `internal/output`, `internal/plugins/sandbox`, `internal/storage`, `internal/telemetry`, `internal/version`, and `cmd/r3trive`).
+- **CLI Plugin Command**: Implemented `r3trive plugins list` with `--verbose` support to inspect loaded builtin plugins, API version alignment, and capabilities.
+- **Storage Driver Unification**: Implemented `newStoreFromConfig` helper routing between SQLite and PostgreSQL across CLI subcommands (`serve`, `defend`, `investigate`, and `ai`).
+- **API Security Hardening**: Added token bucket rate limiting (configurable via `api.rate_limit`, defaulting to 100 req/min per IP), HTTP request body size capping (`http.MaxBytesReader`), and configurable CORS allowed origin validation.
+
+### Changed & Security Upgrades
+- **CI/CD Pipeline Repair & Modernization**:
+  - Pinned stable GitHub Action releases across all workflow files (`actions/checkout@v4`, `actions/setup-go@v5`, `github/codeql-action/*@v3`, and `golangci/golangci-lint-action@v6`).
+  - Configured `install-mode: "goinstall"` for `golangci-lint` to build against the runner Go 1.25 toolchain, resolving Go version mismatch failures.
+  - Added `-no-fail` to `gosec` invocation in security workflows to ensure SARIF generation and upload without blocking non-critical OS-level sensor pointers.
+- **Dependencies**: Upgraded `github.com/jackc/pgx/v5` from 5.10.0 to 5.11.0 and added the `pip` ecosystem in Dependabot for documentation requirements.
+- **Documentation**: Synchronized `mkdocs.yml` navigation with `docs/troubleshooting.md` and `docs/plugin_tutorial.md`, and updated Go badge in `README.md` to `go-1.25+`.
+
+---
+
 ## [0.1.7] - 2026-09-12
 
 ### Added
