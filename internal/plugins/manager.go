@@ -61,6 +61,9 @@ func NewManager() *Manager {
 
 // RegisterPlugin registers an active plugin instance with sandbox boundaries.
 func (m *Manager) RegisterPlugin(instance Instance, sbConfig sandbox.Config) error {
+	if sbConfig.MaxMemoryMB > 0 || len(sbConfig.Permissions) > 0 {
+		return fmt.Errorf("plugin registration failed: in-process plugins cannot enforce memory or capability limits")
+	}
 	m.executionMu.Lock()
 	defer m.executionMu.Unlock()
 	m.mu.Lock()

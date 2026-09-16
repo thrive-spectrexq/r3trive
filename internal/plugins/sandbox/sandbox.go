@@ -16,8 +16,9 @@ const (
 	PermissionProcess    Permission = "process"
 )
 
-// Config holds execution limits. Plugins are in-process Go code, so memory and
-// permission limits cannot be enforced here; use a separate process for untrusted code.
+// Config holds execution limits. Permission and memory fields are retained for
+// configuration compatibility, but Manager rejects them because in-process Go
+// plugins cannot enforce those limits. Use a separate process for untrusted code.
 type Config struct {
 	MaxMemoryMB int           `json:"max_memory_mb"`
 	Timeout     time.Duration `json:"timeout"`

@@ -65,3 +65,11 @@ func TestPluginManager(t *testing.T) {
 		t.Errorf("UnregisterPlugin failed: %v", err)
 	}
 }
+
+func TestPluginManagerRejectsUnenforceableSandboxLimits(t *testing.T) {
+	mgr := NewManager()
+	err := mgr.RegisterPlugin(&dummyEnrichmentPlugin{}, sandbox.Config{Permissions: []sandbox.Permission{sandbox.PermissionNetwork}})
+	if err == nil {
+		t.Fatal("expected registration with unenforceable permissions to fail")
+	}
+}
