@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed & Security Hardening
+- **Secure API Defaults**: The API now binds to loopback by default, denies cross-origin access unless origins are explicitly configured, requires credentials for protected endpoints, compares API keys in constant time, and applies read, write, and idle connection timeouts.
+- **Safer Automated Response**: Response actions now honor request-level dry-run mode, report failed operating-system actions as failures, and reject requests when no response executor is available.
+- **Rate-Limit Integrity**: Rate limiting no longer trusts client-controlled `X-Forwarded-For` headers and expires inactive client records to bound memory use.
+- **Plugin Boundary Clarity**: Plugin execution is deterministic and lifecycle-safe. Configurations requesting unenforceable in-process memory or capability limits are rejected rather than silently treated as sandboxed.
+- **Quarantine Protection**: Quarantine operations now create unique, exclusive destination files to prevent same-name collisions and destination-path overwrite risks.
+- **Storage Reliability**: SQLite event batches now fail and roll back on serialization or insert errors instead of committing partial telemetry silently.
+- **Storage Configuration**: PostgreSQL is rejected in configuration until its incomplete host, rule, and IOC storage implementation reaches feature parity.
+
 ---
 
 ## [0.1.8] - 2026-09-12
