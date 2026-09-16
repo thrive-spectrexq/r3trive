@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sort"
 	"sync"
 	"time"
 
@@ -44,9 +45,10 @@ type Instance interface {
 
 // Manager coordinates plugin discovery, registration, sandbox execution, and event pipelines.
 type Manager struct {
-	mu        sync.RWMutex
-	plugins   map[string]Instance
-	sandboxes map[string]*sandbox.Sandbox
+	mu          sync.RWMutex
+	executionMu sync.Mutex
+	plugins     map[string]Instance
+	sandboxes   map[string]*sandbox.Sandbox
 }
 
 // NewManager initializes a new Plugin Manager.
@@ -59,6 +61,8 @@ func NewManager() *Manager {
 
 // RegisterPlugin registers an active plugin instance with sandbox boundaries.
 func (m *Manager) RegisterPlugin(instance Instance, sbConfig sandbox.Config) error {
+	m.executionMu.Lock()
+	defer m.executionMu.Unlock()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -81,6 +85,8 @@ func (m *Manager) RegisterPlugin(instance Instance, sbConfig sandbox.Config) err
 
 // UnregisterPlugin unloads a plugin.
 func (m *Manager) UnregisterPlugin(id string) error {
+	m.executionMu.Lock()
+	defer m.executionMu.Unlock()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -111,25 +117,36 @@ func (m *Manager) ListPlugins() []Info {
 
 // ProcessEvent forwards an event through all enabled enrichment plugins sequentially inside sandboxes.
 func (m *Manager) ProcessEvent(ctx context.Context, evt event.Event) (event.Event, error) {
+	m.executionMu.Lock()
+	defer m.executionMu.Unlock()
 	m.mu.RLock()
-	defer m.mu.RUnlock()
+	type activePlugin struct {
+		id   string
+		inst Instance
+		info Info
+		sb   *sandbox.Sandbox
+	}
+	active := make([]activePlugin, 0, len(m.plugins))
+	for id, inst := range m.plugins {
+		info := inst.Info()
+		if info.Enabled && info.Type == PluginTypeEnrichment {
+			active = append(active, activePlugin{id: id, inst: inst, info: info, sb: m.sandboxes[id]})
+		}
+	}
+	m.mu.RUnlock()
+	sort.Slice(active, func(i, j int) bool { return active[i].id < active[j].id })
 
 	currentEvt := evt
 
-	for id, inst := range m.plugins {
-		info := inst.Info()
-		if !info.Enabled || info.Type != PluginTypeEnrichment {
-			continue
-		}
-
-		sb, ok := m.sandboxes[id]
-		if !ok {
+	for _, plugin := range active {
+		sb := plugin.sb
+		if sb == nil {
 			sb = sandbox.New(sandbox.Config{Timeout: 5 * time.Second})
 		}
 
 		var enrichedEvt event.Event
-		err := sb.Execute(ctx, info.Name, func(sCtx context.Context) error {
-			res, err := inst.OnEvent(sCtx, currentEvt)
+		err := sb.Execute(ctx, plugin.info.Name, func(sCtx context.Context) error {
+			res, err := plugin.inst.OnEvent(sCtx, currentEvt)
 			if err != nil {
 				return err
 			}
@@ -138,7 +155,7 @@ func (m *Manager) ProcessEvent(ctx context.Context, evt event.Event) (event.Even
 		})
 
 		if err != nil {
-			slog.Warn("enrichment plugin failed, continuing pipeline", "plugin", info.Name, "error", err)
+			slog.Warn("enrichment plugin failed, continuing pipeline", "plugin", plugin.info.Name, "error", err)
 		} else {
 			currentEvt = enrichedEvt
 		}

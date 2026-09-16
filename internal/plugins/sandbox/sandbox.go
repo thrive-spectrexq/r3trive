@@ -16,14 +16,15 @@ const (
 	PermissionProcess    Permission = "process"
 )
 
-// Config holds sandbox execution limits and permissions.
+// Config holds execution limits. Plugins are in-process Go code, so memory and
+// permission limits cannot be enforced here; use a separate process for untrusted code.
 type Config struct {
 	MaxMemoryMB int           `json:"max_memory_mb"`
 	Timeout     time.Duration `json:"timeout"`
 	Permissions []Permission  `json:"permissions"`
 }
 
-// Sandbox isolates plugin execution within configured security boundaries.
+// Sandbox provides timeout and panic isolation for trusted in-process plugins.
 type Sandbox struct {
 	cfg Config
 }

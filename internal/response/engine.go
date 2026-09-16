@@ -64,6 +64,15 @@ func New(dryRun bool) *Engine {
 
 // Execute runs a response action with the given parameters.
 func (e *Engine) Execute(ctx context.Context, action ActionType, params map[string]any) (ActionResult, error) {
+	return e.execute(ctx, action, params, e.dryRun)
+}
+
+// ExecuteDryRun validates and simulates an action regardless of the engine mode.
+func (e *Engine) ExecuteDryRun(ctx context.Context, action ActionType, params map[string]any) (ActionResult, error) {
+	return e.execute(ctx, action, params, true)
+}
+
+func (e *Engine) execute(ctx context.Context, action ActionType, params map[string]any, dryRun bool) (ActionResult, error) {
 	handler, ok := e.actions[action]
 	if !ok {
 		return ActionResult{}, fmt.Errorf("unknown action type: %s", action)
@@ -74,7 +83,7 @@ func (e *Engine) Execute(ctx context.Context, action ActionType, params map[stri
 		return ActionResult{}, err
 	}
 
-	if e.dryRun {
+	if dryRun {
 		slog.Info("dry-run: would execute action", "action", action, "params", params)
 		return ActionResult{
 			Action:    action,
@@ -237,13 +246,17 @@ func (e *Engine) killProcess(ctx context.Context, params map[string]any) (Action
 		msg = fmt.Sprintf("Failed to kill process %d: %v", pid, err)
 	}
 
-	return ActionResult{
+	result := ActionResult{
 		Action:     ActionKillProcess,
 		Success:    success,
 		Message:    msg,
 		Timestamp:  time.Now().UTC(),
 		Reversible: false,
-	}, nil
+	}
+	if err != nil {
+		return result, fmt.Errorf("kill process %d: %w", pid, err)
+	}
+	return result, nil
 }
 
 func (e *Engine) blockIP(ctx context.Context, params map[string]any) (ActionResult, error) {
@@ -263,13 +276,17 @@ func (e *Engine) blockIP(ctx context.Context, params map[string]any) (ActionResu
 		msg = fmt.Sprintf("Failed to block IP %s: %v", ip, err)
 	}
 
-	return ActionResult{
+	result := ActionResult{
 		Action:     ActionBlockIP,
 		Success:    success,
 		Message:    msg,
 		Timestamp:  time.Now().UTC(),
 		Reversible: true,
-	}, nil
+	}
+	if err != nil {
+		return result, fmt.Errorf("block IP %s: %w", ip, err)
+	}
+	return result, nil
 }
 
 func (e *Engine) quarantineFile(ctx context.Context, params map[string]any) (ActionResult, error) {
@@ -289,25 +306,30 @@ func (e *Engine) quarantineFile(ctx context.Context, params map[string]any) (Act
 		msg = fmt.Sprintf("Failed to quarantine file %s: %v", path, err)
 	}
 
-	return ActionResult{
+	result := ActionResult{
 		Action:     ActionQuarantine,
 		Success:    success,
 		Message:    msg,
 		Timestamp:  time.Now().UTC(),
 		Reversible: true, // Can be un-quarantined
-	}, nil
+	}
+	if err != nil {
+		return result, fmt.Errorf("quarantine file %s: %w", path, err)
+	}
+	return result, nil
 }
 
 func (e *Engine) isolateHost(ctx context.Context, params map[string]any) (ActionResult, error) {
 	err := sysIsolateHost(ctx)
 	if err != nil {
-		return ActionResult{
+		result := ActionResult{
 			Action:     ActionIsolateHost,
 			Success:    false,
 			Message:    fmt.Sprintf("Failed to isolate host: %v", err),
 			Timestamp:  time.Now().UTC(),
 			Reversible: true,
-		}, nil
+		}
+		return result, err
 	}
 
 	return ActionResult{

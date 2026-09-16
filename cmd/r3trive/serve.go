@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -40,6 +42,9 @@ func newServeCmd() *cobra.Command {
 			if apiKey == "" && cfg != nil && cfg.API.APIKey != "" {
 				apiKey = cfg.API.APIKey
 			}
+			if apiKey == "" {
+				return fmt.Errorf("serve requires an API key; set api.api_key or pass --api-key")
+			}
 			tlsCert := serveTLSCert
 			if tlsCert == "" && cfg != nil && cfg.API.TLSCert != "" {
 				tlsCert = cfg.API.TLSCert
@@ -47,6 +52,9 @@ func newServeCmd() *cobra.Command {
 			tlsKey := serveTLSKey
 			if tlsKey == "" && cfg != nil && cfg.API.TLSKey != "" {
 				tlsKey = cfg.API.TLSKey
+			}
+			if host, _, err := net.SplitHostPort(addr); err == nil && host != "" && !net.ParseIP(host).IsLoopback() && (tlsCert == "" || tlsKey == "") {
+				return fmt.Errorf("TLS certificate and key are required when serving on a non-loopback address")
 			}
 
 			respEngine := response.New(serveDryRun)

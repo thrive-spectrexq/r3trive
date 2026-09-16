@@ -4,6 +4,8 @@ package response
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log/slog"
@@ -43,14 +45,13 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 		return fmt.Errorf("failed to create quarantine directory: %w", err)
 	}
 
-	fileName := filepath.Base(path)
-	destPath := filepath.Join(quarantineDir, fileName+".quarantined")
-
-	if err := os.Rename(path, destPath); err != nil {
-		// Fallback for cross-device move (EXDEV) or rename failure: copy and remove original
-		if copyErr := moveFileByCopy(path, destPath); copyErr != nil {
-			return fmt.Errorf("failed to move file to quarantine (rename: %w, copy: %w)", err, copyErr)
-		}
+	token := make([]byte, 16)
+	if _, err := rand.Read(token); err != nil {
+		return fmt.Errorf("generating quarantine name: %w", err)
+	}
+	destPath := filepath.Join(quarantineDir, filepath.Base(path)+"."+hex.EncodeToString(token)+".quarantined")
+	if err := moveFileByCopy(path, destPath); err != nil {
+		return fmt.Errorf("failed to move file to quarantine: %w", err)
 	}
 
 	cmd := exec.CommandContext(ctx, "chmod", "000", destPath) // #nosec G204
@@ -71,7 +72,7 @@ func moveFileByCopy(src, dst string) error {
 	}
 	defer in.Close()
 
-	out, err := os.OpenFile(cleanDst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600) // #nosec G304
+	out, err := os.OpenFile(cleanDst, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0600) // #nosec G304
 	if err != nil {
 		return err
 	}

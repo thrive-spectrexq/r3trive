@@ -17,6 +17,16 @@ type mockActionExecutor struct {
 	executeFn func(ctx context.Context, action response.ActionType, params map[string]any) (response.ActionResult, error)
 }
 
+type mockDryRunExecutor struct {
+	mockActionExecutor
+	dryRunCalled bool
+}
+
+func (m *mockDryRunExecutor) ExecuteDryRun(ctx context.Context, action response.ActionType, params map[string]any) (response.ActionResult, error) {
+	m.dryRunCalled = true
+	return response.ActionResult{Action: action, Success: true, Message: "dry-run mock", Timestamp: time.Now().UTC()}, nil
+}
+
 func (m *mockActionExecutor) Execute(ctx context.Context, action response.ActionType, params map[string]any) (response.ActionResult, error) {
 	if m.executeFn != nil {
 		return m.executeFn(ctx, action, params)
@@ -70,16 +80,35 @@ func TestExecuteAction_NoExecutor(t *testing.T) {
 
 	handler(w, req)
 
-	if w.Code != http.StatusAccepted {
-		t.Fatalf("expected status %d, got %d", http.StatusAccepted, w.Code)
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected status %d, got %d", http.StatusServiceUnavailable, w.Code)
 	}
+}
 
-	var resp map[string]any
-	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
-		t.Fatalf("failed to decode response: %v", err)
+func TestExecuteAction_DryRunUsesDryRunExecutor(t *testing.T) {
+	mockExec := &mockDryRunExecutor{}
+	handler := ExecuteAction(nil, mockExec)
+	body := bytes.NewBufferString(`{"action":"kill_process","params":{"pid":4321},"dry_run":true}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/response/execute", body)
+	w := httptest.NewRecorder()
+
+	handler(w, req)
+
+	if w.Code != http.StatusOK || !mockExec.dryRunCalled {
+		t.Fatalf("dry run was not executed safely; status=%d called=%t", w.Code, mockExec.dryRunCalled)
 	}
-	if resp["status"] != "accepted" {
-		t.Fatalf("expected status 'accepted', got %v", resp["status"])
+}
+
+func TestExecuteAction_UnsuccessfulResultIsFailure(t *testing.T) {
+	handler := ExecuteAction(nil, &mockActionExecutor{executeFn: func(context.Context, response.ActionType, map[string]any) (response.ActionResult, error) {
+		return response.ActionResult{Success: false, Message: "operation failed"}, nil
+	}})
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/response/execute", bytes.NewBufferString(`{"action":"kill_process"}`))
+	w := httptest.NewRecorder()
+
+	handler(w, req)
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("expected status %d, got %d", http.StatusInternalServerError, w.Code)
 	}
 }
 

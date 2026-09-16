@@ -15,6 +15,11 @@ type ActionExecutor interface {
 	Execute(ctx context.Context, action response.ActionType, params map[string]any) (response.ActionResult, error)
 }
 
+// DryRunActionExecutor supports validating an action without changing host state.
+type DryRunActionExecutor interface {
+	ExecuteDryRun(ctx context.Context, action response.ActionType, params map[string]any) (response.ActionResult, error)
+}
+
 // ExecuteActionRequest is the request body for executing a response action.
 type ExecuteActionRequest struct {
 	Action string         `json:"action"`
@@ -44,13 +49,35 @@ func ExecuteAction(store storage.Store, executor ActionExecutor) http.HandlerFun
 		)
 
 		if executor != nil {
-			res, err := executor.Execute(r.Context(), response.ActionType(req.Action), req.Params)
+			var res response.ActionResult
+			var err error
+			action := response.ActionType(req.Action)
+			if req.DryRun {
+				dryRunner, ok := executor.(DryRunActionExecutor)
+				if !ok {
+					http.Error(w, "executor does not support dry-run actions", http.StatusNotImplemented)
+					return
+				}
+				res, err = dryRunner.ExecuteDryRun(r.Context(), action, req.Params)
+			} else {
+				res, err = executor.Execute(r.Context(), action, req.Params)
+			}
 			if err != nil {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusBadRequest)
 				_ = json.NewEncoder(w).Encode(map[string]any{
 					"error":  err.Error(),
 					"action": req.Action,
+				})
+				return
+			}
+			if !res.Success {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(map[string]any{
+					"error":  res.Message,
+					"action": req.Action,
+					"result": res,
 				})
 				return
 			}
@@ -67,15 +94,6 @@ func ExecuteAction(store storage.Store, executor ActionExecutor) http.HandlerFun
 			return
 		}
 
-		// Return accepted - placeholder when no executor is wired
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusAccepted)
-		if err := json.NewEncoder(w).Encode(map[string]any{
-			"status":  "accepted",
-			"action":  req.Action,
-			"dry_run": req.DryRun,
-		}); err != nil {
-			slog.Error("failed to encode response", "error", err)
-		}
+		http.Error(w, "response executor is unavailable", http.StatusServiceUnavailable)
 	}
 }

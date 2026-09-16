@@ -2,7 +2,10 @@ package actions
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -43,13 +46,36 @@ func QuarantineFile(ctx context.Context, sourcePath string, quarantineDir string
 		}
 	}
 
-	destPath := filepath.Join(quarantineDir, filepath.Base(sourcePath)+".quarantined")
-	if err := os.Rename(sourcePath, destPath); err != nil {
+	token := make([]byte, 16)
+	if _, err := rand.Read(token); err != nil {
+		return Result{Type: ActionQuarantine, Target: sourcePath, Success: false, Error: fmt.Sprintf("generating quarantine name: %v", err)}
+	}
+	destPath := filepath.Join(quarantineDir, filepath.Base(sourcePath)+"."+hex.EncodeToString(token)+".quarantined")
+	in, err := os.Open(sourcePath)
+	if err != nil {
+		return Result{Type: ActionQuarantine, Target: sourcePath, Success: false, Error: fmt.Sprintf("opening file: %v", err)}
+	}
+	defer in.Close()
+	out, err := os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return Result{Type: ActionQuarantine, Target: sourcePath, Success: false, Error: fmt.Sprintf("creating quarantine file: %v", err)}
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		_ = out.Close()
+		_ = os.Remove(destPath)
+		return Result{Type: ActionQuarantine, Target: sourcePath, Success: false, Error: fmt.Sprintf("copying file to quarantine: %v", err)}
+	}
+	if err := out.Close(); err != nil {
+		_ = os.Remove(destPath)
+		return Result{Type: ActionQuarantine, Target: sourcePath, Success: false, Error: fmt.Sprintf("closing quarantine file: %v", err)}
+	}
+	if err := os.Remove(sourcePath); err != nil {
+		_ = os.Remove(destPath)
 		return Result{
 			Type:    ActionQuarantine,
 			Target:  sourcePath,
 			Success: false,
-			Error:   fmt.Sprintf("moving file to quarantine: %v", err),
+			Error:   fmt.Sprintf("removing original file: %v", err),
 		}
 	}
 

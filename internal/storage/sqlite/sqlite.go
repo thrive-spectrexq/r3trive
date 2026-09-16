@@ -106,8 +106,7 @@ func (s *Store) SaveEvents(ctx context.Context, events []event.Event) error {
 	for _, evt := range events {
 		dataJSON, err := json.Marshal(evt.Data)
 		if err != nil {
-			slog.Error("sqlite: marshaling event data", "event_id", evt.ID, "error", err)
-			continue
+			return fmt.Errorf("sqlite: marshaling event data for %s: %w", evt.ID, err)
 		}
 
 		var enrichJSON []byte
@@ -128,7 +127,7 @@ func (s *Store) SaveEvents(ctx context.Context, events []event.Event) error {
 			evt.ChainHash,
 		)
 		if err != nil {
-			slog.Error("sqlite: inserting event", "event_id", evt.ID, "error", err)
+			return fmt.Errorf("sqlite: inserting event %s: %w", evt.ID, err)
 		}
 	}
 

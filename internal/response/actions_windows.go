@@ -4,7 +4,10 @@ package response
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
@@ -56,13 +59,32 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 	}
 
 	// Move file
-	fileName := filepath.Base(path)
-	destPath := filepath.Join(quarantineDir, fileName+".quarantined")
-
-	if err := os.Rename(path, destPath); err != nil {
-		// Fallback: try to copy and delete if cross-device rename fails,
-		// but simple rename usually works if not locked.
-		return fmt.Errorf("failed to move file to quarantine: %w", err)
+	token := make([]byte, 16)
+	if _, err := rand.Read(token); err != nil {
+		return fmt.Errorf("generating quarantine name: %w", err)
+	}
+	destPath := filepath.Join(quarantineDir, filepath.Base(path)+"."+hex.EncodeToString(token)+".quarantined")
+	in, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("opening source file: %w", err)
+	}
+	defer in.Close()
+	out, err := os.OpenFile(destPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return fmt.Errorf("creating quarantine file: %w", err)
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		_ = out.Close()
+		_ = os.Remove(destPath)
+		return fmt.Errorf("copying file to quarantine: %w", err)
+	}
+	if err := out.Close(); err != nil {
+		_ = os.Remove(destPath)
+		return fmt.Errorf("closing quarantine file: %w", err)
+	}
+	if err := os.Remove(path); err != nil {
+		_ = os.Remove(destPath)
+		return fmt.Errorf("removing source file: %w", err)
 	}
 
 	// Remove permissions (icacls to deny everything or just restrict to SYSTEM)

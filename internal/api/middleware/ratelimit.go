@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 )
@@ -22,6 +21,7 @@ func RateLimit(requestsPerMin int) func(http.Handler) http.Handler {
 
 	var mu sync.Mutex
 	clients := make(map[string]*clientRecord)
+	var lastCleanup time.Time
 	rate := float64(requestsPerMin) / 60.0 // tokens per second
 	burst := float64(requestsPerMin)
 
@@ -30,8 +30,16 @@ func RateLimit(requestsPerMin int) func(http.Handler) http.Handler {
 			ip := extractIP(r)
 
 			mu.Lock()
-			rec, exists := clients[ip]
 			now := time.Now()
+			if now.Sub(lastCleanup) >= 5*time.Minute {
+				for clientIP, client := range clients {
+					if now.Sub(client.lastRefill) >= 10*time.Minute {
+						delete(clients, clientIP)
+					}
+				}
+				lastCleanup = now
+			}
+			rec, exists := clients[ip]
 			if !exists {
 				rec = &clientRecord{tokens: burst, lastRefill: now}
 				clients[ip] = rec
@@ -64,10 +72,6 @@ func RateLimit(requestsPerMin int) func(http.Handler) http.Handler {
 }
 
 func extractIP(r *http.Request) string {
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		parts := strings.Split(xff, ",")
-		return strings.TrimSpace(parts[0])
-	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

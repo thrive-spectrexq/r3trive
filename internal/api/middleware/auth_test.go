@@ -19,10 +19,10 @@ func TestAPIKeyAuth(t *testing.T) {
 		wantStatus int
 	}{
 		{
-			name:       "empty configured key permits all",
+			name:       "empty configured key denies all",
 			apiKey:     "",
 			headerKey:  "",
-			wantStatus: http.StatusOK,
+			wantStatus: http.StatusUnauthorized,
 		},
 		{
 			name:       "valid API key matches",

@@ -78,9 +78,6 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 
 	// Configurable CORS middleware
 	allowedOrigins := cfg.CORSOrigins
-	if len(allowedOrigins) == 0 {
-		allowedOrigins = []string{"*"}
-	}
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
@@ -94,6 +91,7 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 			if isAllowed {
 				if origin != "" && allowedOrigins[0] != "*" {
 					w.Header().Set("Access-Control-Allow-Origin", origin)
+					w.Header().Add("Vary", "Origin")
 				} else {
 					w.Header().Set("Access-Control-Allow-Origin", "*")
 				}
@@ -162,6 +160,9 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 			Addr:              cfg.Addr,
 			Handler:           r,
 			ReadHeaderTimeout: 5 * time.Second,
+			ReadTimeout:       30 * time.Second,
+			WriteTimeout:      30 * time.Second,
+			IdleTimeout:       60 * time.Second,
 		},
 		store:  store,
 		config: cfg,
