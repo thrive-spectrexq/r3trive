@@ -839,7 +839,6 @@ func (s *Store) QueryIOCs(ctx context.Context, iocType string, value string) ([]
 	if value != "" {
 		query += fmt.Sprintf(" AND value = $%d", paramIdx)
 		args = append(args, value)
-		paramIdx++
 	}
 	query += " ORDER BY created_at DESC"
 

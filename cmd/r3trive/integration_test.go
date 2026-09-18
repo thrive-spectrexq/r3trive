@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 )
@@ -148,14 +147,6 @@ func TestIntegrationPluginsList(t *testing.T) {
 	if code != ExitSuccess {
 		t.Errorf("expected exit code %d, got %d", ExitSuccess, code)
 	}
-
-	// Verify standard plugins are displayed
-	pluginsTable := out.String()
-	if !strings.Contains(pluginsTable, "Splunk HEC Forwarder") {
-		// Output from plugins list is printed to stdout directly by output.Formatter
-		// So checking success is key
-	}
-	_ = os.Stdout
 }
 
 func TestIntegrationTelemetryLifecycle(t *testing.T) {
@@ -188,4 +179,3 @@ func TestIntegrationTelemetryLifecycle(t *testing.T) {
 		t.Fatalf("command failed with telemetry enabled: %v", err)
 	}
 }
-
