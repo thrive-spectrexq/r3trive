@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [0.1.9] - 2026-09-18
 
 ### Added & Feature Parity
 - **PostgreSQL Fleet Storage Parity**: Completed implementation of `SaveHost`, `GetHost`, `ListHosts`, `SaveRule`, `GetRule`, `ListRules`, `DeleteRule`, `SaveIOC`, and `QueryIOCs` in `internal/storage/postgres`, with full table and index definitions for `hosts`, `rules`, `playbooks`, and `ioc_entries` in `pgSchema`.
