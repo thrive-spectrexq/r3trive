@@ -66,7 +66,7 @@ type MonitorConfig struct {
 
 // StorageConfig holds storage-specific configuration.
 type StorageConfig struct {
-	// Driver is the storage backend. SQLite is currently the supported backend.
+	// Driver is the storage backend ("sqlite" or "postgres").
 	Driver string `yaml:"driver" json:"driver"`
 	// DSN is the data source name / connection string.
 	DSN string `yaml:"dsn" json:"dsn"`
@@ -182,9 +182,9 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid log_level %q, must be one of: trace, debug, info, warn, error", c.LogLevel)
 	}
 
-	validDrivers := map[string]bool{"sqlite": true}
+	validDrivers := map[string]bool{"sqlite": true, "postgres": true}
 	if !validDrivers[c.Storage.Driver] {
-		return fmt.Errorf("invalid storage driver %q, only sqlite is currently supported", c.Storage.Driver)
+		return fmt.Errorf("invalid storage driver %q, must be sqlite or postgres", c.Storage.Driver)
 	}
 
 	validOutputs := map[string]bool{
