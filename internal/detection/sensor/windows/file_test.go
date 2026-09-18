@@ -216,6 +216,7 @@ func TestWindowsFileSensor_LifecycleAndFileEvents(t *testing.T) {
 	collected := make(map[event.EventType]bool)
 	timeout := time.After(4 * time.Second)
 
+EventLoop:
 	for len(collected) < 4 {
 		select {
 		case ev := <-ch:
@@ -234,7 +235,7 @@ func TestWindowsFileSensor_LifecycleAndFileEvents(t *testing.T) {
 				}
 			}
 		case <-timeout:
-			break
+			break EventLoop
 		}
 	}
 

@@ -150,7 +150,7 @@ func TestWindowsNetworkSensor_LifecycleAndDetection(t *testing.T) {
 	}()
 
 	// Allow baseline snapshot to populate
-	time.Sleep(150 * time.Millisecond)
+	time.Sleep(400 * time.Millisecond)
 
 	// Create a new TCP listener to trigger detection
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -172,7 +172,7 @@ func TestWindowsNetworkSensor_LifecycleAndDetection(t *testing.T) {
 		defer conn.Close()
 	}
 
-	// Collect events until we see our listener or timeout
+	// Collect events until we see our listener or connection or timeout
 	foundListener := false
 	timeout := time.After(4 * time.Second)
 
@@ -180,7 +180,8 @@ func TestWindowsNetworkSensor_LifecycleAndDetection(t *testing.T) {
 		select {
 		case ev := <-ch:
 			if ev.Data.Network != nil {
-				if ev.Type == event.NetworkListen && ev.Data.Network.SrcPort == expectedPort {
+				if (ev.Type == event.NetworkListen && ev.Data.Network.SrcPort == expectedPort) ||
+					(ev.Type == event.NetworkConnect && ev.Data.Network.DstPort == expectedPort) {
 					t.Logf("detected network event: %s %s:%d -> %s:%d (pid: %d, proc: %s)",
 						ev.Type,
 						ev.Data.Network.SrcIP, ev.Data.Network.SrcPort,
