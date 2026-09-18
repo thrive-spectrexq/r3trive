@@ -3,9 +3,11 @@ package config
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -52,6 +54,8 @@ type APIConfig struct {
 	MaxBodyBytes int64 `yaml:"max_body_bytes" json:"max_body_bytes"`
 	// CORSOrigins lists allowed CORS origins.
 	CORSOrigins []string `yaml:"cors_origins" json:"cors_origins"`
+	// AllowInsecureBinding permits non-loopback bindings without auth or TLS.
+	AllowInsecureBinding bool `yaml:"allow_insecure_binding" json:"allow_insecure_binding"`
 }
 
 // MonitorConfig holds monitoring-specific configuration.
@@ -142,13 +146,14 @@ func Default() *Config {
 			RingBufferSize: 10000,
 		},
 		API: APIConfig{
-			Addr:         "127.0.0.1:8080",
-			APIKey:       "",
-			TLSCert:      "",
-			TLSKey:       "",
-			RateLimit:    100,
-			MaxBodyBytes: 1048576, // 1MB
-			CORSOrigins:  nil,
+			Addr:                 "127.0.0.1:8080",
+			APIKey:               "",
+			TLSCert:              "",
+			TLSKey:               "",
+			RateLimit:            100,
+			MaxBodyBytes:         1048576, // 1MB
+			CORSOrigins:          nil,
+			AllowInsecureBinding: false,
 		},
 	}
 }
@@ -187,6 +192,12 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid storage driver %q, must be sqlite or postgres", c.Storage.Driver)
 	}
 
+	if c.Storage.Driver == "postgres" {
+		if !strings.HasPrefix(c.Storage.DSN, "postgres://") && !strings.HasPrefix(c.Storage.DSN, "postgresql://") {
+			return fmt.Errorf("storage: postgres dsn must begin with 'postgres://' or 'postgresql://'")
+		}
+	}
+
 	validOutputs := map[string]bool{
 		"table": true, "json": true, "ndjson": true, "csv": true, "quiet": true,
 	}
@@ -202,7 +213,45 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("sensor.ring_buffer_size must be >= 100, got %d", c.Sensor.RingBufferSize)
 	}
 
+	// TLS pairing check
+	hasCert := c.API.TLSCert != ""
+	hasKey := c.API.TLSKey != ""
+	if (hasCert && !hasKey) || (!hasCert && hasKey) {
+		return fmt.Errorf("api: both tls_cert and tls_key must be configured together")
+	}
+
+	// Secure non-loopback bind check
+	if c.API.Addr != "" && !isLoopbackAddr(c.API.Addr) {
+		hasAuth := c.API.APIKey != ""
+		hasTLS := hasCert && hasKey
+		if !hasAuth && !hasTLS && !c.API.AllowInsecureBinding {
+			return fmt.Errorf("api: binding to non-loopback address %q without authentication (api_key) or TLS is disallowed for security; set allow_insecure_binding: true to override", c.API.Addr)
+		}
+	}
+
 	return nil
+}
+
+// isLoopbackAddr checks if an address or host:port binds exclusively to loopback interfaces.
+func isLoopbackAddr(addr string) bool {
+	if addr == "" {
+		return true
+	}
+	host := addr
+	if h, _, err := net.SplitHostPort(addr); err == nil {
+		host = h
+	}
+	if host == "" || host == "0.0.0.0" || host == "::" || host == "[::]" {
+		return false
+	}
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	if ip != nil && ip.IsLoopback() {
+		return true
+	}
+	return false
 }
 
 // SaveToFile writes the configuration to a YAML file.

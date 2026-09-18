@@ -79,6 +79,70 @@ func TestConfigValidationErrors(t *testing.T) {
 			name: "valid postgres driver",
 			modify: func(c *Config) {
 				c.Storage.Driver = "postgres"
+				c.Storage.DSN = "postgres://localhost:5432/r3trive"
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid postgres dsn format",
+			modify: func(c *Config) {
+				c.Storage.Driver = "postgres"
+				c.Storage.DSN = "/tmp/local.db"
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid tls pairing - cert only",
+			modify: func(c *Config) {
+				c.API.TLSCert = "/etc/ssl/cert.pem"
+				c.API.TLSKey = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid tls pairing - key only",
+			modify: func(c *Config) {
+				c.API.TLSCert = ""
+				c.API.TLSKey = "/etc/ssl/key.pem"
+			},
+			wantErr: true,
+		},
+		{
+			name: "insecure non-loopback bind rejected by default",
+			modify: func(c *Config) {
+				c.API.Addr = "0.0.0.0:8080"
+				c.API.APIKey = ""
+				c.API.TLSCert = ""
+				c.API.TLSKey = ""
+				c.API.AllowInsecureBinding = false
+			},
+			wantErr: true,
+		},
+		{
+			name: "insecure non-loopback bind allowed with flag",
+			modify: func(c *Config) {
+				c.API.Addr = "0.0.0.0:8080"
+				c.API.APIKey = ""
+				c.API.TLSCert = ""
+				c.API.TLSKey = ""
+				c.API.AllowInsecureBinding = true
+			},
+			wantErr: false,
+		},
+		{
+			name: "non-loopback bind allowed with api_key",
+			modify: func(c *Config) {
+				c.API.Addr = "0.0.0.0:8080"
+				c.API.APIKey = "secret-token"
+			},
+			wantErr: false,
+		},
+		{
+			name: "non-loopback bind allowed with tls",
+			modify: func(c *Config) {
+				c.API.Addr = "0.0.0.0:8080"
+				c.API.TLSCert = "/path/to/cert.pem"
+				c.API.TLSKey = "/path/to/key.pem"
 			},
 			wantErr: false,
 		},
@@ -104,6 +168,7 @@ func TestSaveAndLoadFromFile(t *testing.T) {
 	cfg.LogLevel = "debug"
 	cfg.OutputFmt = "json"
 	cfg.Storage.Driver = "postgres"
+	cfg.Storage.DSN = "postgres://user:pass@localhost:5432/r3trive"
 	cfg.Storage.BatchSize = 250
 
 	if err := cfg.SaveToFile(configPath); err != nil {
@@ -143,5 +208,52 @@ func TestPathsNotEmpty(t *testing.T) {
 	cfgPath := DefaultConfigPath()
 	if cfgPath == "" {
 		t.Error("DefaultConfigPath returned empty string")
+	}
+}
+
+func TestApplyEnv(t *testing.T) {
+	t.Setenv("R3TRIVE_LOG_LEVEL", "debug")
+	t.Setenv("R3TRIVE_OUTPUT_FORMAT", "ndjson")
+	t.Setenv("R3TRIVE_STORAGE_DRIVER", "postgres")
+	t.Setenv("R3TRIVE_STORAGE_DSN", "postgres://user:secret@localhost:5432/r3trive")
+	t.Setenv("R3TRIVE_STORAGE_BATCH_SIZE", "500")
+	t.Setenv("R3TRIVE_API_ADDR", "0.0.0.0:9090")
+	t.Setenv("R3TRIVE_API_ALLOW_INSECURE_BINDING", "true")
+	t.Setenv("R3TRIVE_TELEMETRY_ENABLED", "1")
+	t.Setenv("R3TRIVE_AI_BACKEND", "ollama")
+
+	cfg := Default()
+	ApplyEnv(cfg)
+
+	if cfg.LogLevel != "debug" {
+		t.Errorf("expected LogLevel 'debug', got %s", cfg.LogLevel)
+	}
+	if cfg.OutputFmt != "ndjson" {
+		t.Errorf("expected OutputFmt 'ndjson', got %s", cfg.OutputFmt)
+	}
+	if cfg.Storage.Driver != "postgres" {
+		t.Errorf("expected Storage.Driver 'postgres', got %s", cfg.Storage.Driver)
+	}
+	if cfg.Storage.DSN != "postgres://user:secret@localhost:5432/r3trive" {
+		t.Errorf("expected Storage.DSN 'postgres://user:secret@localhost:5432/r3trive', got %s", cfg.Storage.DSN)
+	}
+	if cfg.Storage.BatchSize != 500 {
+		t.Errorf("expected Storage.BatchSize 500, got %d", cfg.Storage.BatchSize)
+	}
+	if cfg.API.Addr != "0.0.0.0:9090" {
+		t.Errorf("expected API.Addr '0.0.0.0:9090', got %s", cfg.API.Addr)
+	}
+	if !cfg.API.AllowInsecureBinding {
+		t.Errorf("expected API.AllowInsecureBinding true, got false")
+	}
+	if !cfg.Telemetry.Enabled {
+		t.Errorf("expected Telemetry.Enabled true, got false")
+	}
+	if cfg.AI.Backend != "ollama" {
+		t.Errorf("expected AI.Backend 'ollama', got %s", cfg.AI.Backend)
+	}
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate failed on env-overlaid config: %v", err)
 	}
 }

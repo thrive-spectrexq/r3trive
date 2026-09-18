@@ -28,12 +28,22 @@ type ConfigError struct {
 
 func (e *ConfigError) Error() string { return e.Msg }
 
+// NewConfigError creates a new ConfigError.
+func NewConfigError(msg string) error {
+	return &ConfigError{Msg: msg}
+}
+
 // PermissionError represents insufficient OS privileges.
 type PermissionError struct {
 	Msg string
 }
 
 func (e *PermissionError) Error() string { return e.Msg }
+
+// NewPermissionError creates a new PermissionError.
+func NewPermissionError(msg string) error {
+	return &PermissionError{Msg: msg}
+}
 
 // StorageError represents a database connection or storage failure.
 type StorageError struct {
@@ -42,12 +52,22 @@ type StorageError struct {
 
 func (e *StorageError) Error() string { return e.Msg }
 
+// NewStorageError creates a new StorageError.
+func NewStorageError(msg string) error {
+	return &StorageError{Msg: msg}
+}
+
 // PlatformError represents an unsupported OS or missing kernel feature.
 type PlatformError struct {
 	Msg string
 }
 
 func (e *PlatformError) Error() string { return e.Msg }
+
+// NewPlatformError creates a new PlatformError.
+func NewPlatformError(msg string) error {
+	return &PlatformError{Msg: msg}
+}
 
 // classifyError inspects an error and maps it to an exit code and descriptive category.
 func classifyError(err error) (int, string) {

@@ -99,14 +99,15 @@ Documentation: https://docs.r3trive.io`,
 	return cmd
 }
 
-// loadConfig loads configuration from file, env vars, and flags.
+// loadConfig loads configuration following the precedence:
+// CLI Flags > Environment Variables (R3TRIVE_*) > Config File > Defaults.
 func loadConfig() error {
 	var err error
 
 	if cfgFile != "" {
 		cfg, err = config.LoadFromFile(cfgFile)
 		if err != nil {
-			return fmt.Errorf("loading config: %w", err)
+			return NewConfigError(fmt.Sprintf("loading config: %v", err))
 		}
 	} else {
 		// Try default config path
@@ -114,7 +115,7 @@ func loadConfig() error {
 		if _, statErr := os.Stat(defaultPath); statErr == nil {
 			cfg, err = config.LoadFromFile(defaultPath)
 			if err != nil {
-				return fmt.Errorf("loading config: %w", err)
+				return NewConfigError(fmt.Sprintf("loading config: %v", err))
 			}
 		} else {
 			// No config file found, use defaults
@@ -122,7 +123,10 @@ func loadConfig() error {
 		}
 	}
 
-	// Override with flags
+	// 1. Overlay environment variables (R3TRIVE_*)
+	config.ApplyEnv(cfg)
+
+	// 2. Override with CLI flags (highest precedence)
 	if logLevel != "" {
 		cfg.LogLevel = logLevel
 	}
@@ -131,6 +135,11 @@ func loadConfig() error {
 	}
 	if quiet {
 		cfg.OutputFmt = "quiet"
+	}
+
+	// 3. Re-validate final merged config
+	if err := cfg.Validate(); err != nil {
+		return NewConfigError(fmt.Sprintf("validating merged configuration: %v", err))
 	}
 
 	// Setup logging
