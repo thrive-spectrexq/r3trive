@@ -1,11 +1,6 @@
-// Package linux implements the Linux process sensor using procfs polling
-// with an upgrade path to eBPF (kernel 5.4+).
-package linux
-
-// TODO: Implement Linux process sensor using /proc polling.
-// Phase 2 will add eBPF support via cilium/ebpf for kernel 5.4+.
+// Package linux implements Linux process, network, and file monitoring sensors
+// utilizing /proc polling, inotify filesystem notifications, and eBPF CO-RE
+// where available.
 //
-// See SYSTEM_ARCHITECTURE.md §4.3.1 (Linux Sensors) for requirements:
-// - eBPF (kernel 5.8+) / fallback: /proc polling
-// - exec, fork, exit events
-// - CO-RE (Compile Once, Run Everywhere) for kernel compatibility
+// See SYSTEM_ARCHITECTURE.md §4.3.1 for platform requirements and architecture.
+package linux

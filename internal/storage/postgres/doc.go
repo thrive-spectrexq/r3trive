@@ -1,11 +1,10 @@
 // Package postgres implements the storage.Store interface using PostgreSQL
-// for fleet/cluster deployments.
+// for enterprise fleet and cluster deployments.
+//
+// Capabilities include:
+// - Events, alerts, and incidents persistence
+// - Hosts registration and status tracking
+// - Correlation rules and playbooks storage
+// - IOC entries query and persistence
+// - Connection pooling and automatic schema initialization
 package postgres
-
-// TODO: Implement PostgreSQL storage backend:
-// - Connection pooling with pgxpool
-// - Hash partitioning by host_id
-// - Range partitioning by timestamp (daily)
-// - Read replicas for query scaling
-// - Prepared statements for high-throughput inserts
-// - SSL/TLS connection support

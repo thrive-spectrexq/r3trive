@@ -1,9 +1,8 @@
-// Package yara provides a Go wrapper for YARA rule compilation and scanning.
+// Package yara provides a pure Go rule parser and string matching engine
+// with a fallback structure for environments where libyara CGO is unavailable.
+//
+// Capabilities include:
+// - Rule and string rule extraction from YARA rule files
+// - Aho-Corasick and regular expression matching across byte streams
+// - Match result reporting with byte offsets and identifiers
 package yara
-
-// TODO: Implement YARA wrapper:
-// - Rule compilation from file/string
-// - File scanning with match results
-// - Memory scanning of process address space
-// - Compiled rule caching
-// - Thread-safe scanner pool

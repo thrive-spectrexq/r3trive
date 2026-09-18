@@ -1,11 +1,3 @@
-// Package yara integrates the YARA scanning engine for file and
-// memory-based malware detection.
+// Package yara integrates YARA file and directory scanning capabilities
+// for proactive threat hunting and suspicious artifact analysis.
 package yara
-
-// TODO: Implement YARA integration:
-// - Compile rules at startup into a compiled rule set
-// - Multi-threaded file scanning
-// - Memory scanning of running processes
-// - Recursive directory scanning with timeout
-// - Metadata extraction for matched rules
-// - Rule hot-reload on SIGHUP
