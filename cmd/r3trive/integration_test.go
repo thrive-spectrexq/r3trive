@@ -157,3 +157,35 @@ func TestIntegrationPluginsList(t *testing.T) {
 	}
 	_ = os.Stdout
 }
+
+func TestIntegrationTelemetryLifecycle(t *testing.T) {
+	resetCLIState()
+	// Disable telemetry (default no-op)
+	t.Setenv("R3TRIVE_TELEMETRY_ENABLED", "false")
+
+	cmd := buildRootCmd()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&out)
+	cmd.SetArgs([]string{"config", "show"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("command failed with telemetry disabled: %v", err)
+	}
+
+	// Enable telemetry with unreachable endpoint; should warn gracefully without crashing
+	resetCLIState()
+	t.Setenv("R3TRIVE_TELEMETRY_ENABLED", "true")
+	t.Setenv("R3TRIVE_TELEMETRY_ENDPOINT", "127.0.0.1:4317")
+
+	cmdTelem := buildRootCmd()
+	var outTelem bytes.Buffer
+	cmdTelem.SetOut(&outTelem)
+	cmdTelem.SetErr(&outTelem)
+	cmdTelem.SetArgs([]string{"config", "show"})
+
+	if err := cmdTelem.Execute(); err != nil {
+		t.Fatalf("command failed with telemetry enabled: %v", err)
+	}
+}
+

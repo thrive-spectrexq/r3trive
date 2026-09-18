@@ -13,6 +13,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/thrive-spectrexq/r3trive/internal/config"
+	"github.com/thrive-spectrexq/r3trive/internal/telemetry"
 )
 
 var (
@@ -29,7 +30,12 @@ var (
 func main() {
 	rootCmd := buildRootCmd()
 
-	if err := rootCmd.Execute(); err != nil {
+	err := rootCmd.Execute()
+	if cfg != nil && cfg.Telemetry.Enabled {
+		telemetry.Shutdown()
+	}
+
+	if err != nil {
 		exitCode, category := classifyError(err)
 		fmt.Fprintf(os.Stderr, "\n[%s] %v\n", category, err)
 		os.Exit(exitCode)
@@ -93,7 +99,25 @@ Documentation: https://docs.r3trive.io`,
 				return nil
 			}
 
-			return loadConfig()
+			if err := loadConfig(); err != nil {
+				return err
+			}
+
+			if cfg != nil && cfg.Telemetry.Enabled {
+				if err := telemetry.Init(telemetry.Config{
+					Enabled:  cfg.Telemetry.Enabled,
+					Endpoint: cfg.Telemetry.Endpoint,
+				}); err != nil {
+					slog.Warn("failed to initialize telemetry", "error", err)
+				}
+			}
+
+			return nil
+		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			if cfg != nil && cfg.Telemetry.Enabled {
+				telemetry.Shutdown()
+			}
 		},
 	}
 
