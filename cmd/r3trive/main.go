@@ -27,6 +27,17 @@ var (
 )
 
 func main() {
+	rootCmd := buildRootCmd()
+
+	if err := rootCmd.Execute(); err != nil {
+		exitCode, category := classifyError(err)
+		fmt.Fprintf(os.Stderr, "\n[%s] %v\n", category, err)
+		os.Exit(exitCode)
+	}
+}
+
+// buildRootCmd constructs the root command with all subcommands and flags registered.
+func buildRootCmd() *cobra.Command {
 	rootCmd := newRootCmd()
 
 	// Register subcommands
@@ -50,11 +61,7 @@ func main() {
 		newPluginsCmd(),
 	)
 
-	if err := rootCmd.Execute(); err != nil {
-		exitCode, category := classifyError(err)
-		fmt.Fprintf(os.Stderr, "\n[%s] %v\n", category, err)
-		os.Exit(exitCode)
-	}
+	return rootCmd
 }
 
 func newRootCmd() *cobra.Command {
