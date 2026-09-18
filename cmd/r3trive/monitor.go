@@ -17,9 +17,6 @@ import (
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor/mock"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/yara"
 	"github.com/thrive-spectrexq/r3trive/internal/output"
-	"github.com/thrive-spectrexq/r3trive/internal/storage"
-	"github.com/thrive-spectrexq/r3trive/internal/storage/postgres"
-	"github.com/thrive-spectrexq/r3trive/internal/storage/sqlite"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
@@ -86,18 +83,9 @@ func runMonitor(cmd *cobra.Command, args []string) error {
 	}
 
 	// Initialize storage
-	var store storage.Store
-	switch cfg.Storage.Driver {
-	case "postgres":
-		store, err = postgres.New(cfg.Storage.DSN)
-		if err != nil {
-			return fmt.Errorf("initializing postgres storage: %w", err)
-		}
-	default:
-		store, err = sqlite.New(cfg.Storage.DSN)
-		if err != nil {
-			return fmt.Errorf("initializing storage: %w", err)
-		}
+	store, err := newStoreFromConfig(cfg)
+	if err != nil {
+		return fmt.Errorf("initializing storage: %w", err)
 	}
 	defer func() {
 		if store != nil {
