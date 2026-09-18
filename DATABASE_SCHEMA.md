@@ -1141,5 +1141,22 @@ CREATE INDEX IF NOT EXISTS idx_ioc_value ON ioc_entries(value);
 
 ---
 
+## 16. Data Lifecycle, Retention & Fleet Storage Parity
+
+### 16.1 Storage Backend Parity
+
+R3TRIVE maintains strict functional parity across storage implementations:
+- **SQLite:** Designed for standalone endpoint operations with zero external dependencies. SQLite utilizes WAL mode and immediate transactions for local persistence.
+- **PostgreSQL (`pgx/v5`):** Designed for centralized fleet aggregation. Supported via `storage.driver: postgres` with verified DSN formatting (`postgres://` or `postgresql://`). Hosts, rules, playbooks, IOCs, events, and alerts map to native PostgreSQL tables with GIN and B-tree indexing.
+
+### 16.2 Event Retention and Pruning
+
+1. **Configurable Retention Window:** Controlled via `storage.retention_days` (default: 30 days) and environment overlay `R3TRIVE_STORAGE_RETENTION_DAYS`.
+2. **Periodic Background Pruning:** Aged events exceeding `retention_days` are periodically purged or archived to preserve storage headroom and avoid unbounded disk growth.
+3. **Forensic Integrity:** Incident records and associated investigative evidence are pinned and excluded from automated pruning until explicitly closed and archived by an analyst.
+
+---
+
 *End of DATABASE_SCHEMA.md*
 *Related: SYSTEM_ARCHITECTURE.md, API_REFERENCE.md*
+

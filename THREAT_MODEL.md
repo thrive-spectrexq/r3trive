@@ -103,6 +103,24 @@ Threat modeling follows STRIDE (Spoofing, Tampering, Repudiation, Information Di
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+### 3.1 Defensive Security Boundary & Operational Privilege Model
+
+R3TRIVE enforces explicit separation of capabilities according to operational privilege tiers:
+
+| Privilege Tier | Allowed Operations | Security Controls & Enforcement |
+|---|---|---|
+| **Standard User** (Non-Admin / Non-Root) | `version`, `config show/validate`, `plugins list`, host read-only baseline audits, offline rule compilation | Read-only access to host artifacts; cannot execute destructive containment or bind to privileged ports. |
+| **Elevated Operator** (Administrator / `root`) | `monitor` (ETW/eBPF sensors), `defend` (containment execution), `hunt` (kernel-level process & memory inspection), `serve` | Explicit OS authorization; guarded by defensive verification checks and dry-run safety gates. |
+
+### 3.2 Defensive Containment Safety Controls
+
+Active defense mechanisms are bounded to prevent accidental denial of service or operator lockout:
+1. **Dry-Run Enforcement:** All defensive operations support verification via dry-run flags or request payloads before applying operating system changes.
+2. **Management Connection Preservation:** Host network isolation commands prioritize preserving operator management channels (e.g., existing SSH or management port bindings) by default.
+3. **Collision-Safe Quarantine:** Quarantined files are moved into segregated quarantine directories using cryptographically unique filenames, eliminating destination overwrite and path traversal risks.
+4. **Action Auditability:** Every containment action (process kill, firewall rule insertion, file movement) generates an immutable, tamper-evident audit record logged to persistent storage.
+5. **Secure API Binding Gates:** The embedded REST API server binds exclusively to the loopback interface (`127.0.0.1:8080`) by default. Binding to `0.0.0.0`, `::`, or external IP addresses is strictly rejected unless authenticated with an API key, secured via TLS, or explicitly permitted by the operator via `allow_insecure_binding: true`.
+
 ---
 
 ## 4. Threat Actors

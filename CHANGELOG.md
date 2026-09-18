@@ -12,12 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added & Feature Parity
 - **PostgreSQL Fleet Storage Parity**: Completed implementation of `SaveHost`, `GetHost`, `ListHosts`, `SaveRule`, `GetRule`, `ListRules`, `DeleteRule`, `SaveIOC`, and `QueryIOCs` in `internal/storage/postgres`, with full table and index definitions for `hosts`, `rules`, `playbooks`, and `ioc_entries` in `pgSchema`.
 - **Restored PostgreSQL Configuration**: Re-enabled `postgres` as a supported storage driver in `internal/config/config.go` with full configuration validation and unit test coverage.
+- **Structured CLI Error Classification & Exit Codes**: Introduced deterministic exit codes (`0` Success, `1` Runtime, `2` Config, `3` Permission, `4` Storage, `5` Platform) in `cmd/r3trive/errors.go` and mapped CLI errors to category banners printed to `stderr`.
+- **Multi-Tier Configuration Precedence & Environment Overlays**: Implemented `internal/config/env.go` supporting `R3TRIVE_*` environment variables with strict resolution precedence (`CLI Flags` > `Environment Variables` > `YAML Configuration` > `Defaults`) and post-overlay re-validation.
+- **OpenTelemetry Lifecycle Hooks**: Connected OpenTelemetry tracer and meter initialization and shutdown flush hooks directly into CLI `PersistentPreRunE` and `PersistentPostRun` lifecycle.
+- **CLI Integration Test Suite**: Added `cmd/r3trive/integration_test.go` verifying command execution, version outputs, invalid flags, environment overlays, precedence gates, and telemetry shutdown.
 
 ### Fixed & Security Hardening
 - **Windows Sensor Test Reliability**: Resolved infinite loop test hang in `internal/detection/sensor/windows/file_test.go` caused by an unlabeled break inside select, and tuned network sensor polling and event matching in `network_test.go`.
 - **Unified CLI Storage Initialization**: Routed `cmd/r3trive/monitor.go` through `newStoreFromConfig(cfg)` ensuring uniform storage backend handling across all CLI commands.
 - **Documentation Synchronization**: Cleared obsolete placeholder TODO comments and updated package documentation across `pkg/rule`, `pkg/sigma`, `pkg/yara`, `internal/storage/postgres`, and sensor packages.
-- **Secure API Defaults**: The API now binds to loopback by default, denies cross-origin access unless origins are explicitly configured, requires credentials for protected endpoints, compares API keys in constant time, and applies read, write, and idle connection timeouts.
+- **Secure API Defaults**: The API now binds to loopback by default (`127.0.0.1:8080`), rejects non-loopback bindings without authentication (`api_key`) or TLS certificates unless explicitly allowed (`allow_insecure_binding`), denies cross-origin access unless origins are explicitly configured, compares API keys in constant time, and applies read, write, and idle connection timeouts.
 - **Safer Automated Response**: Response actions now honor request-level dry-run mode, report failed operating-system actions as failures, and reject requests when no response executor is available.
 - **Rate-Limit Integrity**: Rate limiting no longer trusts client-controlled `X-Forwarded-For` headers and expires inactive client records to bound memory use.
 - **Plugin Boundary Clarity**: Plugin execution is deterministic and lifecycle-safe. Configurations requesting unenforceable in-process memory or capability limits are rejected rather than silently treated as sandboxed.

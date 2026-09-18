@@ -32,6 +32,66 @@ Where traditional security products rely on fragile signature databases and dema
 
 ---
 
+## Product Scope: Shipped MVP vs. Roadmap
+
+To ensure operational predictability and deployment maturity, R3TRIVE clearly delineates between fully implemented production capabilities and planned roadmap modules:
+
+### Shipped & Production-Ready (Current Release)
+- **Core CLI & Runtime:** Single portable binary with deterministic operational exit codes (`0`-`5`), structured JSON/table output, and graceful OpenTelemetry shutdown flushing.
+- **Config & Overlays:** Strict 4-tier precedence (`CLI Flags` > `Environment Variables` > `YAML Config` > `Defaults`) with schema and security validation.
+- **Dual-Storage Engine:** SQLite embedded database for standalone single-host operations and PostgreSQL for centralized fleet telemetry aggregation.
+- **Hardened API Server:** Built-in REST API with default loopback binding (`127.0.0.1:8080`), mandatory API key or TLS for non-loopback binds, token-bucket rate limiting, and CORS origin controls.
+- **Threat Hunting & Inspection:** Live OS process enumeration (Windows Toolhelp32, Linux `/proc`, macOS `ps`), YARA/Sigma scanning, and host security baseline audits.
+- **Defensive Response Foundation:** Process termination, network isolation, and file quarantine with dry-run support, path collision protection, and execution error reporting.
+
+### Roadmap & Advanced Fleet Features (In Development)
+- Continuous kernel-level real-time event streaming drivers (eBPF on Linux, ETW kernel driver on Windows).
+- Distributed multi-broker event mesh (NATS JetStream / Apache Kafka) for 100,000+ host fleets.
+- Bidirectional enterprise connectors for cloud SIEMs and automated SOAR orchestration.
+
+---
+
+## Operational Reference
+
+### Standard CLI Exit Codes
+
+Scripts and automation can rely on deterministic exit codes:
+
+| Code | Status | Description |
+|---|---|---|
+| `0` | **Success** | Normal, successful command execution. |
+| `1` | **Runtime Error** | Unexpected execution failure or unhandled exception. |
+| `2` | **Configuration Error** | Invalid flags, YAML syntax error, or security validation failure. |
+| `3` | **Permission Error** | Insufficient OS privileges (e.g., Administrator / root required). |
+| `4` | **Storage Error** | Database connection, migration, or persistence failure. |
+| `5` | **Platform Error** | Unsupported operating system or missing sensor kernel subsystem. |
+
+### Configuration Precedence & Environment Overlays
+
+Configuration is resolved in the following strict order of priority:
+1. **CLI Flags** (`--log-level`, `--output`, etc.)
+2. **Environment Variables** (`R3TRIVE_*`)
+3. **YAML Configuration File** (`--config <path>` or platform default path)
+4. **Compiled Defaults**
+
+| Environment Variable | Config Equivalent | Default |
+|---|---|---|
+| `R3TRIVE_LOG_LEVEL` | `log_level` | `info` |
+| `R3TRIVE_OUTPUT_FORMAT` | `output_format` | `table` |
+| `R3TRIVE_DATA_DIR` | `data_dir` | Platform standard |
+| `R3TRIVE_STORAGE_DRIVER` | `storage.driver` | `sqlite` (`postgres` supported) |
+| `R3TRIVE_STORAGE_DSN` | `storage.dsn` | `<data_dir>/r3trive.db` |
+| `R3TRIVE_STORAGE_BATCH_SIZE` | `storage.batch_size` | `100` |
+| `R3TRIVE_API_ADDR` | `api.addr` | `127.0.0.1:8080` (loopback) |
+| `R3TRIVE_API_KEY` | `api.api_key` | `""` |
+| `R3TRIVE_API_TLS_CERT` | `api.tls_cert` | `""` |
+| `R3TRIVE_API_TLS_KEY` | `api.tls_key` | `""` |
+| `R3TRIVE_API_ALLOW_INSECURE_BINDING`| `api.allow_insecure_binding` | `false` |
+| `R3TRIVE_TELEMETRY_ENABLED` | `telemetry.enabled` | `false` |
+| `R3TRIVE_TELEMETRY_ENDPOINT` | `telemetry.endpoint` | `localhost:4317` |
+
+---
+
 ## Features
 
 ### Endpoint Monitoring
