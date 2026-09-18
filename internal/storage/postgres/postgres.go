@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -63,10 +64,64 @@ CREATE TABLE IF NOT EXISTS incidents (
     notes TEXT
 );
 
+CREATE TABLE IF NOT EXISTS hosts (
+    id TEXT PRIMARY KEY,
+    hostname TEXT NOT NULL,
+    os TEXT NOT NULL DEFAULT '',
+    arch TEXT NOT NULL DEFAULT '',
+    ip_address TEXT,
+    last_seen TIMESTAMPTZ,
+    agent_ver TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    tags JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS rules (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    severity TEXT NOT NULL DEFAULT 'medium',
+    confidence DOUBLE PRECISION NOT NULL DEFAULT 0.5,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    conditions TEXT NOT NULL,
+    attack_tactic TEXT,
+    attack_technique TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS playbooks (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    trigger TEXT NOT NULL,
+    actions JSONB NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ioc_entries (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    value TEXT NOT NULL,
+    source TEXT,
+    severity TEXT NOT NULL DEFAULT 'medium',
+    tags JSONB,
+    first_seen TIMESTAMPTZ,
+    last_seen TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(type, value)
+);
+
 CREATE INDEX IF NOT EXISTS idx_events_ts ON events(timestamp);
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(type);
 CREATE INDEX IF NOT EXISTS idx_alerts_ts ON alerts(timestamp);
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);
+CREATE INDEX IF NOT EXISTS idx_hosts_hostname ON hosts(hostname);
+CREATE INDEX IF NOT EXISTS idx_hosts_status ON hosts(status);
+CREATE INDEX IF NOT EXISTS idx_ioc_type ON ioc_entries(type);
+CREATE INDEX IF NOT EXISTS idx_ioc_value ON ioc_entries(value);
 `
 
 // Store implements storage.Store for PostgreSQL enterprise fleet deployments.
@@ -511,39 +566,314 @@ func (s *Store) UpdateIncidentStatus(ctx context.Context, id string, status even
 }
 
 func (s *Store) SaveHost(ctx context.Context, host storage.Host) error {
-	return fmt.Errorf("postgres: SaveHost not implemented")
+	if s.db == nil {
+		return fmt.Errorf("postgres database connection not active")
+	}
+
+	tagsJSON, err := json.Marshal(host.Tags)
+	if err != nil {
+		return fmt.Errorf("postgres: marshaling host tags: %w", err)
+	}
+
+	createdAt := host.CreatedAt
+	if createdAt.IsZero() {
+		createdAt = time.Now().UTC()
+	}
+
+	_, err = s.db.ExecContext(ctx, `
+		INSERT INTO hosts (id, hostname, os, arch, ip_address, last_seen, agent_ver, status, tags, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		ON CONFLICT (id) DO UPDATE SET
+			hostname = EXCLUDED.hostname,
+			os = EXCLUDED.os,
+			arch = EXCLUDED.arch,
+			ip_address = EXCLUDED.ip_address,
+			last_seen = EXCLUDED.last_seen,
+			agent_ver = EXCLUDED.agent_ver,
+			status = EXCLUDED.status,
+			tags = EXCLUDED.tags
+	`, host.ID, host.Hostname, host.OS, host.Arch, host.IPAddress, host.LastSeen, host.AgentVer, host.Status, string(tagsJSON), createdAt)
+	if err != nil {
+		return fmt.Errorf("postgres: saving host: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) GetHost(ctx context.Context, id string) (storage.Host, error) {
-	return storage.Host{}, fmt.Errorf("postgres: GetHost not implemented")
+	if s.db == nil {
+		return storage.Host{}, fmt.Errorf("postgres database connection not active")
+	}
+
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, hostname, os, arch, ip_address, last_seen, agent_ver, status, tags, created_at FROM hosts WHERE id = $1`, id)
+
+	var h storage.Host
+	var (
+		lastSeen            sql.NullTime
+		ipAddress, agentVer sql.NullString
+		tagsJSON            sql.NullString
+	)
+	err := row.Scan(&h.ID, &h.Hostname, &h.OS, &h.Arch, &ipAddress, &lastSeen, &agentVer, &h.Status, &tagsJSON, &h.CreatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return storage.Host{}, fmt.Errorf("host not found: %s", id)
+		}
+		return storage.Host{}, fmt.Errorf("postgres: scanning host: %w", err)
+	}
+	if ipAddress.Valid {
+		h.IPAddress = ipAddress.String
+	}
+	if lastSeen.Valid {
+		h.LastSeen = lastSeen.Time
+	}
+	if agentVer.Valid {
+		h.AgentVer = agentVer.String
+	}
+	if tagsJSON.Valid && tagsJSON.String != "" {
+		_ = json.Unmarshal([]byte(tagsJSON.String), &h.Tags)
+	}
+	return h, nil
 }
 
 func (s *Store) ListHosts(ctx context.Context) ([]storage.Host, error) {
-	return nil, fmt.Errorf("postgres: ListHosts not implemented")
+	if s.db == nil {
+		return nil, fmt.Errorf("postgres database connection not active")
+	}
+
+	rows, err := s.db.QueryContext(ctx, `SELECT id, hostname, os, arch, ip_address, last_seen, agent_ver, status, tags, created_at FROM hosts ORDER BY hostname ASC`)
+	if err != nil {
+		return nil, fmt.Errorf("postgres: list hosts: %w", err)
+	}
+	defer rows.Close()
+
+	var hosts []storage.Host
+	for rows.Next() {
+		var h storage.Host
+		var (
+			lastSeen            sql.NullTime
+			ipAddress, agentVer sql.NullString
+			tagsJSON            sql.NullString
+		)
+		if err := rows.Scan(&h.ID, &h.Hostname, &h.OS, &h.Arch, &ipAddress, &lastSeen, &agentVer, &h.Status, &tagsJSON, &h.CreatedAt); err != nil {
+			return nil, fmt.Errorf("postgres: scan host: %w", err)
+		}
+		if ipAddress.Valid {
+			h.IPAddress = ipAddress.String
+		}
+		if lastSeen.Valid {
+			h.LastSeen = lastSeen.Time
+		}
+		if agentVer.Valid {
+			h.AgentVer = agentVer.String
+		}
+		if tagsJSON.Valid && tagsJSON.String != "" {
+			_ = json.Unmarshal([]byte(tagsJSON.String), &h.Tags)
+		}
+		hosts = append(hosts, h)
+	}
+	return hosts, rows.Err()
 }
 
 func (s *Store) SaveRule(ctx context.Context, rule storage.StoredRule) error {
-	return fmt.Errorf("postgres: SaveRule not implemented")
+	if s.db == nil {
+		return fmt.Errorf("postgres database connection not active")
+	}
+
+	createdAt := rule.CreatedAt
+	if createdAt.IsZero() {
+		createdAt = time.Now().UTC()
+	}
+	updatedAt := rule.UpdatedAt
+	if updatedAt.IsZero() {
+		updatedAt = time.Now().UTC()
+	}
+
+	_, err := s.db.ExecContext(ctx, `
+		INSERT INTO rules (id, name, description, severity, confidence, enabled, conditions, attack_tactic, attack_technique, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		ON CONFLICT (id) DO UPDATE SET
+			name = EXCLUDED.name,
+			description = EXCLUDED.description,
+			severity = EXCLUDED.severity,
+			confidence = EXCLUDED.confidence,
+			enabled = EXCLUDED.enabled,
+			conditions = EXCLUDED.conditions,
+			attack_tactic = EXCLUDED.attack_tactic,
+			attack_technique = EXCLUDED.attack_technique,
+			updated_at = EXCLUDED.updated_at
+	`, rule.ID, rule.Name, rule.Description, rule.Severity, rule.Confidence, rule.Enabled, rule.Conditions, rule.ATTACKTactic, rule.ATTACKTechnique, createdAt, updatedAt)
+	if err != nil {
+		return fmt.Errorf("postgres: saving rule: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) GetRule(ctx context.Context, id string) (storage.StoredRule, error) {
-	return storage.StoredRule{}, fmt.Errorf("postgres: GetRule not implemented")
+	if s.db == nil {
+		return storage.StoredRule{}, fmt.Errorf("postgres database connection not active")
+	}
+
+	row := s.db.QueryRowContext(ctx,
+		`SELECT id, name, description, severity, confidence, enabled, conditions, attack_tactic, attack_technique, created_at, updated_at FROM rules WHERE id = $1`, id)
+
+	var r storage.StoredRule
+	var desc, tactic, technique sql.NullString
+	err := row.Scan(&r.ID, &r.Name, &desc, &r.Severity, &r.Confidence, &r.Enabled, &r.Conditions, &tactic, &technique, &r.CreatedAt, &r.UpdatedAt)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return storage.StoredRule{}, fmt.Errorf("rule not found: %s", id)
+		}
+		return storage.StoredRule{}, fmt.Errorf("postgres: scanning rule: %w", err)
+	}
+	if desc.Valid {
+		r.Description = desc.String
+	}
+	if tactic.Valid {
+		r.ATTACKTactic = tactic.String
+	}
+	if technique.Valid {
+		r.ATTACKTechnique = technique.String
+	}
+	return r, nil
 }
 
 func (s *Store) ListRules(ctx context.Context, enabledOnly bool) ([]storage.StoredRule, error) {
-	return nil, fmt.Errorf("postgres: ListRules not implemented")
+	if s.db == nil {
+		return nil, fmt.Errorf("postgres database connection not active")
+	}
+
+	query := `SELECT id, name, description, severity, confidence, enabled, conditions, attack_tactic, attack_technique, created_at, updated_at FROM rules`
+	if enabledOnly {
+		query += ` WHERE enabled = TRUE`
+	}
+	query += ` ORDER BY name ASC`
+
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("postgres: list rules: %w", err)
+	}
+	defer rows.Close()
+
+	var rules []storage.StoredRule
+	for rows.Next() {
+		var r storage.StoredRule
+		var desc, tactic, technique sql.NullString
+		if err := rows.Scan(&r.ID, &r.Name, &desc, &r.Severity, &r.Confidence, &r.Enabled, &r.Conditions, &tactic, &technique, &r.CreatedAt, &r.UpdatedAt); err != nil {
+			return nil, fmt.Errorf("postgres: scan rule: %w", err)
+		}
+		if desc.Valid {
+			r.Description = desc.String
+		}
+		if tactic.Valid {
+			r.ATTACKTactic = tactic.String
+		}
+		if technique.Valid {
+			r.ATTACKTechnique = technique.String
+		}
+		rules = append(rules, r)
+	}
+	return rules, rows.Err()
 }
 
 func (s *Store) DeleteRule(ctx context.Context, id string) error {
-	return fmt.Errorf("postgres: DeleteRule not implemented")
+	if s.db == nil {
+		return fmt.Errorf("postgres database connection not active")
+	}
+
+	res, err := s.db.ExecContext(ctx, `DELETE FROM rules WHERE id = $1`, id)
+	if err != nil {
+		return fmt.Errorf("postgres: deleting rule: %w", err)
+	}
+	affected, err := res.RowsAffected()
+	if err == nil && affected == 0 {
+		return fmt.Errorf("rule not found: %s", id)
+	}
+	return nil
 }
 
 func (s *Store) SaveIOC(ctx context.Context, ioc storage.IOCEntry) error {
-	return fmt.Errorf("postgres: SaveIOC not implemented")
+	if s.db == nil {
+		return fmt.Errorf("postgres database connection not active")
+	}
+
+	tagsJSON, err := json.Marshal(ioc.Tags)
+	if err != nil {
+		return fmt.Errorf("postgres: marshaling ioc tags: %w", err)
+	}
+
+	createdAt := ioc.CreatedAt
+	if createdAt.IsZero() {
+		createdAt = time.Now().UTC()
+	}
+
+	_, err = s.db.ExecContext(ctx, `
+		INSERT INTO ioc_entries (id, type, value, source, severity, tags, first_seen, last_seen, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		ON CONFLICT (id) DO UPDATE SET
+			type = EXCLUDED.type,
+			value = EXCLUDED.value,
+			source = EXCLUDED.source,
+			severity = EXCLUDED.severity,
+			tags = EXCLUDED.tags,
+			last_seen = EXCLUDED.last_seen
+	`, ioc.ID, ioc.Type, ioc.Value, ioc.Source, ioc.Severity, string(tagsJSON), ioc.FirstSeen, ioc.LastSeen, createdAt)
+	if err != nil {
+		return fmt.Errorf("postgres: saving ioc: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) QueryIOCs(ctx context.Context, iocType string, value string) ([]storage.IOCEntry, error) {
-	return nil, fmt.Errorf("postgres: QueryIOCs not implemented")
+	if s.db == nil {
+		return nil, fmt.Errorf("postgres database connection not active")
+	}
+
+	query := `SELECT id, type, value, source, severity, tags, first_seen, last_seen, created_at FROM ioc_entries WHERE 1=1`
+	var args []interface{}
+	paramIdx := 1
+	if iocType != "" {
+		query += fmt.Sprintf(" AND type = $%d", paramIdx)
+		args = append(args, iocType)
+		paramIdx++
+	}
+	if value != "" {
+		query += fmt.Sprintf(" AND value = $%d", paramIdx)
+		args = append(args, value)
+		paramIdx++
+	}
+	query += " ORDER BY created_at DESC"
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("postgres: query iocs: %w", err)
+	}
+	defer rows.Close()
+
+	var iocs []storage.IOCEntry
+	for rows.Next() {
+		var ioc storage.IOCEntry
+		var (
+			tagsJSON, source    sql.NullString
+			firstSeen, lastSeen sql.NullTime
+		)
+		if err := rows.Scan(&ioc.ID, &ioc.Type, &ioc.Value, &source, &ioc.Severity, &tagsJSON, &firstSeen, &lastSeen, &ioc.CreatedAt); err != nil {
+			return nil, fmt.Errorf("postgres: scan ioc: %w", err)
+		}
+		if source.Valid {
+			ioc.Source = source.String
+		}
+		if firstSeen.Valid {
+			ioc.FirstSeen = firstSeen.Time
+		}
+		if lastSeen.Valid {
+			ioc.LastSeen = lastSeen.Time
+		}
+		if tagsJSON.Valid && tagsJSON.String != "" {
+			_ = json.Unmarshal([]byte(tagsJSON.String), &ioc.Tags)
+		}
+		iocs = append(iocs, ioc)
+	}
+	return iocs, rows.Err()
 }
 
 var _ storage.Store = (*Store)(nil)
