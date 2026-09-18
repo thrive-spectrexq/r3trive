@@ -51,7 +51,9 @@ func main() {
 	)
 
 	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
+		exitCode, category := classifyError(err)
+		fmt.Fprintf(os.Stderr, "\n[%s] %v\n", category, err)
+		os.Exit(exitCode)
 	}
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 )
 
@@ -65,5 +66,32 @@ func TestPluginsCmdExecution(t *testing.T) {
 
 	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("plugins list command failed: %v", err)
+	}
+}
+
+func TestClassifyError(t *testing.T) {
+	tests := []struct {
+		name         string
+		err          error
+		expectedCode int
+	}{
+		{"nil error", nil, ExitSuccess},
+		{"config flag error", &ConfigError{Msg: "unknown flag: --foo"}, ExitConfigError},
+		{"config text error", fmt.Errorf("config: validating: invalid storage driver"), ExitConfigError},
+		{"permission error", &PermissionError{Msg: "administrator privileges required"}, ExitPermissionError},
+		{"access denied", fmt.Errorf("open C:\\Windows\\System32: access is denied"), ExitPermissionError},
+		{"storage error", &StorageError{Msg: "failed to connect to postgres"}, ExitStorageError},
+		{"storage text error", fmt.Errorf("sqlite: database is locked"), ExitStorageError},
+		{"platform error", &PlatformError{Msg: "unsupported OS: freebsd"}, ExitPlatformError},
+		{"general error", fmt.Errorf("something unexpected occurred"), ExitGeneralError},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			code, _ := classifyError(tt.err)
+			if code != tt.expectedCode {
+				t.Errorf("classifyError(%v) = %d, expected %d", tt.err, code, tt.expectedCode)
+			}
+		})
 	}
 }
