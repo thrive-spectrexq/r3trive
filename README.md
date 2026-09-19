@@ -76,6 +76,8 @@ Configuration is resolved in the following strict order of priority:
 
 | Environment Variable | Config Equivalent | Default |
 |---|---|---|
+| `R3TRIVE_MODE` | `mode` | `development` (`production` supported) |
+| `R3TRIVE_CONFIG` | (Path to config file) | System standard |
 | `R3TRIVE_LOG_LEVEL` | `log_level` | `info` |
 | `R3TRIVE_OUTPUT_FORMAT` | `output_format` | `table` |
 | `R3TRIVE_DATA_DIR` | `data_dir` | Platform standard |
@@ -89,6 +91,8 @@ Configuration is resolved in the following strict order of priority:
 | `R3TRIVE_API_ALLOW_INSECURE_BINDING`| `api.allow_insecure_binding` | `false` |
 | `R3TRIVE_TELEMETRY_ENABLED` | `telemetry.enabled` | `false` |
 | `R3TRIVE_TELEMETRY_ENDPOINT` | `telemetry.endpoint` | `localhost:4317` |
+
+> For production cluster operations, Kubernetes probes, and security hardening, see the [Operator's Guide](docs/OPERATOR_GUIDE.md).
 
 ---
 

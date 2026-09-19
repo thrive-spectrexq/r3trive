@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Explicit Operating Modes & Security Defaults**: Introduced `mode: "production"` and `"development"` in configuration and `R3TRIVE_MODE`/`R3TRIVE_ENV` environment variables. Production mode enforces mandatory API keys, strictly forbids `allow_insecure_binding: true`, forbids wildcard `*` CORS origins, and requires TLS on non-loopback interfaces.
+- **Startup Configuration Transparency & Credential Masking**: Added `cfg.LogEffective(logger)` logging effective settings on startup with credential masking (`MaskDSN`) for database connection URIs. Supported `R3TRIVE_CONFIG` environment path override with 4-tier precedence resolution.
+- **Storage Reliability, Bounds & Retention Pruning**: Configured connection pool limits (`SetMaxOpenConns(25)`, `SetMaxIdleConns(5)`, `SetConnMaxLifetime`, `SetConnMaxIdleTime`) for both SQLite and PostgreSQL. Enforced query bounds on `QueryEvents` (`default: 100`, `max: 1000`). Replaced silent drops in SQLite `SaveEvents` with `ON CONFLICT(id) DO NOTHING`. Added `PruneEvents` method to `storage.Store` interface and connected it to `RetentionManager.ExecutePurgeCycle`.
+- **Operational Health, Readiness & Liveness Probes**: Added Kubernetes-ready `GET /api/v1/live` (liveness) and `GET /api/v1/ready` (readiness checking storage connectivity) endpoints. Upgraded `GET /api/v1/health` with dynamic status reporting.
+- **Standardized API Error Envelopes**: Introduced `ErrorResponse` and `WriteError` helper across API handlers and middleware to ensure consistent JSON error shapes with error code, message, and timestamp. Fixed rate limiter configuration so `RateLimit: 0` explicitly disables rate limiting.
+- **Cross-Platform Sensor Contract Test Suite**: Added `RunSensorContractTest` in `internal/detection/sensor/contract_test.go` verifying sensor lifecycle, goroutine containment on cancellation, and event schema conformance across platforms.
+- **AI Retry Budget & Resilience**: Added `RetryingClient` wrapper with exponential backoff for Ollama and OpenAI backends to withstand transient upstream network failures.
+- **Defensive Containment Guardrails & Audit Logging**: Enforced defensive allowlist guardrails preventing termination of system init processes (PID 1) and isolation/blocking of localhost (`127.0.0.1`, `localhost`). Implemented tamper-evident action audit logging in `response.Engine` via `AuditLog()`.
+- **End-to-End Workflow Integration Test**: Created `tests/integration/workflow_test.go` validating the full pipeline from config loading, storage, sensor collection, correlation, incident handling, defensive response, and audit log generation.
+- **Production Configuration & Operator Guide**: Added production template `configs/r3trive.production.yaml` and operations runbook `docs/OPERATOR_GUIDE.md`.
+
+---
+
 ## [0.1.9] - 2026-09-18
 
 ### Added & Feature Parity

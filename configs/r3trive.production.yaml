@@ -1,0 +1,59 @@
+# R3TRIVE Production Configuration Template
+# Documentation: https://docs.r3trive.io
+# Operational Guide: docs/OPERATOR_GUIDE.md
+
+# Operating Mode: 'production' enforces strict security controls
+mode: production
+
+# Global logging: trace, debug, info, warn, error
+log_level: info
+
+# Output format for CLI output: json, table, ndjson, csv
+output_format: json
+
+# Active Endpoint Sensor Configuration
+sensor:
+  mode: native             # 'native' uses OS-level APIs (eBPF on Linux, Toolhelp/iphlpapi on Windows)
+  ring_buffer_size: 20000  # Size of in-memory buffer before backpressure
+
+# Continuous Monitoring Parameters
+monitor:
+  min_severity: medium
+  poll_interval_ms: 1000
+  enabled_sensors:
+    - process
+    - network
+    - file
+    - registry
+
+# Persistent Storage
+storage:
+  driver: postgres # 'postgres' for multi-node enterprise fleet or 'sqlite' for standalone
+  dsn: "postgres://r3trive_user:${DB_PASSWORD}@postgres.internal.net:5432/r3trivedb?sslmode=verify-full"
+  batch_size: 250
+  flush_interval_ms: 1000
+  retention_days: 90 # Automated retention policy
+
+# REST Management API
+api:
+  addr: "0.0.0.0:8443"
+  api_key: "${R3TRIVE_API_KEY}" # Mandatory in production mode
+  tls_cert: "/etc/r3trive/tls/server.crt" # Mandatory for non-loopback in production
+  tls_key: "/etc/r3trive/tls/server.key"   # Mandatory for non-loopback in production
+  rate_limit: 500                         # Max requests per second (0 to disable)
+  max_body_bytes: 2097152                 # 2MB max payload size
+  cors_origins:
+    - "https://console.internal.net"      # Explicit origin required (wildcard '*' prohibited in production)
+  allow_insecure_binding: false           # Prohibited in production mode
+
+# AI Threat Investigation & Remediation Copilot
+ai:
+  backend: ollama                         # 'ollama', 'openai', or 'none'
+  endpoint: "http://ollama-internal.net:11434"
+  model: llama3
+  api_key: "${AI_API_KEY}"
+
+# OpenTelemetry Distributed Metrics & Tracing
+telemetry:
+  enabled: true
+  endpoint: "otel-collector.internal.net:4317"
