@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 // APIKeyAuth validates the X-API-Key header against the configured API key.
@@ -16,7 +17,12 @@ func APIKeyAuth(apiKey string) func(http.Handler) http.Handler {
 			if apiKey == "" || subtle.ConstantTimeCompare([]byte(key), []byte(apiKey)) != 1 {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusUnauthorized)
-				if err := json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized: invalid or missing API key"}); err != nil {
+				resp := map[string]any{
+					"error":     "unauthorized: invalid or missing API key",
+					"code":      "unauthorized",
+					"timestamp": time.Now().UTC(),
+				}
+				if err := json.NewEncoder(w).Encode(resp); err != nil {
 					slog.Error("failed to encode response", "error", err)
 				}
 				return

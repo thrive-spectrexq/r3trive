@@ -57,12 +57,10 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// Rate limiting middleware
-	rateLimit := cfg.RateLimit
-	if rateLimit <= 0 {
-		rateLimit = 100
+	// Rate limiting middleware (0 disables rate limiting)
+	if cfg.RateLimit > 0 {
+		r.Use(apimiddleware.RateLimit(cfg.RateLimit))
 	}
-	r.Use(apimiddleware.RateLimit(rateLimit))
 
 	// Request size limit middleware
 	maxBody := cfg.MaxBodyBytes
@@ -109,6 +107,8 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/health", handlers.GetHealth(store))
+		r.Get("/live", handlers.GetLive())
+		r.Get("/ready", handlers.GetReady(store))
 		r.Get("/openapi.json", HandleOpenAPIJSON)
 
 		r.Group(func(r chi.Router) {

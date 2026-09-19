@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
@@ -48,12 +49,16 @@ func (d *dummyStore) SaveIOC(ctx context.Context, ioc storage.IOCEntry) error { 
 func (d *dummyStore) QueryIOCs(ctx context.Context, iocType string, value string) ([]storage.IOCEntry, error) {
 	return nil, nil
 }
+func (d *dummyStore) PruneEvents(ctx context.Context, olderThan time.Time) (int64, error) {
+	return 0, nil
+}
 func (d *dummyStore) Close() error { return nil }
 
 func TestNewServerRoutes(t *testing.T) {
 	cfg := ServerConfig{
-		Addr:   ":8080",
-		APIKey: "testkey",
+		Addr:      ":8080",
+		APIKey:    "testkey",
+		RateLimit: 0, // ensure 0 does not panic and disables rate limiter
 	}
 
 	server := NewServer(cfg, &dummyStore{})
@@ -84,6 +89,22 @@ func TestNewServerRoutes(t *testing.T) {
 	server.httpServer.Handler.ServeHTTP(recHealth, reqHealth)
 	if recHealth.Code != http.StatusOK {
 		t.Errorf("Health endpoint returned %d, want 200", recHealth.Code)
+	}
+
+	// 3b. Check liveness route
+	reqLive := httptest.NewRequest(http.MethodGet, "/api/v1/live", nil)
+	recLive := httptest.NewRecorder()
+	server.httpServer.Handler.ServeHTTP(recLive, reqLive)
+	if recLive.Code != http.StatusOK {
+		t.Errorf("Liveness endpoint returned %d, want 200", recLive.Code)
+	}
+
+	// 3c. Check readiness route
+	reqReady := httptest.NewRequest(http.MethodGet, "/api/v1/ready", nil)
+	recReady := httptest.NewRecorder()
+	server.httpServer.Handler.ServeHTTP(recReady, reqReady)
+	if recReady.Code != http.StatusOK {
+		t.Errorf("Readiness endpoint returned %d, want 200", recReady.Code)
 	}
 
 	// 4. Check protected route without key returns 401

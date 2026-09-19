@@ -137,6 +137,77 @@ func TestGetHealth(t *testing.T) {
 	}
 }
 
+func TestGetLive(t *testing.T) {
+	handler := GetLive()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/live", nil)
+	rec := httptest.NewRecorder()
+
+	handler(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+
+	var resp map[string]string
+	if err := json.NewDecoder(rec.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed decoding live response: %v", err)
+	}
+	if resp["status"] != "live" {
+		t.Errorf("expected status live, got %v", resp["status"])
+	}
+}
+
+func TestGetReady(t *testing.T) {
+	// Ready success
+	hSuccess := GetReady(&mockStore{})
+	recSuccess := httptest.NewRecorder()
+	hSuccess(recSuccess, httptest.NewRequest(http.MethodGet, "/api/v1/ready", nil))
+	if recSuccess.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", recSuccess.Code)
+	}
+
+	// Ready fail when store has error
+	hFail := GetReady(&mockStore{singleEventErr: errors.New("db down")})
+	recFail := httptest.NewRecorder()
+	hFail(recFail, httptest.NewRequest(http.MethodGet, "/api/v1/ready", nil))
+	if recFail.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected status 503, got %d", recFail.Code)
+	}
+
+	// Ready fail when store is nil
+	hNil := GetReady(nil)
+	recNil := httptest.NewRecorder()
+	hNil(recNil, httptest.NewRequest(http.MethodGet, "/api/v1/ready", nil))
+	if recNil.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected status 503, got %d", recNil.Code)
+	}
+}
+
+func TestWriteError(t *testing.T) {
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	_ = req
+
+	WriteError(rec, http.StatusBadRequest, "invalid_param", "Parameter 'foo' is invalid")
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("expected status 400, got %d", rec.Code)
+	}
+
+	var errResp ErrorResponse
+	if err := json.NewDecoder(rec.Body).Decode(&errResp); err != nil {
+		t.Fatalf("failed decoding error response: %v", err)
+	}
+	if errResp.Error != "Parameter 'foo' is invalid" {
+		t.Errorf("expected message 'Parameter foo is invalid', got %q", errResp.Error)
+	}
+	if errResp.Code != "invalid_param" {
+		t.Errorf("expected code 'invalid_param', got %q", errResp.Code)
+	}
+	if errResp.Timestamp.IsZero() {
+		t.Errorf("expected timestamp to be set")
+	}
+}
+
 func TestEventsHandlers(t *testing.T) {
 	store := &mockStore{
 		events: []event.Event{
