@@ -101,6 +101,14 @@ func (m *mockStore) QueryIOCs(ctx context.Context, iocType string, value string)
 	}
 	return m.iocs, nil
 }
+func (m *mockStore) PruneEvents(ctx context.Context, olderThan time.Time) (int64, error) {
+	if m.saveErr != nil {
+		return 0, m.saveErr
+	}
+	count := int64(len(m.events))
+	m.events = nil
+	return count, nil
+}
 func (m *mockStore) Close() error { return nil }
 
 func withURLParam(req *http.Request, key, val string) *http.Request {

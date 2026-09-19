@@ -52,6 +52,11 @@ func (m *mockRetentionStore) SaveIOC(ctx context.Context, ioc IOCEntry) error { 
 func (m *mockRetentionStore) QueryIOCs(ctx context.Context, iocType string, value string) ([]IOCEntry, error) {
 	return nil, nil
 }
+func (m *mockRetentionStore) PruneEvents(ctx context.Context, olderThan time.Time) (int64, error) {
+	count := int64(len(m.events))
+	m.events = nil
+	return count, nil
+}
 func (m *mockRetentionStore) Close() error { return nil }
 
 func TestRetentionManager_ExecutePurgeCycle(t *testing.T) {

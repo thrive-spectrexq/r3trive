@@ -12,6 +12,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	_ "modernc.org/sqlite"
 
@@ -43,6 +44,12 @@ func New(dsn string) (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("sqlite: opening %s: %w", dsn, err)
 	}
+
+	// Configure connection pooling for reliability and concurrent readers
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(1 * time.Hour)
+	db.SetConnMaxIdleTime(15 * time.Minute)
 
 	// Enable WAL mode for concurrent reads
 	if _, err := db.Exec("PRAGMA journal_mode=WAL"); err != nil {
@@ -96,8 +103,9 @@ func (s *Store) SaveEvents(ctx context.Context, events []event.Event) error {
 	defer tx.Rollback() //nolint:errcheck
 
 	stmt, err := tx.PrepareContext(ctx,
-		`INSERT OR IGNORE INTO events (id, timestamp, host_id, hostname, type, severity, sensor, data, enrichments, chain_hash)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+		`INSERT INTO events (id, timestamp, host_id, hostname, type, severity, sensor, data, enrichments, chain_hash)
+		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		 ON CONFLICT(id) DO NOTHING`)
 	if err != nil {
 		return fmt.Errorf("sqlite: prepare insert: %w", err)
 	}
@@ -166,10 +174,15 @@ func (s *Store) QueryEvents(ctx context.Context, q storage.EventQuery) ([]event.
 
 	query += " ORDER BY timestamp DESC"
 
-	if q.Limit > 0 {
-		query += " LIMIT ?"
-		args = append(args, q.Limit)
+	limit := q.Limit
+	if limit <= 0 {
+		limit = 100
+	} else if limit > 1000 {
+		limit = 1000
 	}
+	query += " LIMIT ?"
+	args = append(args, limit)
+
 	if q.Offset > 0 {
 		query += " OFFSET ?"
 		args = append(args, q.Offset)
@@ -678,3 +691,17 @@ func (s *Store) QueryIOCs(ctx context.Context, iocType string, value string) ([]
 	}
 	return iocs, rows.Err()
 }
+
+// PruneEvents removes events older than olderThan and returns the count of deleted records.
+func (s *Store) PruneEvents(ctx context.Context, olderThan time.Time) (int64, error) {
+	res, err := s.db.ExecContext(ctx, "DELETE FROM events WHERE timestamp < ?", olderThan.UTC())
+	if err != nil {
+		return 0, fmt.Errorf("sqlite: pruning events: %w", err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("sqlite: checking pruned count: %w", err)
+	}
+	return count, nil
+}
+

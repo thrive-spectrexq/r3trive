@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
 )
@@ -63,4 +64,13 @@ func TestPostgresStore_NilDBMethods(t *testing.T) {
 	if _, err := s.QueryIOCs(ctx, "ip", "1.1.1.1"); err == nil || err.Error() == "postgres: QueryIOCs not implemented" {
 		t.Errorf("expected connection inactive error, got: %v", err)
 	}
+
+	if _, err := s.PruneEvents(ctx, time.Now()); err == nil {
+		t.Errorf("expected connection inactive error for PruneEvents, got nil")
+	}
+
+	if _, err := s.QueryEvents(ctx, storage.EventQuery{}); err == nil {
+		t.Errorf("expected connection inactive error for QueryEvents, got nil")
+	}
 }
+

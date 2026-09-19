@@ -113,6 +113,9 @@ type Store interface {
 	SaveIOC(ctx context.Context, ioc IOCEntry) error
 	QueryIOCs(ctx context.Context, iocType string, value string) ([]IOCEntry, error)
 
+	// PruneEvents removes events older than the cutoff timestamp and returns the count removed.
+	PruneEvents(ctx context.Context, olderThan time.Time) (int64, error)
+
 	// Close releases all resources held by the store.
 	Close() error
 }

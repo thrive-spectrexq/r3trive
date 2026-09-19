@@ -13,6 +13,7 @@ import (
 // PurgeStats summarizes records archived and purged during a retention cycle.
 type PurgeStats struct {
 	EventsArchived int       `json:"events_archived"`
+	EventsPurged   int64     `json:"events_purged"`
 	ArchiveFile    string    `json:"archive_file"`
 	CutoffTime     time.Time `json:"cutoff_time"`
 }
@@ -42,7 +43,7 @@ func (m *RetentionManager) ExecutePurgeCycle(ctx context.Context) (PurgeStats, e
 
 	events, err := m.store.QueryEvents(ctx, EventQuery{
 		Until: cutoff,
-		Limit: 5000,
+		Limit: 1000,
 	})
 	if err != nil {
 		return PurgeStats{}, fmt.Errorf("failed to query aged events: %w", err)
@@ -78,8 +79,14 @@ func (m *RetentionManager) ExecutePurgeCycle(ctx context.Context) (PurgeStats, e
 		}
 	}
 
+	purged, err := m.store.PruneEvents(ctx, cutoff)
+	if err != nil {
+		return PurgeStats{}, fmt.Errorf("failed to prune aged events: %w", err)
+	}
+
 	return PurgeStats{
 		EventsArchived: len(events),
+		EventsPurged:   purged,
 		ArchiveFile:    archivePath,
 		CutoffTime:     cutoff,
 	}, nil

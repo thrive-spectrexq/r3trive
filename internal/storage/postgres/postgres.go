@@ -145,7 +145,8 @@ func New(dsn string) (*Store, error) {
 
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxLifetime(1 * time.Hour)
+	db.SetConnMaxIdleTime(15 * time.Minute)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -332,8 +333,10 @@ func (s *Store) QueryEvents(ctx context.Context, query storage.EventQuery) ([]ev
 	}
 
 	limit := query.Limit
-	if limit <= 0 || limit > 1000 {
+	if limit <= 0 {
 		limit = 100
+	} else if limit > 1000 {
+		limit = 1000
 	}
 
 	sqlStr := fmt.Sprintf(`
@@ -873,6 +876,22 @@ func (s *Store) QueryIOCs(ctx context.Context, iocType string, value string) ([]
 		iocs = append(iocs, ioc)
 	}
 	return iocs, rows.Err()
+}
+
+// PruneEvents removes events older than olderThan and returns the count of purged records.
+func (s *Store) PruneEvents(ctx context.Context, olderThan time.Time) (int64, error) {
+	if s.db == nil {
+		return 0, fmt.Errorf("postgres database connection not active")
+	}
+	res, err := s.db.ExecContext(ctx, "DELETE FROM events WHERE timestamp < $1", olderThan.UTC())
+	if err != nil {
+		return 0, fmt.Errorf("postgres: pruning events: %w", err)
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("postgres: checking pruned count: %w", err)
+	}
+	return count, nil
 }
 
 var _ storage.Store = (*Store)(nil)
