@@ -120,3 +120,44 @@ func TestDryRunBlockIP_ValidIPv6(t *testing.T) {
 		t.Errorf("expected success in dry-run mode")
 	}
 }
+
+func TestKillProcess_PID1Prohibited(t *testing.T) {
+	engine := New(true)
+	_, err := engine.Execute(context.Background(), ActionKillProcess, map[string]any{"pid": 1})
+	if err == nil {
+		t.Fatalf("expected guardrail error for PID 1, got nil")
+	}
+}
+
+func TestBlockIP_LocalhostProhibited(t *testing.T) {
+	engine := New(true)
+	_, err := engine.Execute(context.Background(), ActionBlockIP, map[string]any{"ip": "127.0.0.1"})
+	if err == nil {
+		t.Fatalf("expected guardrail error for blocking 127.0.0.1, got nil")
+	}
+}
+
+func TestIsolateHost_LocalhostProhibited(t *testing.T) {
+	engine := New(true)
+	_, err := engine.Execute(context.Background(), ActionIsolateHost, map[string]any{"target": "127.0.0.1"})
+	if err == nil {
+		t.Fatalf("expected guardrail error for isolating 127.0.0.1, got nil")
+	}
+}
+
+func TestEngine_AuditLogging(t *testing.T) {
+	engine := New(true)
+	_, err := engine.Execute(context.Background(), ActionBlockIP, map[string]any{"ip": "198.51.100.25"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	audit := engine.AuditLog()
+	if len(audit) != 1 {
+		t.Fatalf("expected 1 audit record, got %d", len(audit))
+	}
+	if audit[0].Action != ActionBlockIP || !audit[0].Success || !audit[0].DryRun {
+		t.Errorf("audit record mismatch: %+v", audit[0])
+	}
+}
+

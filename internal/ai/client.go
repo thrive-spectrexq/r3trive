@@ -22,18 +22,20 @@ type Client interface {
 func NewClient(cfg config.AIConfig) (Client, error) {
 	switch cfg.Backend {
 	case "ollama":
-		return &OllamaClient{
+		base := &OllamaClient{
 			Endpoint: cfg.Endpoint,
 			Model:    cfg.Model,
 			client:   &http.Client{Timeout: 60 * time.Second},
-		}, nil
+		}
+		return NewRetryingClient(base, 3, 100*time.Millisecond), nil
 	case "openai":
-		return &OpenAIClient{
+		base := &OpenAIClient{
 			Endpoint: cfg.Endpoint,
 			Model:    cfg.Model,
 			APIKey:   cfg.APIKey,
 			client:   &http.Client{Timeout: 60 * time.Second},
-		}, nil
+		}
+		return NewRetryingClient(base, 3, 100*time.Millisecond), nil
 	case "mock", "dev":
 		return &MockClient{ModelName: cfg.Model}, nil
 	case "none", "":
@@ -41,6 +43,57 @@ func NewClient(cfg config.AIConfig) (Client, error) {
 	default:
 		return nil, fmt.Errorf("unsupported ai backend: %s", cfg.Backend)
 	}
+}
+
+// RetryingClient wraps any Client with exponential backoff retries on transient errors.
+type RetryingClient struct {
+	client     Client
+	maxRetries int
+	baseDelay  time.Duration
+}
+
+// NewRetryingClient wraps an existing Client with retry capabilities.
+func NewRetryingClient(c Client, maxRetries int, baseDelay time.Duration) *RetryingClient {
+	if maxRetries <= 0 {
+		maxRetries = 3
+	}
+	if baseDelay <= 0 {
+		baseDelay = 50 * time.Millisecond
+	}
+	return &RetryingClient{
+		client:     c,
+		maxRetries: maxRetries,
+		baseDelay:  baseDelay,
+	}
+}
+
+// Chat executes Chat on the underlying client with exponential backoff retries on failure.
+func (r *RetryingClient) Chat(ctx context.Context, prompt string) (string, error) {
+	var lastErr error
+	delay := r.baseDelay
+
+	for attempt := 0; attempt <= r.maxRetries; attempt++ {
+		if attempt > 0 {
+			select {
+			case <-ctx.Done():
+				return "", ctx.Err()
+			case <-time.After(delay):
+			}
+			delay *= 2
+		}
+
+		res, err := r.client.Chat(ctx, prompt)
+		if err == nil {
+			return res, nil
+		}
+		lastErr = err
+
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
+	}
+
+	return "", fmt.Errorf("ai client exhausted %d retries: %w", r.maxRetries, lastErr)
 }
 
 // MockClient provides an offline testing client implementation.

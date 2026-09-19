@@ -2,9 +2,11 @@ package ai
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/thrive-spectrexq/r3trive/internal/config"
 )
@@ -80,3 +82,46 @@ func TestOpenAIClient(t *testing.T) {
 		t.Errorf("expected Authorization header 'Bearer test-secret-key', got %q", authHeaderReceived)
 	}
 }
+
+type flakyMockClient struct {
+	failTimes int
+	attempts  int
+}
+
+func (f *flakyMockClient) Chat(ctx context.Context, prompt string) (string, error) {
+	f.attempts++
+	if f.attempts <= f.failTimes {
+		return "", errors.New("transient upstream failure")
+	}
+	return "recovered output", nil
+}
+
+func TestRetryingClient_SuccessAfterTransientError(t *testing.T) {
+	flaky := &flakyMockClient{failTimes: 2}
+	retrying := NewRetryingClient(flaky, 3, 10*time.Millisecond)
+
+	res, err := retrying.Chat(context.Background(), "test prompt")
+	if err != nil {
+		t.Fatalf("expected retry to succeed, got: %v", err)
+	}
+	if res != "recovered output" {
+		t.Errorf("expected 'recovered output', got %q", res)
+	}
+	if flaky.attempts != 3 {
+		t.Errorf("expected 3 attempts, got %d", flaky.attempts)
+	}
+}
+
+func TestRetryingClient_ExhaustsRetries(t *testing.T) {
+	flaky := &flakyMockClient{failTimes: 5}
+	retrying := NewRetryingClient(flaky, 2, 10*time.Millisecond)
+
+	_, err := retrying.Chat(context.Background(), "test prompt")
+	if err == nil {
+		t.Fatalf("expected error after exhausting retries, got nil")
+	}
+	if flaky.attempts != 3 { // 1 initial + 2 retries = 3 attempts
+		t.Errorf("expected 3 attempts before failure, got %d", flaky.attempts)
+	}
+}
+

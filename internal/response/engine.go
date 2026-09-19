@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
@@ -37,10 +38,24 @@ type ActionResult struct {
 	Reversible bool       `json:"reversible"`
 }
 
+// AuditRecord captures an immutable record of every defensive response action attempted or executed.
+type AuditRecord struct {
+	ID        string         `json:"id"`
+	Timestamp time.Time      `json:"timestamp"`
+	Action    ActionType     `json:"action"`
+	Params    map[string]any `json:"params,omitempty"`
+	DryRun    bool           `json:"dry_run"`
+	Success   bool           `json:"success"`
+	Error     string         `json:"error,omitempty"`
+	Message   string         `json:"message,omitempty"`
+}
+
 // Engine executes response actions and manages playbooks.
 type Engine struct {
-	dryRun  bool
-	actions map[ActionType]ActionHandler
+	dryRun   bool
+	actions  map[ActionType]ActionHandler
+	mu       sync.RWMutex
+	auditLog []AuditRecord
 }
 
 // ActionHandler is the function signature for action implementations.
@@ -83,24 +98,65 @@ func (e *Engine) execute(ctx context.Context, action ActionType, params map[stri
 		return ActionResult{}, err
 	}
 
+	record := AuditRecord{
+		ID:        fmt.Sprintf("audit_%d", time.Now().UnixNano()),
+		Timestamp: time.Now().UTC(),
+		Action:    action,
+		Params:    params,
+		DryRun:    dryRun,
+	}
+
 	if dryRun {
 		slog.Info("dry-run: would execute action", "action", action, "params", params)
-		return ActionResult{
+		res := ActionResult{
 			Action:    action,
 			Success:   true,
 			Message:   fmt.Sprintf("[DRY-RUN] Would execute %s", action),
 			Timestamp: time.Now().UTC(),
-		}, nil
+		}
+		record.Success = true
+		record.Message = res.Message
+		e.recordAudit(record)
+		return res, nil
 	}
 
 	result, err := handler(ctx, params)
 	if err != nil {
 		slog.Error("action failed", "action", action, "error", err)
+		record.Success = false
+		record.Error = err.Error()
+		e.recordAudit(record)
 		return result, err
 	}
 
+	record.Success = result.Success
+	record.Message = result.Message
+	e.recordAudit(record)
+
 	slog.Info("action executed", "action", action, "success", result.Success)
 	return result, nil
+}
+
+func (e *Engine) recordAudit(r AuditRecord) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	e.auditLog = append(e.auditLog, r)
+	slog.Info("defense action audit",
+		"audit_id", r.ID,
+		"action", r.Action,
+		"dry_run", r.DryRun,
+		"success", r.Success,
+		"error", r.Error,
+	)
+}
+
+// AuditLog returns a snapshot copy of the defensive response audit log.
+func (e *Engine) AuditLog() []AuditRecord {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	records := make([]AuditRecord, len(e.auditLog))
+	copy(records, e.auditLog)
+	return records
 }
 
 // validateParams validates the parameters for a given action type without executing.
@@ -125,6 +181,9 @@ func (e *Engine) validateParams(action ActionType, params map[string]any) error 
 		if pid <= 0 {
 			return fmt.Errorf("invalid pid: %d (must be positive)", pid)
 		}
+		if pid == 1 {
+			return fmt.Errorf("defensive guardrail: killing system init process pid 1 is prohibited")
+		}
 	case ActionBlockIP:
 		ipVal, ok := params["ip"]
 		if !ok {
@@ -137,6 +196,9 @@ func (e *Engine) validateParams(action ActionType, params map[string]any) error 
 		if net.ParseIP(ip) == nil {
 			return fmt.Errorf("invalid IP address: %q", ip)
 		}
+		if ip == "127.0.0.1" || ip == "localhost" {
+			return fmt.Errorf("defensive guardrail: blocking localhost (%s) is prohibited", ip)
+		}
 	case ActionQuarantine:
 		pathVal, ok := params["path"]
 		if !ok {
@@ -144,6 +206,17 @@ func (e *Engine) validateParams(action ActionType, params map[string]any) error 
 		}
 		if _, ok := pathVal.(string); !ok {
 			return fmt.Errorf("invalid path type: %T", pathVal)
+		}
+	case ActionIsolateHost:
+		if targetVal, ok := params["target"]; ok {
+			if s, ok := targetVal.(string); ok && (s == "127.0.0.1" || s == "localhost") {
+				return fmt.Errorf("defensive guardrail: isolating localhost (%s) is prohibited", s)
+			}
+		}
+		if ipVal, ok := params["ip"]; ok {
+			if s, ok := ipVal.(string); ok && (s == "127.0.0.1" || s == "localhost") {
+				return fmt.Errorf("defensive guardrail: isolating localhost (%s) is prohibited", s)
+			}
 		}
 	}
 	return nil
