@@ -257,3 +257,105 @@ func TestApplyEnv(t *testing.T) {
 		t.Fatalf("Validate failed on env-overlaid config: %v", err)
 	}
 }
+
+func TestProductionModeValidation(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*Config)
+		wantErr bool
+	}{
+		{
+			name: "production mode without api key fails",
+			modify: func(c *Config) {
+				c.Mode = "production"
+				c.API.APIKey = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "production mode with allow_insecure_binding fails",
+			modify: func(c *Config) {
+				c.Mode = "production"
+				c.API.APIKey = "valid-secret-key"
+				c.API.AllowInsecureBinding = true
+			},
+			wantErr: true,
+		},
+		{
+			name: "production mode with wildcard cors fails",
+			modify: func(c *Config) {
+				c.Mode = "production"
+				c.API.APIKey = "valid-secret-key"
+				c.API.CORSOrigins = []string{"*"}
+			},
+			wantErr: true,
+		},
+		{
+			name: "production mode non-loopback without tls fails",
+			modify: func(c *Config) {
+				c.Mode = "production"
+				c.API.APIKey = "valid-secret-key"
+				c.API.Addr = "192.168.1.100:8080"
+				c.API.TLSCert = ""
+				c.API.TLSKey = ""
+			},
+			wantErr: true,
+		},
+		{
+			name: "production mode valid loopback passes",
+			modify: func(c *Config) {
+				c.Mode = "production"
+				c.API.APIKey = "valid-secret-key"
+				c.API.Addr = "127.0.0.1:8080"
+				c.API.CORSOrigins = []string{"https://console.r3trive.io"}
+			},
+			wantErr: false,
+		},
+		{
+			name: "production mode valid non-loopback with tls passes",
+			modify: func(c *Config) {
+				c.Mode = "production"
+				c.API.APIKey = "valid-secret-key"
+				c.API.Addr = "0.0.0.0:8443"
+				c.API.TLSCert = "/etc/ssl/cert.pem"
+				c.API.TLSKey = "/etc/ssl/key.pem"
+				c.API.CORSOrigins = []string{"https://console.r3trive.io"}
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid mode fails",
+			modify: func(c *Config) {
+				c.Mode = "staging-unknown"
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := Default()
+			tt.modify(cfg)
+			err := cfg.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestModeEnvOverlay(t *testing.T) {
+	t.Setenv("R3TRIVE_MODE", "production")
+	t.Setenv("R3TRIVE_API_KEY", "env-secret-key")
+
+	cfg := Default()
+	ApplyEnv(cfg)
+
+	if cfg.Mode != "production" {
+		t.Errorf("expected Mode 'production', got %s", cfg.Mode)
+	}
+	if cfg.API.APIKey != "env-secret-key" {
+		t.Errorf("expected API.APIKey 'env-secret-key', got %s", cfg.API.APIKey)
+	}
+}
+

@@ -14,6 +14,9 @@ import (
 
 // Config holds all R3TRIVE configuration.
 type Config struct {
+	// Mode defines runtime environment ("development" or "production"). Default: "development"
+	Mode string `yaml:"mode" json:"mode"`
+
 	// General settings
 	LogLevel  string `yaml:"log_level" json:"log_level"`
 	DataDir   string `yaml:"data_dir" json:"data_dir"`
@@ -116,6 +119,7 @@ func Default() *Config {
 	dbPath := filepath.Join(dataDir, "r3trive.db")
 
 	return &Config{
+		Mode:      "development",
 		LogLevel:  "info",
 		DataDir:   dataDir,
 		OutputFmt: "table",
@@ -180,6 +184,13 @@ func LoadFromFile(path string) (*Config, error) {
 
 // Validate checks the configuration for errors.
 func (c *Config) Validate() error {
+	if c.Mode == "" {
+		c.Mode = "development"
+	}
+	if c.Mode != "development" && c.Mode != "production" {
+		return fmt.Errorf("invalid mode %q, must be 'development' or 'production'", c.Mode)
+	}
+
 	validLogLevels := map[string]bool{
 		"trace": true, "debug": true, "info": true, "warn": true, "error": true,
 	}
@@ -226,6 +237,26 @@ func (c *Config) Validate() error {
 		hasTLS := hasCert && hasKey
 		if !hasAuth && !hasTLS && !c.API.AllowInsecureBinding {
 			return fmt.Errorf("api: binding to non-loopback address %q without authentication (api_key) or TLS is disallowed for security; set allow_insecure_binding: true to override", c.API.Addr)
+		}
+	}
+
+	// Production mode security enforcements
+	if c.Mode == "production" {
+		if c.API.APIKey == "" {
+			return fmt.Errorf("security: production mode requires an explicit api.api_key")
+		}
+		if c.API.AllowInsecureBinding {
+			return fmt.Errorf("security: production mode prohibits allow_insecure_binding: true")
+		}
+		for _, o := range c.API.CORSOrigins {
+			if o == "*" {
+				return fmt.Errorf("security: production mode prohibits wildcard CORS origin '*'")
+			}
+		}
+		if c.API.Addr != "" && !isLoopbackAddr(c.API.Addr) {
+			if c.API.TLSCert == "" || c.API.TLSKey == "" {
+				return fmt.Errorf("security: production mode requires TLS (tls_cert, tls_key) when binding to non-loopback address %q", c.API.Addr)
+			}
 		}
 	}
 

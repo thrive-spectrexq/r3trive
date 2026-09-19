@@ -14,6 +14,13 @@ func ApplyEnv(cfg *Config) {
 		return
 	}
 
+	// Mode
+	if val := os.Getenv("R3TRIVE_MODE"); val != "" {
+		cfg.Mode = strings.ToLower(val)
+	} else if val := os.Getenv("R3TRIVE_ENV"); val != "" {
+		cfg.Mode = strings.ToLower(val)
+	}
+
 	// General
 	if val := os.Getenv("R3TRIVE_LOG_LEVEL"); val != "" {
 		cfg.LogLevel = val
