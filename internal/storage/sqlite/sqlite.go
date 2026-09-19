@@ -704,4 +704,3 @@ func (s *Store) PruneEvents(ctx context.Context, olderThan time.Time) (int64, er
 	}
 	return count, nil
 }
-

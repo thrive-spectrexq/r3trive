@@ -2,6 +2,7 @@ package sensor_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -70,7 +71,7 @@ func runSensorContractTest(t *testing.T, s sensor.Sensor, maxWait time.Duration)
 	// 5. Verify Start returns cleanly without hanging
 	select {
 	case err := <-errChan:
-		if err != nil && err != context.Canceled {
+		if err != nil && !errors.Is(err, context.Canceled) {
 			t.Errorf("sensor Start() exited with error: %v", err)
 		}
 	case <-time.After(3 * time.Second):

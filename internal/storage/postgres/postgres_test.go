@@ -73,4 +73,3 @@ func TestPostgresStore_NilDBMethods(t *testing.T) {
 		t.Errorf("expected connection inactive error for QueryEvents, got nil")
 	}
 }
-

@@ -124,4 +124,3 @@ func TestRetryingClient_ExhaustsRetries(t *testing.T) {
 		t.Errorf("expected 3 attempts before failure, got %d", flaky.attempts)
 	}
 }
-

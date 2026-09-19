@@ -413,4 +413,3 @@ func (c *Config) LogEffective(logger *slog.Logger) {
 		slog.Bool("telemetry_enabled", c.Telemetry.Enabled),
 	)
 }
-

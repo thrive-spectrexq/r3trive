@@ -192,4 +192,3 @@ func TestSQLiteQueryEventsBounds(t *testing.T) {
 		t.Errorf("expected 120 events, got %d", len(results120))
 	}
 }
-

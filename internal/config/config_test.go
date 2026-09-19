@@ -398,4 +398,3 @@ func TestLogEffective(t *testing.T) {
 	cfg.LogEffective(nil)
 	cfg.LogEffective(slog.Default())
 }
-

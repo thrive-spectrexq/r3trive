@@ -160,4 +160,3 @@ func TestEngine_AuditLogging(t *testing.T) {
 		t.Errorf("audit record mismatch: %+v", audit[0])
 	}
 }
-
