@@ -64,3 +64,4 @@ func TestMockNetworkSensor(t *testing.T) {
 		t.Error("expected network sensor health to be true")
 	}
 }
+
