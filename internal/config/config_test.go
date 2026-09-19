@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 	"testing"
@@ -357,5 +358,44 @@ func TestModeEnvOverlay(t *testing.T) {
 	if cfg.API.APIKey != "env-secret-key" {
 		t.Errorf("expected API.APIKey 'env-secret-key', got %s", cfg.API.APIKey)
 	}
+}
+
+func TestMaskDSN(t *testing.T) {
+	tests := []struct {
+		input string
+		want  string
+	}{
+		{
+			input: "/var/lib/r3trive.db",
+			want:  "/var/lib/r3trive.db",
+		},
+		{
+			input: "postgres://admin:secret123@localhost:5432/r3trivedb?sslmode=disable",
+			want:  "postgres://admin:****@localhost:5432/r3trivedb?sslmode=disable",
+		},
+		{
+			input: "postgresql://user@localhost/db",
+			want:  "postgresql://user@localhost/db",
+		},
+	}
+
+	for _, tt := range tests {
+		got := MaskDSN(tt.input)
+		if got != tt.want {
+			t.Errorf("MaskDSN(%q) = %q, want %q", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestLogEffective(t *testing.T) {
+	cfg := Default()
+	cfg.Storage.DSN = "postgres://operator:mypassword@localhost:5432/r3trive"
+	cfg.API.APIKey = "super-secret"
+	cfg.API.TLSCert = "/etc/cert.pem"
+	cfg.API.TLSKey = "/etc/key.pem"
+
+	// Must run without panic with nil or real logger
+	cfg.LogEffective(nil)
+	cfg.LogEffective(slog.Default())
 }
 

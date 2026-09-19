@@ -135,8 +135,13 @@ Documentation: https://docs.r3trive.io`,
 func loadConfig() error {
 	var err error
 
-	if cfgFile != "" {
-		cfg, err = config.LoadFromFile(cfgFile)
+	effectivePath := cfgFile
+	if effectivePath == "" {
+		effectivePath = os.Getenv("R3TRIVE_CONFIG")
+	}
+
+	if effectivePath != "" {
+		cfg, err = config.LoadFromFile(effectivePath)
 		if err != nil {
 			return NewConfigError(fmt.Sprintf("loading config: %v", err))
 		}
@@ -175,6 +180,9 @@ func loadConfig() error {
 
 	// Setup logging
 	setupLogging(cfg.LogLevel)
+
+	// Log effective configuration summary
+	cfg.LogEffective(slog.Default())
 
 	return nil
 }

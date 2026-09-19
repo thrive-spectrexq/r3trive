@@ -3,7 +3,9 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -351,3 +353,64 @@ func DefaultConfigPath() string {
 		return filepath.Join(xdgConfig, "r3trive", "config.yaml")
 	}
 }
+
+// MaskDSN returns a sanitized version of a database connection string with credentials hidden.
+func MaskDSN(dsn string) string {
+	if !strings.Contains(dsn, "://") {
+		return dsn
+	}
+	u, err := url.Parse(dsn)
+	if err != nil {
+		return "[redacted-dsn]"
+	}
+	if u.User != nil {
+		if _, hasPassword := u.User.Password(); hasPassword {
+			u.User = url.UserPassword(u.User.Username(), "placeholder")
+			res := u.String()
+			return strings.Replace(res, ":placeholder@", ":****@", 1)
+		}
+	}
+	return u.String()
+}
+
+// LogEffective emits a structured summary of the effective configuration.
+func (c *Config) LogEffective(logger *slog.Logger) {
+	if logger == nil {
+		return
+	}
+
+	apiKeyStatus := "none"
+	if c.API.APIKey != "" {
+		apiKeyStatus = "****"
+	}
+
+	tlsStatus := "disabled"
+	if c.API.TLSCert != "" && c.API.TLSKey != "" {
+		tlsStatus = "enabled"
+	}
+
+	aiKeyStatus := "none"
+	if c.AI.APIKey != "" {
+		aiKeyStatus = "****"
+	}
+
+	logger.Info("effective configuration loaded",
+		slog.String("mode", c.Mode),
+		slog.String("log_level", c.LogLevel),
+		slog.String("output_format", c.OutputFmt),
+		slog.String("data_dir", c.DataDir),
+		slog.String("storage_driver", c.Storage.Driver),
+		slog.String("storage_dsn", MaskDSN(c.Storage.DSN)),
+		slog.Int("storage_batch_size", c.Storage.BatchSize),
+		slog.Int("storage_retention_days", c.Storage.RetentionDays),
+		slog.String("api_addr", c.API.Addr),
+		slog.String("api_key", apiKeyStatus),
+		slog.String("api_tls", tlsStatus),
+		slog.Bool("api_allow_insecure_binding", c.API.AllowInsecureBinding),
+		slog.String("sensor_mode", c.Sensor.Mode),
+		slog.String("ai_backend", c.AI.Backend),
+		slog.String("ai_key", aiKeyStatus),
+		slog.Bool("telemetry_enabled", c.Telemetry.Enabled),
+	)
+}
+

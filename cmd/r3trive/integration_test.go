@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -89,6 +91,83 @@ func TestIntegrationConfigPrecedence(t *testing.T) {
 	}
 	if cfg == nil || cfg.LogLevel != "debug" {
 		t.Errorf("expected LogLevel 'debug' from CLI flag, got: %+v", cfg)
+	}
+}
+
+func TestIntegrationConfigEnvPathOverride(t *testing.T) {
+	tempDir := t.TempDir()
+	customPath := filepath.Join(tempDir, "custom.yaml")
+	content := []byte("log_level: error\nstorage:\n  driver: sqlite\n")
+	if err := os.WriteFile(customPath, content, 0o600); err != nil {
+		t.Fatalf("writing custom config: %v", err)
+	}
+
+	resetCLIState()
+	t.Setenv("R3TRIVE_CONFIG", customPath)
+	cmd := buildRootCmd()
+	var out bytes.Buffer
+	cmd.SetOut(&out)
+	cmd.SetErr(&out)
+	cmd.SetArgs([]string{"config", "show"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("config show with R3TRIVE_CONFIG failed: %v", err)
+	}
+	if cfg == nil || cfg.LogLevel != "error" {
+		t.Errorf("expected LogLevel 'error' from R3TRIVE_CONFIG file, got: %+v", cfg)
+	}
+}
+
+func TestIntegrationFourTierPrecedence(t *testing.T) {
+	tempDir := t.TempDir()
+	customPath := filepath.Join(tempDir, "precedence.yaml")
+	// File specifies log_level: warn
+	content := []byte("log_level: warn\nstorage:\n  driver: sqlite\n")
+	if err := os.WriteFile(customPath, content, 0o600); err != nil {
+		t.Fatalf("writing precedence config: %v", err)
+	}
+
+	// Case 1: Config file overrides defaults (info -> warn)
+	resetCLIState()
+	cmd1 := buildRootCmd()
+	var out1 bytes.Buffer
+	cmd1.SetOut(&out1)
+	cmd1.SetErr(&out1)
+	cmd1.SetArgs([]string{"--config", customPath, "config", "show"})
+	if err := cmd1.Execute(); err != nil {
+		t.Fatalf("tier 2 failed: %v", err)
+	}
+	if cfg.LogLevel != "warn" {
+		t.Errorf("expected file override 'warn', got %s", cfg.LogLevel)
+	}
+
+	// Case 2: Environment variable overrides config file (warn -> debug)
+	resetCLIState()
+	t.Setenv("R3TRIVE_LOG_LEVEL", "debug")
+	cmd2 := buildRootCmd()
+	var out2 bytes.Buffer
+	cmd2.SetOut(&out2)
+	cmd2.SetErr(&out2)
+	cmd2.SetArgs([]string{"--config", customPath, "config", "show"})
+	if err := cmd2.Execute(); err != nil {
+		t.Fatalf("tier 3 failed: %v", err)
+	}
+	if cfg.LogLevel != "debug" {
+		t.Errorf("expected env override 'debug', got %s", cfg.LogLevel)
+	}
+
+	// Case 3: CLI flag overrides environment variable and file (debug -> trace)
+	resetCLIState()
+	cmd3 := buildRootCmd()
+	var out3 bytes.Buffer
+	cmd3.SetOut(&out3)
+	cmd3.SetErr(&out3)
+	cmd3.SetArgs([]string{"--config", customPath, "--log-level", "trace", "config", "show"})
+	if err := cmd3.Execute(); err != nil {
+		t.Fatalf("tier 4 failed: %v", err)
+	}
+	if cfg.LogLevel != "trace" {
+		t.Errorf("expected flag override 'trace', got %s", cfg.LogLevel)
 	}
 }
 
