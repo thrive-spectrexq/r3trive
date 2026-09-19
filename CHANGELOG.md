@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [0.1.10] - 2026-09-19
 
 ### Added
 - **Explicit Operating Modes & Security Defaults**: Introduced `mode: "production"` and `"development"` in configuration and `R3TRIVE_MODE`/`R3TRIVE_ENV` environment variables. Production mode enforces mandatory API keys, strictly forbids `allow_insecure_binding: true`, forbids wildcard `*` CORS origins, and requires TLS on non-loopback interfaces.
