@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.11] - 2026-09-23
+
+### Added & Architectural Hardening
+- **Detection & Correlation Engine Hardening**:
+  - Aligned event type constants in detection pipeline to match sensor emission contracts.
+  - Implemented streaming file hashing bounded to 20MB with 32KB chunk buffers to prevent OOM errors on large files.
+  - Fully integrated `Normalizer` and `Enricher` into the real-time detection pipeline with bounded YARA worker pools.
+  - Added high-performance reflection-free field extraction, entity-partitioned sliding window state, and extended comparison operators (`gt`, `lt`, `gte`, `lte`, `contains`, `regex`, `cidr`) in the correlation engine.
+  - Aligned Sigma field mapping with filter negation and enabled observation collection for `IsolationForest` anomaly baselining.
+- **Threat Intelligence & SOAR Playbook Hardening**:
+  - Implemented Bloom filter hash matching (1M capacity, 0.1% false-positive probability) and CIDR subnet prefix parsing via `netip.Prefix` in the IOC engine.
+  - Expanded `MatchEvent` to evaluate network domains, URLs, and process command lines against active threat intel.
+  - Introduced reversible playbook execution with automated compensation and rollback handlers (`unblock_ip`, `unquarantine_file`, `unisolate_host`).
+  - Implemented cross-platform host network isolation with DNS pinhole rules allowing loopback and DNS resolution while dropping unauthorized ingress and egress.
+  - Enforced critical system process termination prevention (PID 1, init, launchd, wininit).
+  - Added threat feed persistence to SQLite/PostgreSQL with automatic startup cache warmup.
+- **Distributed Fleet, Telemetry & Storage**:
+  - Added high-throughput batch event ingestion endpoint `POST /api/v1/events/batch` with validation and rate limiting.
+  - Fixed retention purge bug to support multi-chunk pagination beyond 1,000 events with a background purge worker.
+  - Wired OpenTelemetry metric instruments (`events_total`, `detections_total`, `actions_total`, `duration_seconds`) across pipeline, correlation, and aggregator.
+  - Added Prometheus `/metrics` scrape endpoint.
+  - Added compound indexes in PostgreSQL schema (`events_timestamp_type_idx`, `rules_name_enabled_idx`).
+- **AI Security Copilot & Local RAG**:
+  - Implemented prompt injection defense using `<untrusted_event_payload>` XML boundary encapsulation and explicit system instruction hierarchy.
+  - Added structured `ActionRecommendation` schema parser and strict safety validator blocking dangerous shell commands and unapproved operations.
+  - Added automated PII and credential redaction (`RedactPII`) stripping AWS access keys, JWTs, private keys, passwords, and tokens before LLM dispatch.
+  - Expanded offline local RAG security taxonomy and pre-seeded MITRE ATT&CK techniques with cosine vector retrieval.
+
+---
+
 ## [0.1.10] - 2026-09-19
 
 ### Added
