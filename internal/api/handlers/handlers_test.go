@@ -415,3 +415,60 @@ func TestIOCsHandlers(t *testing.T) {
 		t.Errorf("AddIOC status = %d, want 201", recAdd.Code)
 	}
 }
+
+func TestBatchIngestEvents(t *testing.T) {
+	store := &mockStore{}
+	handler := BatchIngestEvents(store)
+
+	// 1. Valid array payload
+	validArray := `[{"type":"process.create","severity":"low"},{"type":"file.create","severity":"medium"}]`
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/events/batch", bytes.NewBufferString(validArray))
+	rec := httptest.NewRecorder()
+	handler(rec, req)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("expected 201 Created for valid array, got %d", rec.Code)
+	}
+	var res map[string]any
+	if err := json.NewDecoder(rec.Body).Decode(&res); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+	if res["status"] != "success" || res["ingested"].(float64) != 2 {
+		t.Errorf("unexpected batch response: %v", res)
+	}
+
+	// 2. Valid wrapped payload
+	validWrapped := `{"events":[{"type":"network.connect","severity":"high"}]}`
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/events/batch", bytes.NewBufferString(validWrapped))
+	rec = httptest.NewRecorder()
+	handler(rec, req)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("expected 201 Created for wrapped events, got %d", rec.Code)
+	}
+
+	// 3. Empty batch payload
+	emptyPayload := `[]`
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/events/batch", bytes.NewBufferString(emptyPayload))
+	rec = httptest.NewRecorder()
+	handler(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request for empty array, got %d", rec.Code)
+	}
+
+	// 4. Invalid JSON
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/events/batch", bytes.NewBufferString(`{not-json}`))
+	rec = httptest.NewRecorder()
+	handler(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request for invalid json, got %d", rec.Code)
+	}
+
+	// 5. Store error
+	failStore := &mockStore{saveErr: errors.New("db error")}
+	failHandler := BatchIngestEvents(failStore)
+	req = httptest.NewRequest(http.MethodPost, "/api/v1/events/batch", bytes.NewBufferString(validArray))
+	rec = httptest.NewRecorder()
+	failHandler(rec, req)
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500 InternalServerError on saveErr, got %d", rec.Code)
+	}
+}

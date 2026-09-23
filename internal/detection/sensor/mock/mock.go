@@ -22,11 +22,14 @@ type processSensor struct {
 	eventsCollected atomic.Int64
 	errorCount      atomic.Int64
 	lastEventTime   atomic.Value
+	stopCh          chan struct{}
 }
 
 // NewProcessSensor creates a new mock process sensor.
 func NewProcessSensor() sensor.Sensor {
-	return &processSensor{}
+	return &processSensor{
+		stopCh: make(chan struct{}),
+	}
 }
 
 func (s *processSensor) Name() string { return "MockProcessSensor" }
@@ -38,13 +41,28 @@ func (s *processSensor) Platform() []sensor.Platform {
 func (s *processSensor) Start(ctx context.Context, ch chan<- event.Event) error {
 	slog.Info("mock process sensor started")
 
-	ticker := time.NewTicker(2 * time.Second)
+	// Emit initial event immediately
+	firstEvt := s.generateEvent()
+	select {
+	case ch <- firstEvt:
+		s.eventsCollected.Add(1)
+		s.lastEventTime.Store(firstEvt.Timestamp.Format(time.RFC3339))
+	case <-ctx.Done():
+		return nil
+	case <-s.stopCh:
+		return nil
+	}
+
+	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			slog.Info("mock process sensor stopping")
+			return nil
+		case <-s.stopCh:
+			slog.Info("mock process sensor stopped via stopCh")
 			return nil
 		case <-ticker.C:
 			evt := s.generateEvent()
@@ -54,12 +72,19 @@ func (s *processSensor) Start(ctx context.Context, ch chan<- event.Event) error 
 				s.lastEventTime.Store(evt.Timestamp.Format(time.RFC3339))
 			case <-ctx.Done():
 				return nil
+			case <-s.stopCh:
+				return nil
 			}
 		}
 	}
 }
 
 func (s *processSensor) Stop() error {
+	select {
+	case <-s.stopCh:
+	default:
+		close(s.stopCh)
+	}
 	return nil
 }
 
@@ -176,11 +201,14 @@ type networkSensor struct {
 	eventsCollected atomic.Int64
 	errorCount      atomic.Int64
 	lastEventTime   atomic.Value
+	stopCh          chan struct{}
 }
 
 // NewNetworkSensor creates a new mock network sensor.
 func NewNetworkSensor() sensor.Sensor {
-	return &networkSensor{}
+	return &networkSensor{
+		stopCh: make(chan struct{}),
+	}
 }
 
 func (s *networkSensor) Name() string { return "MockNetworkSensor" }
@@ -192,13 +220,28 @@ func (s *networkSensor) Platform() []sensor.Platform {
 func (s *networkSensor) Start(ctx context.Context, ch chan<- event.Event) error {
 	slog.Info("mock network sensor started")
 
-	ticker := time.NewTicker(3 * time.Second)
+	// Emit initial event immediately
+	firstEvt := s.generateEvent()
+	select {
+	case ch <- firstEvt:
+		s.eventsCollected.Add(1)
+		s.lastEventTime.Store(firstEvt.Timestamp.Format(time.RFC3339))
+	case <-ctx.Done():
+		return nil
+	case <-s.stopCh:
+		return nil
+	}
+
+	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
 			slog.Info("mock network sensor stopping")
+			return nil
+		case <-s.stopCh:
+			slog.Info("mock network sensor stopped via stopCh")
 			return nil
 		case <-ticker.C:
 			evt := s.generateEvent()
@@ -208,12 +251,19 @@ func (s *networkSensor) Start(ctx context.Context, ch chan<- event.Event) error 
 				s.lastEventTime.Store(evt.Timestamp.Format(time.RFC3339))
 			case <-ctx.Done():
 				return nil
+			case <-s.stopCh:
+				return nil
 			}
 		}
 	}
 }
 
 func (s *networkSensor) Stop() error {
+	select {
+	case <-s.stopCh:
+	default:
+		close(s.stopCh)
+	}
 	return nil
 }
 

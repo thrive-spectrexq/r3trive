@@ -166,6 +166,28 @@ func (e *Engine) ExecutePlaybook(ctx context.Context, pb *Playbook, incident eve
 		// Record rollback step if action is reversible
 		if res.Reversible && res.Success {
 			execResult.RollbackPlan = append(execResult.RollbackPlan, fmt.Sprintf("undo %s: %s", step.Action, res.Message))
+
+			// Construct executable compensation step
+			switch step.Action {
+			case response.ActionBlockIP:
+				execResult.RollbackSteps = append(execResult.RollbackSteps, CompensationStep{
+					Name:   fmt.Sprintf("unblock_%s", step.Name),
+					Action: response.ActionUnblockIP,
+					Params: map[string]any{"ip": params["ip"]},
+				})
+			case response.ActionQuarantine:
+				execResult.RollbackSteps = append(execResult.RollbackSteps, CompensationStep{
+					Name:   fmt.Sprintf("unquarantine_%s", step.Name),
+					Action: response.ActionUnquarantine,
+					Params: map[string]any{"path": params["path"]},
+				})
+			case response.ActionIsolateHost:
+				execResult.RollbackSteps = append(execResult.RollbackSteps, CompensationStep{
+					Name:   "unisolate_host",
+					Action: response.ActionUnisolateHost,
+					Params: nil,
+				})
+			}
 		}
 
 		// Handle step failure logic
@@ -206,4 +228,29 @@ func (e *Engine) ExecutePlaybook(ctx context.Context, pb *Playbook, incident eve
 
 	execResult.EndTime = time.Now().UTC()
 	return execResult, nil
+}
+
+// ExecuteRollback runs compensating steps in reverse sequence to rollback actions taken during playbook execution.
+func (e *Engine) ExecuteRollback(ctx context.Context, executor ActionExecutor, steps []CompensationStep) ([]StepResult, error) {
+	var results []StepResult
+	for i := len(steps) - 1; i >= 0; i-- {
+		step := steps[i]
+		slog.Info("executing rollback step", "step", step.Name, "action", step.Action, "params", step.Params)
+		res, err := executor.Execute(ctx, step.Action, step.Params)
+		stepRes := StepResult{
+			StepName:  step.Name,
+			Action:    step.Action,
+			Success:   res.Success && err == nil,
+			Message:   res.Message,
+			Timestamp: time.Now().UTC(),
+		}
+		if err != nil {
+			stepRes.Error = err.Error()
+		}
+		results = append(results, stepRes)
+		if err != nil {
+			return results, fmt.Errorf("rollback step '%s' failed: %w", step.Name, err)
+		}
+	}
+	return results, nil
 }

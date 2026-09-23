@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -122,5 +123,23 @@ func TestNewServerRoutes(t *testing.T) {
 	server.httpServer.Handler.ServeHTTP(recEventsAuth, reqEventsAuth)
 	if recEventsAuth.Code != http.StatusOK {
 		t.Errorf("Protected events endpoint returned %d with auth, want 200", recEventsAuth.Code)
+	}
+
+	// 6. Check /metrics endpoint returns 200 and text/plain
+	reqMetrics := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	recMetrics := httptest.NewRecorder()
+	server.httpServer.Handler.ServeHTTP(recMetrics, reqMetrics)
+	if recMetrics.Code != http.StatusOK {
+		t.Errorf("Metrics endpoint returned %d, want 200", recMetrics.Code)
+	}
+
+	// 7. Check POST /api/v1/events/batch with auth
+	batchBody := `[{"type":"process.create"}]`
+	reqBatch := httptest.NewRequest(http.MethodPost, "/api/v1/events/batch", strings.NewReader(batchBody))
+	reqBatch.Header.Set("X-API-Key", "testkey")
+	recBatch := httptest.NewRecorder()
+	server.httpServer.Handler.ServeHTTP(recBatch, reqBatch)
+	if recBatch.Code != http.StatusCreated {
+		t.Errorf("Batch events endpoint returned %d with auth, want 201", recBatch.Code)
 	}
 }

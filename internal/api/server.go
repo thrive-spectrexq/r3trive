@@ -13,6 +13,7 @@ import (
 	"github.com/thrive-spectrexq/r3trive/internal/api/handlers"
 	apimiddleware "github.com/thrive-spectrexq/r3trive/internal/api/middleware"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
+	"github.com/thrive-spectrexq/r3trive/internal/telemetry"
 )
 
 // ServerConfig holds the configuration for the API server.
@@ -103,6 +104,7 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 		})
 	})
 
+	r.Get("/metrics", telemetry.PrometheusHandler())
 	r.Get("/swagger", HandleSwaggerUI)
 
 	r.Route("/api/v1", func(r chi.Router) {
@@ -117,6 +119,7 @@ func NewServer(cfg ServerConfig, store storage.Store) *Server {
 
 			r.Route("/events", func(r chi.Router) {
 				r.Get("/", handlers.QueryEvents(store))
+				r.Post("/batch", handlers.BatchIngestEvents(store))
 				r.Get("/{id}", handlers.GetEvent(store))
 			})
 

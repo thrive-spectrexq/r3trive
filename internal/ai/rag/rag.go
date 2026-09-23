@@ -198,6 +198,27 @@ func (kb *KnowledgeBase) seedATTACKData() {
 			Content:  "Adversaries may use Valid Accounts to log into Remote Desktop Protocol (RDP) services to move laterally across a network.",
 			Tags:     []string{"rdp", "remote", "desktop", "lateral", "movement"},
 		},
+		{
+			ID:       "T1486",
+			Title:    "Data Encrypted for Impact",
+			Category: "Impact",
+			Content:  "Adversaries may encrypt data on target systems or delete volume shadow copies to disrupt availability and extort victims for ransomware recovery.",
+			Tags:     []string{"ransomware", "encrypt", "shadow", "impact", "recovery"},
+		},
+		{
+			ID:       "T1053.005",
+			Title:    "Scheduled Task/Job: Scheduled Task",
+			Category: "Persistence",
+			Content:  "Adversaries may abuse task scheduling functionality to facilitate initial or recurring execution of malicious code, utilizing schtasks or at utilities.",
+			Tags:     []string{"task", "scheduled", "persistence", "execution", "schtasks"},
+		},
+		{
+			ID:       "T1071.004",
+			Title:    "Application Layer Protocol: DNS Tunneling",
+			Category: "Command and Control",
+			Content:  "Adversaries may communicate using the Domain Name System (DNS) to route data, evade firewall egress filters, and establish stealthy C2 beaconing.",
+			Tags:     []string{"dns", "tunneling", "c2", "beaconing", "exfiltration"},
+		},
 	}
 
 	for _, doc := range docs {

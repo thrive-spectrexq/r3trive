@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -27,22 +28,47 @@ type ClientMetrics struct {
 	IsHealthy     bool
 }
 
+var (
+	emailRegex     = regexp.MustCompile(`(?i)\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`)
+	privateIPRegex = regexp.MustCompile(`\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3})\b`)
+	tokenRegex     = regexp.MustCompile(`(?i)(bearer\s+[A-Za-z0-9\-\._~+/]+=*|api[_-]?key[:=\s]+["']?[A-Za-z0-9\-\._~+/]+["']?)`)
+	passwordRegex  = regexp.MustCompile(`(?i)(-(?:p|password)|--(?:password|secret))\s+([^\s]+)`)
+)
+
+// RedactPII masks private internal IPs, credentials, bearer tokens, and emails from AI prompts.
+func RedactPII(input string) string {
+	out := emailRegex.ReplaceAllString(input, "[REDACTED_EMAIL]")
+	out = tokenRegex.ReplaceAllString(out, "[REDACTED_TOKEN]")
+	out = passwordRegex.ReplaceAllString(out, "$1 [REDACTED_SECRET]")
+	out = privateIPRegex.ReplaceAllString(out, "[REDACTED_INTERNAL_IP]")
+	return out
+}
+
 // Router dispatches prompts to primary and fallback AI model clients with circuit breaking.
 type Router struct {
-	mu           sync.RWMutex
-	primary      Client
-	fallbacks    []Client
-	stats        map[string]*ClientMetrics
-	cooldownTime time.Duration
+	mu            sync.RWMutex
+	primary       Client
+	fallbacks     []Client
+	stats         map[string]*ClientMetrics
+	cooldownTime  time.Duration
+	redactPrompts bool
+}
+
+// SetRedactPrompts configures whether outbound prompts should have PII and internal secrets redacted.
+func (r *Router) SetRedactPrompts(redact bool) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.redactPrompts = redact
 }
 
 // New creates a new AI model router with automatic fallback logic.
 func New(primary Client, fallbacks ...Client) *Router {
 	r := &Router{
-		primary:      primary,
-		fallbacks:    fallbacks,
-		stats:        make(map[string]*ClientMetrics),
-		cooldownTime: 30 * time.Second,
+		primary:       primary,
+		fallbacks:     fallbacks,
+		stats:         make(map[string]*ClientMetrics),
+		cooldownTime:  30 * time.Second,
+		redactPrompts: true, // Default to secure PII redaction for safety
 	}
 
 	if primary != nil {
@@ -63,12 +89,18 @@ func (r *Router) Chat(ctx context.Context, prompt string) (string, error) {
 	primary := r.primary
 	fallbacks := make([]Client, len(r.fallbacks))
 	copy(fallbacks, r.fallbacks)
+	redact := r.redactPrompts
 	r.mu.RUnlock()
+
+	outboundPrompt := prompt
+	if redact {
+		outboundPrompt = RedactPII(prompt)
+	}
 
 	// Try Primary first if healthy or cooled down
 	if primary != nil && r.isClientAvailable(primary.Name()) {
 		slog.Debug("dispatching AI prompt to primary backend", "client", primary.Name())
-		res, err := primary.Chat(ctx, prompt)
+		res, err := primary.Chat(ctx, outboundPrompt)
 		if err == nil {
 			r.recordSuccess(primary.Name())
 			return res, nil
@@ -83,7 +115,7 @@ func (r *Router) Chat(ctx context.Context, prompt string) (string, error) {
 			continue
 		}
 		slog.Info("attempting fallback AI backend", "client", fb.Name())
-		res, err := fb.Chat(ctx, prompt)
+		res, err := fb.Chat(ctx, outboundPrompt)
 		if err == nil {
 			r.recordSuccess(fb.Name())
 			return res, nil

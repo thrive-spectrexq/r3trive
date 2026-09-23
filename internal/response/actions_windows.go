@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func sysKillProcess(ctx context.Context, pid int) error {
@@ -96,7 +97,90 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 	return nil
 }
 
+func sysUnblockIP(ctx context.Context, ip string) error {
+	if net.ParseIP(ip) == nil {
+		return fmt.Errorf("invalid IP address: %q", ip)
+	}
+	slog.Info("executing Windows Firewall unblock", "ip", ip)
+	ruleName := fmt.Sprintf("R3TRIVE-BLOCK-%s", ip)
+
+	// Delete inbound & outbound rules
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "delete", "rule", "name="+ruleName+"-IN").Run()
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "delete", "rule", "name="+ruleName+"-OUT").Run()
+
+	return nil
+}
+
+func sysUnquarantineFile(ctx context.Context, originalPath string) error {
+	slog.Info("restoring quarantined file", "path", originalPath)
+	quarantineDir := `C:\ProgramData\R3trive\Quarantine`
+	base := filepath.Base(originalPath)
+
+	entries, err := os.ReadDir(quarantineDir)
+	if err != nil {
+		return fmt.Errorf("reading quarantine dir: %w", err)
+	}
+
+	var foundPath string
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), base+".") && strings.HasSuffix(entry.Name(), ".quarantined") {
+			foundPath = filepath.Join(quarantineDir, entry.Name())
+			break
+		}
+	}
+
+	if foundPath == "" {
+		return fmt.Errorf("quarantined file for %s not found", originalPath)
+	}
+
+	// Restore file
+	in, err := os.Open(foundPath)
+	if err != nil {
+		return fmt.Errorf("opening quarantined file: %w", err)
+	}
+	defer in.Close()
+
+	if err := os.MkdirAll(filepath.Dir(originalPath), 0750); err != nil {
+		return fmt.Errorf("creating target directory: %w", err)
+	}
+
+	out, err := os.OpenFile(originalPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0640)
+	if err != nil {
+		return fmt.Errorf("restoring original file: %w", err)
+	}
+	defer out.Close()
+
+	if _, err := io.Copy(out, in); err != nil {
+		return fmt.Errorf("copying restored file: %w", err)
+	}
+
+	_ = in.Close()
+	_ = os.Remove(foundPath)
+	return nil
+}
+
 func sysIsolateHost(ctx context.Context) error {
-	slog.Warn("Host isolation requested but disabled for safety")
-	return fmt.Errorf("host isolation is disabled by default for safety")
+	slog.Info("activating host isolation with administrative pinhole")
+	// Block general outbound
+	cmdBlock := exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule",
+		"name=R3TRIVE-ISOLATE-OUT", "dir=out", "action=block")
+	if out, err := cmdBlock.CombinedOutput(); err != nil {
+		return fmt.Errorf("isolation rule creation failed: %w, output: %s", err, string(out))
+	}
+
+	// Allow loopback and DNS so management agent retains connectivity
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule",
+		"name=R3TRIVE-ISOLATE-DNS", "dir=out", "action=allow", "protocol=UDP", "remoteport=53").Run()
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "add", "rule",
+		"name=R3TRIVE-ISOLATE-LOOPBACK", "dir=out", "action=allow", "remoteip=127.0.0.1").Run()
+
+	return nil
+}
+
+func sysUnisolateHost(ctx context.Context) error {
+	slog.Info("deactivating host isolation")
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "delete", "rule", "name=R3TRIVE-ISOLATE-OUT").Run()
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "delete", "rule", "name=R3TRIVE-ISOLATE-DNS").Run()
+	_ = exec.CommandContext(ctx, "netsh", "advfirewall", "firewall", "delete", "rule", "name=R3TRIVE-ISOLATE-LOOPBACK").Run()
+	return nil
 }

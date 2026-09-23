@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -27,6 +29,10 @@ const (
 	ActionIsolateHost    ActionType = "isolate_host"
 	ActionKillConnection ActionType = "kill_connection"
 	ActionDisableService ActionType = "disable_service"
+	// Inverse / Rollback actions
+	ActionUnblockIP     ActionType = "unblock_ip"
+	ActionUnquarantine  ActionType = "unquarantine_file"
+	ActionUnisolateHost ActionType = "unisolate_host"
 )
 
 // ActionResult holds the outcome of executing a response action.
@@ -68,11 +74,15 @@ func New(dryRun bool) *Engine {
 		actions: make(map[ActionType]ActionHandler),
 	}
 
-	// Register built-in actions (platform-specific implementations added later)
+	// Register built-in actions
 	e.actions[ActionKillProcess] = e.killProcess
 	e.actions[ActionBlockIP] = e.blockIP
 	e.actions[ActionQuarantine] = e.quarantineFile
 	e.actions[ActionIsolateHost] = e.isolateHost
+	// Register rollback inverse actions
+	e.actions[ActionUnblockIP] = e.unblockIP
+	e.actions[ActionUnquarantine] = e.unquarantineFile
+	e.actions[ActionUnisolateHost] = e.unisolateHost
 
 	return e
 }
@@ -184,6 +194,11 @@ func (e *Engine) validateParams(action ActionType, params map[string]any) error 
 		if pid == 1 {
 			return fmt.Errorf("defensive guardrail: killing system init process pid 1 is prohibited")
 		}
+		if nameVal, ok := params["process_name"]; ok {
+			if name, ok := nameVal.(string); ok && isProtectedProcess(name) {
+				return fmt.Errorf("defensive guardrail: killing critical system process %s is prohibited", name)
+			}
+		}
 	case ActionBlockIP:
 		ipVal, ok := params["ip"]
 		if !ok {
@@ -207,6 +222,24 @@ func (e *Engine) validateParams(action ActionType, params map[string]any) error 
 		if _, ok := pathVal.(string); !ok {
 			return fmt.Errorf("invalid path type: %T", pathVal)
 		}
+	case ActionUnblockIP:
+		ipVal, ok := params["ip"]
+		if !ok {
+			return fmt.Errorf("missing ip parameter")
+		}
+		if _, ok := ipVal.(string); !ok {
+			return fmt.Errorf("invalid ip type: %T", ipVal)
+		}
+	case ActionUnquarantine:
+		pathVal, ok := params["path"]
+		if !ok {
+			return fmt.Errorf("missing path parameter")
+		}
+		if _, ok := pathVal.(string); !ok {
+			return fmt.Errorf("invalid path type: %T", pathVal)
+		}
+	case ActionUnisolateHost:
+		// No required parameters
 	case ActionIsolateHost:
 		if targetVal, ok := params["target"]; ok {
 			if s, ok := targetVal.(string); ok && (s == "127.0.0.1" || s == "localhost") {
@@ -220,6 +253,23 @@ func (e *Engine) validateParams(action ActionType, params map[string]any) error 
 		}
 	}
 	return nil
+}
+
+func isProtectedProcess(name string) bool {
+	lower := strings.ToLower(filepath.Base(name))
+	protected := map[string]bool{
+		"csrss.exe":    true,
+		"lsass.exe":    true,
+		"services.exe": true,
+		"smss.exe":     true,
+		"wininit.exe":  true,
+		"systemd":      true,
+		"init":         true,
+		"sshd":         true,
+		"dbus-daemon":  true,
+		"kthreadd":     true,
+	}
+	return protected[lower]
 }
 
 // RespondToIncident evaluates an incident and executes appropriate responses.
@@ -412,4 +462,51 @@ func (e *Engine) isolateHost(ctx context.Context, params map[string]any) (Action
 		Timestamp:  time.Now().UTC(),
 		Reversible: true,
 	}, nil
+}
+
+func (e *Engine) unblockIP(ctx context.Context, params map[string]any) (ActionResult, error) {
+	ip := params["ip"].(string)
+	err := sysUnblockIP(ctx, ip)
+	msg := fmt.Sprintf("Unblocked IP %s", ip)
+	if err != nil {
+		msg = fmt.Sprintf("Failed to unblock IP %s: %v", ip, err)
+	}
+	return ActionResult{
+		Action:     ActionUnblockIP,
+		Success:    err == nil,
+		Message:    msg,
+		Timestamp:  time.Now().UTC(),
+		Reversible: false,
+	}, err
+}
+
+func (e *Engine) unquarantineFile(ctx context.Context, params map[string]any) (ActionResult, error) {
+	path := params["path"].(string)
+	err := sysUnquarantineFile(ctx, path)
+	msg := fmt.Sprintf("Restored quarantined file %s", path)
+	if err != nil {
+		msg = fmt.Sprintf("Failed to restore quarantined file %s: %v", path, err)
+	}
+	return ActionResult{
+		Action:     ActionUnquarantine,
+		Success:    err == nil,
+		Message:    msg,
+		Timestamp:  time.Now().UTC(),
+		Reversible: false,
+	}, err
+}
+
+func (e *Engine) unisolateHost(ctx context.Context, params map[string]any) (ActionResult, error) {
+	err := sysUnisolateHost(ctx)
+	msg := "Host isolation removed"
+	if err != nil {
+		msg = fmt.Sprintf("Failed to remove host isolation: %v", err)
+	}
+	return ActionResult{
+		Action:     ActionUnisolateHost,
+		Success:    err == nil,
+		Message:    msg,
+		Timestamp:  time.Now().UTC(),
+		Reversible: false,
+	}, err
 }

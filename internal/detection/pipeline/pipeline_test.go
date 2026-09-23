@@ -73,4 +73,15 @@ func TestPipelineExecution(t *testing.T) {
 	if stats.SensorCount != 1 {
 		t.Errorf("expected SensorCount 1, got %d", stats.SensorCount)
 	}
+
+	// Verify normalization happened on the collected event
+	if count > 0 {
+		evt := collectedEvents[0]
+		if evt.Host.OS == "" {
+			t.Errorf("expected normalized Host.OS to be populated")
+		}
+		if evt.Enrichments == nil {
+			t.Errorf("expected Enrichments map to be initialized by enricher")
+		}
+	}
 }

@@ -67,3 +67,79 @@ eicar_hash_sample,hash,critical,EICAR Hash
 		t.Errorf("expected 2 loaded entries, got %d", eng.Count())
 	}
 }
+
+func TestCIDRAndDomainURLMatching(t *testing.T) {
+	eng := NewEngine()
+
+	// Add CIDR subnet
+	eng.AddEntry(IOCEntry{
+		ID:          "ioc-subnet",
+		Type:        IOCTypeIP,
+		Value:       "198.51.100.0/24",
+		Severity:    event.SeverityCritical,
+		Description: "Malicious Russian C2 Subnet",
+	})
+
+	// Add domain
+	eng.AddEntry(IOCEntry{
+		ID:          "ioc-domain",
+		Type:        IOCTypeDomain,
+		Value:       "c2-evil-domain.com",
+		Severity:    event.SeverityHigh,
+		Description: "Known adversary beacon domain",
+	})
+
+	// Add URL
+	eng.AddEntry(IOCEntry{
+		ID:          "ioc-url",
+		Type:        IOCTypeURL,
+		Value:       "http://malicious-drop.com/payload.bin",
+		Severity:    event.SeverityCritical,
+		Description: "Stage 2 loader payload URL",
+	})
+
+	// 1. Test IP in CIDR subnet
+	evtSubnet := event.Event{
+		ID:        "evt-sub-1",
+		Timestamp: time.Now().UTC(),
+		Type:      event.NetworkConnect,
+		Data: event.EventData{
+			Network: &event.NetworkData{
+				DstIP: "198.51.100.45",
+			},
+		},
+	}
+	matchesSub := eng.MatchEvent(evtSubnet)
+	if len(matchesSub) == 0 {
+		t.Fatalf("expected CIDR match for 198.51.100.45 in 198.51.100.0/24")
+	}
+
+	// 2. Test domain in process command line
+	evtCmd := event.Event{
+		ID:        "evt-cmd-1",
+		Timestamp: time.Now().UTC(),
+		Type:      event.ProcessCreate,
+		Data: event.EventData{
+			Process: &event.ProcessData{
+				Name:    "powershell.exe",
+				CmdLine: "curl -Uri http://c2-evil-domain.com/beacon",
+			},
+		},
+	}
+	matchesCmd := eng.MatchEvent(evtCmd)
+	if len(matchesCmd) == 0 {
+		t.Fatalf("expected domain match in process command line")
+	}
+
+	// 3. Test enriched URL match
+	evtURL := event.Event{
+		ID:          "evt-url-1",
+		Timestamp:   time.Now().UTC(),
+		Type:        event.NetworkConnect,
+		Enrichments: map[string]any{"url": "http://malicious-drop.com/payload.bin"},
+	}
+	matchesURL := eng.MatchEvent(evtURL)
+	if len(matchesURL) == 0 {
+		t.Fatalf("expected URL match in enrichments")
+	}
+}

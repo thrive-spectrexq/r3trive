@@ -89,22 +89,20 @@ func (t *NativeTranspiler) Transpile(sr *Rule) (*rule.Rule, error) {
 			continue
 		}
 
+		isFilter := strings.HasPrefix(strings.ToLower(key), "filter")
+
 		switch v := val.(type) {
 		case map[string]interface{}:
 			for fieldKey, fieldVal := range v {
-				cond := parseFieldCondition(fieldKey, fieldVal)
-				if cond != nil {
-					conditions = append(conditions, *cond)
-				}
+				conds := parseFieldCondition(fieldKey, fieldVal, isFilter)
+				conditions = append(conditions, conds...)
 			}
 		case []interface{}:
 			for _, item := range v {
 				if m, ok := item.(map[string]interface{}); ok {
 					for fieldKey, fieldVal := range m {
-						cond := parseFieldCondition(fieldKey, fieldVal)
-						if cond != nil {
-							conditions = append(conditions, *cond)
-						}
+						conds := parseFieldCondition(fieldKey, fieldVal, isFilter)
+						conditions = append(conditions, conds...)
 					}
 				}
 			}
@@ -135,7 +133,7 @@ func (t *NativeTranspiler) Transpile(sr *Rule) (*rule.Rule, error) {
 	return r3Rule, nil
 }
 
-func parseFieldCondition(field string, val interface{}) *rule.Condition {
+func parseFieldCondition(field string, val interface{}, isNegated bool) []rule.Condition {
 	operator := "eq"
 	cleanField := field
 
@@ -155,28 +153,59 @@ func parseFieldCondition(field string, val interface{}) *rule.Condition {
 		}
 	}
 
+	if isNegated {
+		switch operator {
+		case "eq":
+			operator = "ne"
+		case "contains":
+			operator = "not_contains"
+		default:
+			operator = "ne"
+		}
+	}
+
+	targetField := mapSigmaField(cleanField)
+
 	switch v := val.(type) {
 	case string:
-		return &rule.Condition{
-			Field:    mapSigmaField(cleanField),
-			Operator: operator,
-			Value:    v,
+		return []rule.Condition{
+			{
+				Field:    targetField,
+				Operator: operator,
+				Value:    v,
+			},
 		}
 	case []interface{}:
+		if isNegated {
+			// For negated lists, each item must not match (AND NE)
+			var conds []rule.Condition
+			for _, item := range v {
+				conds = append(conds, rule.Condition{
+					Field:    targetField,
+					Operator: "ne",
+					Value:    fmt.Sprintf("%v", item),
+				})
+			}
+			return conds
+		}
 		var strVals []string
 		for _, item := range v {
 			strVals = append(strVals, fmt.Sprintf("%v", item))
 		}
-		return &rule.Condition{
-			Field:    mapSigmaField(cleanField),
-			Operator: "oneOf",
-			Values:   strVals,
+		return []rule.Condition{
+			{
+				Field:    targetField,
+				Operator: "oneOf",
+				Values:   strVals,
+			},
 		}
 	default:
-		return &rule.Condition{
-			Field:    mapSigmaField(cleanField),
-			Operator: operator,
-			Value:    fmt.Sprintf("%v", v),
+		return []rule.Condition{
+			{
+				Field:    targetField,
+				Operator: operator,
+				Value:    fmt.Sprintf("%v", v),
+			},
 		}
 	}
 }
@@ -187,8 +216,8 @@ func mapSigmaField(field string) string {
 		return "data.process.name"
 	case "commandline":
 		return "data.process.cmdline"
-	case "parentimage":
-		return "data.process.parent_name"
+	case "parentimage", "parent_image", "parentprocessname":
+		return "data.process.parent.name"
 	case "user":
 		return "data.process.user"
 	case "destinationip", "dst_ip":

@@ -20,7 +20,14 @@ func (m *mockRetentionStore) GetEvent(ctx context.Context, id string) (event.Eve
 }
 func (m *mockRetentionStore) SaveEvents(ctx context.Context, events []event.Event) error { return nil }
 func (m *mockRetentionStore) QueryEvents(ctx context.Context, query EventQuery) ([]event.Event, error) {
-	return m.events, nil
+	if query.Offset >= len(m.events) {
+		return nil, nil
+	}
+	end := len(m.events)
+	if query.Limit > 0 && query.Offset+query.Limit < end {
+		end = query.Offset + query.Limit
+	}
+	return m.events[query.Offset:end], nil
 }
 func (m *mockRetentionStore) SaveAlert(ctx context.Context, alert event.Alert) error { return nil }
 func (m *mockRetentionStore) SaveIncident(ctx context.Context, incident event.Incident) error {
@@ -74,24 +81,50 @@ func TestRetentionManager_ExecutePurgeCycle(t *testing.T) {
 		t.Errorf("expected 0 events archived, got %d", statsEmpty.EventsArchived)
 	}
 
-	// 2. Archived events case
-	eventsStore := &mockRetentionStore{
-		events: []event.Event{
-			{ID: "evt-old-1", Type: event.ProcessCreate, Timestamp: time.Now().Add(-48 * time.Hour)},
-			{ID: "evt-old-2", Type: event.NetworkConnect, Timestamp: time.Now().Add(-50 * time.Hour)},
-		},
+	// 2. Archived events case (1,500 events to verify multi-chunk pagination beyond 1,000)
+	var events []event.Event
+	for i := 0; i < 1500; i++ {
+		events = append(events, event.Event{
+			ID:        "evt-old",
+			Type:      event.ProcessCreate,
+			Timestamp: time.Now().Add(-48 * time.Hour),
+		})
 	}
+	eventsStore := &mockRetentionStore{events: events}
 	mgr := NewRetentionManager(eventsStore, archiveDir, 24*time.Hour)
 	stats, err := mgr.ExecutePurgeCycle(context.Background())
 	if err != nil {
 		t.Fatalf("ExecutePurgeCycle error: %v", err)
 	}
 
-	if stats.EventsArchived != 2 {
-		t.Errorf("expected 2 events archived, got %d", stats.EventsArchived)
+	if stats.EventsArchived != 1500 {
+		t.Errorf("expected 1500 events archived across chunks, got %d", stats.EventsArchived)
+	}
+	if stats.EventsPurged != 1500 {
+		t.Errorf("expected 1500 events purged, got %d", stats.EventsPurged)
 	}
 
 	if _, err := os.Stat(stats.ArchiveFile); os.IsNotExist(err) {
 		t.Fatalf("expected archive file to exist at %s", stats.ArchiveFile)
 	}
+
+	// 3. Background worker test
+	ctx, cancel := context.WithCancel(context.Background())
+	workerStore := &mockRetentionStore{
+		events: []event.Event{
+			{ID: "worker-evt", Type: event.ProcessCreate, Timestamp: time.Now().Add(-48 * time.Hour)},
+		},
+	}
+	workerMgr := NewRetentionManager(workerStore, archiveDir, 24*time.Hour)
+	ch := workerMgr.StartBackgroundWorker(ctx, 20*time.Millisecond)
+
+	select {
+	case st := <-ch:
+		if st.EventsArchived != 1 {
+			t.Errorf("expected worker to archive 1 event, got %d", st.EventsArchived)
+		}
+	case <-time.After(500 * time.Millisecond):
+		t.Error("timeout waiting for background worker to produce stats")
+	}
+	cancel()
 }

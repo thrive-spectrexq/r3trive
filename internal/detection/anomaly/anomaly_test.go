@@ -118,3 +118,30 @@ func TestIsolationForestAndBaseline(t *testing.T) {
 		t.Fatalf("second occurrence should not be marked as isNew")
 	}
 }
+
+func TestBaselineManagerTrainedScoring(t *testing.T) {
+	// Short learning period so learning phase finishes quickly
+	bm := NewBaselineManager(50 * time.Millisecond)
+
+	// Feed initial normal events during learning period
+	for i := 0; i < 15; i++ {
+		bm.RecordProcessEvent("host-01", "svchost.exe")
+		bm.RecordProcessEvent("host-01", "explorer.exe")
+	}
+
+	// Wait for learning period to elapse
+	time.Sleep(60 * time.Millisecond)
+	if bm.IsLearning() {
+		t.Fatalf("expected learning period to have elapsed")
+	}
+
+	// Normal known event should yield a low score
+	_, normalScore := bm.RecordProcessEvent("host-01", "svchost.exe")
+
+	// Rare/anomalous novel event with extreme profile change
+	_, anomalyScore := bm.RecordProcessEvent("host-01", "mimikatz_dump.exe")
+
+	if anomalyScore == 0.0 && normalScore == 0.0 {
+		t.Fatalf("expected trained baseline manager to return non-zero anomaly scores")
+	}
+}

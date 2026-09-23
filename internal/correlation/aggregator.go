@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
+	"github.com/thrive-spectrexq/r3trive/internal/telemetry"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
@@ -132,6 +133,7 @@ func (a *IncidentAggregator) ProcessAlert(ctx context.Context, alert event.Alert
 		extractArtifacts(inc, alert.Event)
 
 		a.activeIncidents[hostKey] = inc
+		telemetry.RecordIncident(ctx, int64(len(a.activeIncidents)))
 
 		slog.Info("created new incident from alert",
 			"incident_id", inc.ID,

@@ -22,6 +22,14 @@ func NewMockEmbedder() *MockEmbedder {
 		vocabulary: []string{
 			"process", "registry", "network", "injection", "malware",
 			"powershell", "lsass", "c2", "beacon", "persistence",
+			"credential", "dumping", "lateral", "movement", "privilege",
+			"escalation", "evasion", "ransomware", "encrypt", "shadow",
+			"exfiltration", "dns", "tunneling", "beaconing", "rdp",
+			"mimikatz", "procdump", "hollowing", "dll", "hijack",
+			"service", "scheduled", "task", "wmi", "encodedcommand",
+			"bypass", "firewall", "certutil", "bitsadmin", "dropper",
+			"cobalt", "strike", "cmd", "execution", "defense",
+			"reconnaissance", "discovery", "phishing", "autorun", "sam",
 		},
 	}
 }

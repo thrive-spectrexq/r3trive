@@ -17,11 +17,12 @@ type EntityProfile struct {
 
 // BaselineManager coordinates UEBA baseline learning and anomaly thresholding.
 type BaselineManager struct {
-	profiles       map[string]*EntityProfile
-	forest         *IsolationForest
-	learningPeriod time.Duration
-	startTime      time.Time
-	mu             sync.RWMutex
+	profiles             map[string]*EntityProfile
+	forest               *IsolationForest
+	trainingObservations []Point
+	learningPeriod       time.Duration
+	startTime            time.Time
+	mu                   sync.RWMutex
 }
 
 // NewBaselineManager creates a UEBA baseline manager with a defined learning duration.
@@ -42,6 +43,15 @@ func (b *BaselineManager) IsLearning() bool {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 	return time.Since(b.startTime) < b.learningPeriod
+}
+
+// Train explicitly fits the internal isolation forest with the provided observations.
+func (b *BaselineManager) Train(data []Point) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if len(data) > 0 {
+		b.forest.Train(data)
+	}
 }
 
 // RecordProcessEvent updates the baseline profile for an entity and evaluates novelty.
@@ -71,6 +81,21 @@ func (b *BaselineManager) RecordProcessEvent(entityID string, processName string
 		float64(len(profile.ObservedProcesses)),
 		float64(profile.TotalEvents),
 		float64(count),
+	}
+
+	b.trainingObservations = append(b.trainingObservations, featureVector)
+
+	// If currently learning, incrementally train or update when observation threshold is met
+	if time.Since(b.startTime) < b.learningPeriod {
+		if len(b.trainingObservations) >= 10 && !b.forest.isTrained {
+			b.forest.Train(b.trainingObservations)
+		}
+		return isNew, 0.0
+	}
+
+	// Learning period ended: ensure forest is trained before scoring
+	if !b.forest.isTrained && len(b.trainingObservations) > 0 {
+		b.forest.Train(b.trainingObservations)
 	}
 
 	score := b.forest.AnomalyScore(featureVector)

@@ -51,14 +51,22 @@ type StepResult struct {
 	Error     string              `json:"error,omitempty"`
 }
 
+// CompensationStep represents an executable compensating action to revert a change.
+type CompensationStep struct {
+	Name   string              `json:"name"`
+	Action response.ActionType `json:"action"`
+	Params map[string]any      `json:"params"`
+}
+
 // ExecutionResult captures the overall outcome of running a playbook against an incident.
 type ExecutionResult struct {
-	PlaybookID   string       `json:"playbook_id"`
-	PlaybookName string       `json:"playbook_name"`
-	IncidentID   string       `json:"incident_id"`
-	StartTime    time.Time    `json:"start_time"`
-	EndTime      time.Time    `json:"end_time"`
-	Success      bool         `json:"success"`
-	StepResults  []StepResult `json:"step_results"`
-	RollbackPlan []string     `json:"rollback_plan,omitempty"`
+	PlaybookID    string             `json:"playbook_id"`
+	PlaybookName  string             `json:"playbook_name"`
+	IncidentID    string             `json:"incident_id"`
+	StartTime     time.Time          `json:"start_time"`
+	EndTime       time.Time          `json:"end_time"`
+	Success       bool               `json:"success"`
+	StepResults   []StepResult       `json:"step_results"`
+	RollbackPlan  []string           `json:"rollback_plan,omitempty"`
+	RollbackSteps []CompensationStep `json:"rollback_steps,omitempty"`
 }

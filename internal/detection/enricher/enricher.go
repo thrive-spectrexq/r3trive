@@ -5,6 +5,7 @@ package enricher
 import (
 	"crypto/sha256"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 
@@ -52,16 +53,31 @@ func (e *Enricher) Enrich(evt event.Event) event.Event {
 	return evt
 }
 
-// hashFile computes SHA256 of a file. Returns nil if the file can't be read.
+const maxHashFileSize = 20 * 1024 * 1024 // 20 MB ceiling
+
+// hashFile computes SHA256 of a file using a streaming reader. Returns nil if the file can't be read.
 func hashFile(path string) map[string]string {
-	data, err := os.ReadFile(path) // #nosec G304
+	file, err := os.Open(path) // #nosec G304
 	if err != nil {
-		slog.Debug("enricher: could not hash file", "path", path, "error", err)
+		slog.Debug("enricher: could not open file for hashing", "path", path, "error", err)
+		return nil
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil || stat.Size() > maxHashFileSize {
+		slog.Debug("enricher: file exceeds max hash size or stat failed", "path", path)
 		return nil
 	}
 
-	hash := sha256.Sum256(data)
+	hasher := sha256.New()
+	buf := make([]byte, 32*1024) // 32 KB buffer
+	if _, err := io.CopyBuffer(hasher, file, buf); err != nil {
+		slog.Debug("enricher: streaming hash failed", "path", path, "error", err)
+		return nil
+	}
+
 	return map[string]string{
-		"sha256": fmt.Sprintf("%x", hash),
+		"sha256": fmt.Sprintf("%x", hasher.Sum(nil)),
 	}
 }

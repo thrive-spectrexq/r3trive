@@ -5,12 +5,16 @@ package pipeline
 import (
 	"context"
 	"log/slog"
+	"runtime"
 	"sync"
 	"time"
 
+	"github.com/thrive-spectrexq/r3trive/internal/detection/enricher"
+	"github.com/thrive-spectrexq/r3trive/internal/detection/normalizer"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/sensor"
 	"github.com/thrive-spectrexq/r3trive/internal/detection/yara"
 	"github.com/thrive-spectrexq/r3trive/internal/storage"
+	"github.com/thrive-spectrexq/r3trive/internal/telemetry"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 	"github.com/thrive-spectrexq/r3trive/pkg/utils"
 )
@@ -20,6 +24,8 @@ type Config struct {
 	Sensors        []sensor.Sensor
 	Store          storage.Store
 	YaraScanner    yara.Scanner
+	Normalizer     *normalizer.Normalizer
+	Enricher       *enricher.Enricher
 	RingBufferSize int
 	BatchSize      int
 	FlushInterval  time.Duration
@@ -30,10 +36,12 @@ type EventCallback func(event.Event)
 
 // Pipeline orchestrates event collection, processing, and storage.
 type Pipeline struct {
-	cfg       Config
-	ring      *utils.RingBuffer[event.Event]
-	callbacks []EventCallback
-	mu        sync.RWMutex
+	cfg        Config
+	normalizer *normalizer.Normalizer
+	enricher   *enricher.Enricher
+	ring       *utils.RingBuffer[event.Event]
+	callbacks  []EventCallback
+	mu         sync.RWMutex
 }
 
 // New creates a new event pipeline.
@@ -48,9 +56,21 @@ func New(cfg Config) *Pipeline {
 		cfg.FlushInterval = time.Second
 	}
 
+	norm := cfg.Normalizer
+	if norm == nil {
+		norm = normalizer.New()
+	}
+
+	enr := cfg.Enricher
+	if enr == nil {
+		enr = enricher.New()
+	}
+
 	return &Pipeline{
-		cfg:  cfg,
-		ring: utils.NewRingBuffer[event.Event](cfg.RingBufferSize),
+		cfg:        cfg,
+		normalizer: norm,
+		enricher:   enr,
+		ring:       utils.NewRingBuffer[event.Event](cfg.RingBufferSize),
 	}
 }
 
@@ -91,6 +111,36 @@ func (p *Pipeline) Start(ctx context.Context) error {
 		}()
 	}
 
+	// Bounded worker pool for YARA scanning to prevent goroutine exhaustion and disk thrashing
+	type yaraJob struct {
+		path  string
+		evtID string
+	}
+	numWorkers := runtime.NumCPU() * 2
+	if numWorkers < 4 {
+		numWorkers = 4
+	}
+	yaraJobCh := make(chan yaraJob, 256)
+	var yaraWg sync.WaitGroup
+	if p.cfg.YaraScanner != nil {
+		for i := 0; i < numWorkers; i++ {
+			yaraWg.Add(1)
+			go func() {
+				defer yaraWg.Done()
+				for job := range yaraJobCh {
+					matches, err := p.cfg.YaraScanner.ScanFile(ctx, job.path)
+					if err != nil {
+						slog.Debug("yara scan failed", "path", job.path, "error", err)
+						continue
+					}
+					if len(matches) > 0 {
+						slog.Warn("yara matched on file/process", "path", job.path, "matches", len(matches), "event_id", job.evtID)
+					}
+				}
+			}()
+		}
+	}
+
 	// Main event loop
 	for {
 		select {
@@ -99,39 +149,45 @@ func (p *Pipeline) Start(ctx context.Context) error {
 			wg.Wait()
 			close(batchCh)
 			storageWg.Wait()
+			if p.cfg.YaraScanner != nil {
+				close(yaraJobCh)
+				yaraWg.Wait()
+			}
 			slog.Info("pipeline stopped")
 			return nil
 
 		case evt := <-eventCh:
-			// Trigger YARA on certain events
+			start := time.Now()
+
+			// Normalization & Enrichment Stage
+			if p.normalizer != nil {
+				evt = p.normalizer.Normalize(evt)
+			}
+			if p.enricher != nil {
+				evt = p.enricher.Enrich(evt)
+			}
+
+			telemetry.RecordEvent(ctx, 1)
+			telemetry.RecordDetectionLatency(ctx, float64(time.Since(start).Milliseconds()))
+
+			// Trigger YARA on file and process events (supporting canonical and legacy types)
 			if p.cfg.YaraScanner != nil {
-				if evt.Type == "FileCreate" && evt.Data.File != nil {
-					path := evt.Data.File.Path
-					if path != "" {
-						go func(path string, evtID string) {
-							matches, err := p.cfg.YaraScanner.ScanFile(ctx, path)
-							if err != nil {
-								slog.Error("yara scan failed", "path", path, "error", err)
-								return
-							}
-							if len(matches) > 0 {
-								slog.Warn("yara matched on file creation", "path", path, "matches", len(matches))
-							}
-						}(path, evt.ID)
+				var scanPath string
+				if (evt.Type == event.FileCreate || evt.Type == "FileCreate") && evt.Data.File != nil {
+					scanPath = evt.Data.File.Path
+				} else if (evt.Type == event.ProcessCreate || evt.Type == "ProcessCreate") && evt.Data.Process != nil {
+					if evt.Data.Process.Path != "" {
+						scanPath = evt.Data.Process.Path
+					} else {
+						scanPath = evt.Data.Process.Name
 					}
-				} else if evt.Type == "ProcessCreate" && evt.Data.Process != nil {
-					path := evt.Data.Process.Name // Or ImagePath if available in your struct
-					if path != "" {
-						go func(path string, evtID string) {
-							matches, err := p.cfg.YaraScanner.ScanFile(ctx, path)
-							if err != nil {
-								slog.Error("yara scan failed", "path", path, "error", err)
-								return
-							}
-							if len(matches) > 0 {
-								slog.Warn("yara matched on process creation", "path", path, "matches", len(matches))
-							}
-						}(path, evt.ID)
+				}
+
+				if scanPath != "" {
+					select {
+					case yaraJobCh <- yaraJob{path: scanPath, evtID: evt.ID}:
+					default:
+						slog.Warn("yara worker pool full, skipping non-blocking scan", "path", scanPath)
 					}
 				}
 			}

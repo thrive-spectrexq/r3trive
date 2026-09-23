@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/thrive-spectrexq/r3trive/internal/intelligence/ioc"
+	"github.com/thrive-spectrexq/r3trive/internal/storage"
+	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
 // FeedSource represents a remote threat intelligence source.
@@ -25,6 +27,7 @@ type FeedSource struct {
 // Manager coordinates fetching and ingesting remote threat feeds.
 type Manager struct {
 	iocEngine  *ioc.Engine
+	store      storage.Store
 	httpClient *http.Client
 	sources    []FeedSource
 }
@@ -38,6 +41,11 @@ func NewManager(iocEngine *ioc.Engine) *Manager {
 		},
 		sources: make([]FeedSource, 0),
 	}
+}
+
+// SetStore attaches a persistent storage backend to the feed manager.
+func (m *Manager) SetStore(store storage.Store) {
+	m.store = store
 }
 
 // RegisterSource adds a feed source to the manager.
@@ -78,8 +86,43 @@ func (m *Manager) FetchSource(ctx context.Context, src FeedSource) (int, error) 
 
 	for _, entry := range entries {
 		m.iocEngine.AddEntry(entry)
+		if m.store != nil {
+			_ = m.store.SaveIOC(ctx, storage.IOCEntry{
+				ID:        entry.ID,
+				Type:      string(entry.Type),
+				Value:     entry.Value,
+				Source:    src.Name,
+				Severity:  string(entry.Severity),
+				CreatedAt: time.Now().UTC(),
+			})
+		}
 	}
 
 	slog.Info("successfully ingested threat feed", "source", src.Name, "count", len(entries))
 	return len(entries), nil
+}
+
+// LoadFromStore warms the in-memory IOC engine from persistent storage.
+func (m *Manager) LoadFromStore(ctx context.Context) (int, error) {
+	if m.store == nil {
+		return 0, nil
+	}
+
+	iocs, err := m.store.QueryIOCs(ctx, "", "")
+	if err != nil {
+		return 0, fmt.Errorf("loading IOCs from store: %w", err)
+	}
+
+	for _, stored := range iocs {
+		m.iocEngine.AddEntry(ioc.IOCEntry{
+			ID:          stored.ID,
+			Type:        ioc.IOCType(stored.Type),
+			Value:       stored.Value,
+			Severity:    event.Severity(stored.Severity),
+			Description: fmt.Sprintf("Persisted IOC from %s", stored.Source),
+		})
+	}
+
+	slog.Info("warmed IOC engine from database", "count", len(iocs))
+	return len(iocs), nil
 }

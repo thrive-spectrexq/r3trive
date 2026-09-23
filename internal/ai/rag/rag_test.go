@@ -41,4 +41,21 @@ func TestKnowledgeBaseAddRetrieve(t *testing.T) {
 	if len(incMatches) != 1 || incMatches[0].ID != "INC-999" {
 		t.Errorf("expected to find searched incident INC-999")
 	}
+
+	// Test newly seeded technique retrieval
+	ransomResults := kb.RetrieveRelevant(ctx, "ransomware encrypted shadow copy", 2)
+	if len(ransomResults) == 0 {
+		t.Fatalf("expected RAG search results for ransomware query")
+	}
+	if ransomResults[0].ID != "T1486" {
+		t.Errorf("expected T1486 for ransomware query, got %s", ransomResults[0].ID)
+	}
+
+	dnsResults := kb.RetrieveRelevant(ctx, "dns tunneling beaconing", 2)
+	if len(dnsResults) == 0 {
+		t.Fatalf("expected RAG search results for dns tunneling query")
+	}
+	if dnsResults[0].ID != "T1071.004" {
+		t.Errorf("expected T1071.004 for dns tunneling query, got %s", dnsResults[0].ID)
+	}
 }

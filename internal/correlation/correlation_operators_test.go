@@ -310,3 +310,135 @@ func TestExtractField_NilPointers(t *testing.T) {
 		})
 	}
 }
+
+func TestExtendedOperators(t *testing.T) {
+	engine := New()
+	engine.LoadRules([]Rule{
+		{
+			ID:       "op-ne",
+			Name:     "Not Equal Test",
+			Severity: "low",
+			Conditions: []Condition{
+				{Field: "data.process.name", Operator: "ne", Value: "safe.exe"},
+			},
+		},
+		{
+			ID:       "op-not-contains",
+			Name:     "Not Contains Test",
+			Severity: "low",
+			Conditions: []Condition{
+				{Field: "data.process.path", Operator: "not_contains", Value: "System32"},
+			},
+		},
+		{
+			ID:       "op-startswith",
+			Name:     "Starts With Test",
+			Severity: "medium",
+			Conditions: []Condition{
+				{Field: "data.process.cmdline", Operator: "startsWith", Value: "powershell -enc"},
+			},
+		},
+		{
+			ID:       "op-endswith",
+			Name:     "Ends With Test",
+			Severity: "high",
+			Conditions: []Condition{
+				{Field: "data.file.path", Operator: "endsWith", Value: ".exe"},
+			},
+		},
+	})
+
+	evt := event.Event{
+		ID:        "evt-ext-1",
+		Timestamp: time.Now().UTC(),
+		Type:      event.ProcessCreate,
+		Data: event.EventData{
+			Process: &event.ProcessData{
+				Name:    "malware.exe",
+				Path:    "/tmp/malware.exe",
+				CmdLine: "powershell -enc aW52b2tl",
+			},
+			File: &event.FileData{
+				Path: "/tmp/dropped.exe",
+			},
+		},
+	}
+
+	alerts := engine.Evaluate(context.Background(), evt)
+	if len(alerts) != 4 {
+		t.Fatalf("expected 4 alerts from extended operators, got %d", len(alerts))
+	}
+}
+
+func TestEntityPartitionedCorrelation(t *testing.T) {
+	engine := New()
+	engine.LoadRules([]Rule{
+		{
+			ID:        "thresh-host-rule",
+			Name:      "Host Brute Force",
+			Severity:  "high",
+			Threshold: 3,
+			Timeframe: "1m",
+			Conditions: []Condition{
+				{Field: "data.process.name", Operator: "eq", Value: "failed_login.exe"},
+			},
+		},
+	})
+
+	now := time.Now().UTC()
+	// Host A sends 2 events (threshold is 3, so Host A should NOT trigger)
+	evtA1 := event.Event{
+		ID:        "evt-a-1",
+		Host:      event.HostInfo{ID: "host-A"},
+		Timestamp: now,
+		Data:      event.EventData{Process: &event.ProcessData{Name: "failed_login.exe"}},
+	}
+	evtA2 := event.Event{
+		ID:        "evt-a-2",
+		Host:      event.HostInfo{ID: "host-A"},
+		Timestamp: now.Add(1 * time.Second),
+		Data:      event.EventData{Process: &event.ProcessData{Name: "failed_login.exe"}},
+	}
+
+	// Host B sends 2 events (should NOT combine with Host A to trigger)
+	evtB1 := event.Event{
+		ID:        "evt-b-1",
+		Host:      event.HostInfo{ID: "host-B"},
+		Timestamp: now.Add(2 * time.Second),
+		Data:      event.EventData{Process: &event.ProcessData{Name: "failed_login.exe"}},
+	}
+	evtB2 := event.Event{
+		ID:        "evt-b-2",
+		Host:      event.HostInfo{ID: "host-B"},
+		Timestamp: now.Add(3 * time.Second),
+		Data:      event.EventData{Process: &event.ProcessData{Name: "failed_login.exe"}},
+	}
+
+	if alerts := engine.Evaluate(context.Background(), evtA1); len(alerts) != 0 {
+		t.Errorf("expected 0 alerts, got %d", len(alerts))
+	}
+	if alerts := engine.Evaluate(context.Background(), evtA2); len(alerts) != 0 {
+		t.Errorf("expected 0 alerts, got %d", len(alerts))
+	}
+	if alerts := engine.Evaluate(context.Background(), evtB1); len(alerts) != 0 {
+		t.Errorf("expected 0 alerts, got %d", len(alerts))
+	}
+	if alerts := engine.Evaluate(context.Background(), evtB2); len(alerts) != 0 {
+		t.Errorf("expected 0 alerts (cross-host events should not combine), got %d", len(alerts))
+	}
+
+	// Now Host B sends a 3rd event, which SHOULD trigger for Host B only!
+	evtB3 := event.Event{
+		ID:        "evt-b-3",
+		Host:      event.HostInfo{ID: "host-B"},
+		Timestamp: now.Add(4 * time.Second),
+		Data:      event.EventData{Process: &event.ProcessData{Name: "failed_login.exe"}},
+	}
+	alertsB := engine.Evaluate(context.Background(), evtB3)
+	if len(alertsB) != 1 {
+		t.Fatalf("expected 1 alert for Host B upon reaching threshold, got %d", len(alertsB))
+	}
+	if alertsB[0].Event.Host.ID != "host-B" {
+		t.Errorf("expected alert for host-B, got %s", alertsB[0].Event.Host.ID)
+	}
+}

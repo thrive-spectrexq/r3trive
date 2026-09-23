@@ -3,6 +3,7 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"regexp"
 	"strconv"
 	"strings"
@@ -157,4 +158,102 @@ func extractSection(text, startHeader, nextHeader string) string {
 
 	sub = strings.TrimLeft(sub, ":#-\n\r\t ")
 	return strings.TrimSpace(sub)
+}
+
+// ActionRecommendation represents a proposed remediation action produced by the AI copilot.
+type ActionRecommendation struct {
+	Action     string         `json:"action" yaml:"action"`
+	Target     string         `json:"target" yaml:"target"`
+	Reason     string         `json:"reason" yaml:"reason"`
+	Risk       string         `json:"risk" yaml:"risk"`
+	Parameters map[string]any `json:"parameters,omitempty" yaml:"parameters,omitempty"`
+}
+
+// ValidateActionRecommendation checks that an action is permitted and has safe, well-formed targets.
+func ValidateActionRecommendation(rec ActionRecommendation) error {
+	action := strings.ToLower(strings.TrimSpace(rec.Action))
+	switch action {
+	case "kill_process":
+		target := strings.TrimSpace(rec.Target)
+		if target == "" {
+			if pidVal, ok := rec.Parameters["pid"]; ok {
+				target = fmt.Sprintf("%v", pidVal)
+			}
+		}
+		pid, err := strconv.Atoi(target)
+		if err != nil || pid <= 1 {
+			return fmt.Errorf("kill_process requires valid PID > 1, got %q", target)
+		}
+	case "block_ip", "unblock_ip":
+		target := strings.TrimSpace(rec.Target)
+		if target == "" {
+			if ipVal, ok := rec.Parameters["ip"]; ok {
+				target = fmt.Sprintf("%v", ipVal)
+			}
+		}
+		ip := net.ParseIP(target)
+		if ip == nil {
+			return fmt.Errorf("%s requires valid IP address, got %q", action, target)
+		}
+		if ip.IsLoopback() || target == "0.0.0.0" {
+			return fmt.Errorf("%s on loopback/wildcard IP is prohibited", action)
+		}
+	case "isolate_host", "unisolate_host":
+		target := strings.TrimSpace(rec.Target)
+		if target == "" {
+			if hVal, ok := rec.Parameters["host_id"]; ok {
+				target = fmt.Sprintf("%v", hVal)
+			}
+		}
+		if target == "" || strings.EqualFold(target, "localhost") || target == "127.0.0.1" {
+			return fmt.Errorf("%s target must be a valid non-loopback host identifier", action)
+		}
+	case "quarantine_file", "unquarantine_file":
+		target := strings.TrimSpace(rec.Target)
+		if target == "" {
+			if pVal, ok := rec.Parameters["path"]; ok {
+				target = fmt.Sprintf("%v", pVal)
+			}
+		}
+		cleanTarget := strings.TrimRight(target, "/\\")
+		if cleanTarget == "" || cleanTarget == "/" || cleanTarget == "C:" || cleanTarget == `C:\Windows` {
+			return fmt.Errorf("%s on root/critical system path is prohibited: %q", action, target)
+		}
+	default:
+		return fmt.Errorf("unrecognized or prohibited defensive action: %q", rec.Action)
+	}
+	return nil
+}
+
+// ParseActionRecommendations parses and validates defensive action recommendations from an AI response.
+func ParseActionRecommendations(input string) ([]ActionRecommendation, error) {
+	// Attempt JSON array extraction
+	start := strings.Index(input, "[")
+	end := strings.LastIndex(input, "]")
+	if start != -1 && end != -1 && start < end {
+		var list []ActionRecommendation
+		jsonStr := input[start : end+1]
+		if err := json.Unmarshal([]byte(jsonStr), &list); err == nil && len(list) > 0 {
+			for i, item := range list {
+				if err := ValidateActionRecommendation(item); err != nil {
+					return nil, fmt.Errorf("recommendation [%d] validation failed: %w", i, err)
+				}
+			}
+			return list, nil
+		}
+	}
+
+	// Attempt YAML extraction
+	yamlStr := ExtractYAMLBlock(input)
+	var yamlList []ActionRecommendation
+	if err := yaml.Unmarshal([]byte(yamlStr), &yamlList); err == nil && len(yamlList) > 0 {
+		for i, item := range yamlList {
+			if err := ValidateActionRecommendation(item); err != nil {
+				return nil, fmt.Errorf("recommendation [%d] validation failed: %w", i, err)
+			}
+		}
+		return yamlList, nil
+	}
+
+	return nil, fmt.Errorf("failed to parse structured action recommendations from AI response")
 }

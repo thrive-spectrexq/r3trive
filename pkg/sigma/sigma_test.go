@@ -40,3 +40,56 @@ detection:
 		t.Errorf("expected conditions in transpiled rule")
 	}
 }
+
+func TestSigmaFilterAndParentMapping(t *testing.T) {
+	sigmaContent := `
+title: Suspicious Child of Word
+id: 11111111-2222-3333-4444-555555555555
+description: Detects suspicious child process spawned by Microsoft Word
+level: critical
+tags:
+  - attack.execution
+  - attack.t1204.002
+detection:
+  selection:
+    ParentImage|endswith: winword.exe
+    Image|endswith: cmd.exe
+  filter:
+    CommandLine|contains: benign_addon
+  condition: selection and not filter
+`
+
+	sr, err := ParseRule([]byte(sigmaContent))
+	if err != nil {
+		t.Fatalf("ParseRule failed: %v", err)
+	}
+
+	transpiler := NewTranspiler()
+	r3Rule, err := transpiler.Transpile(sr)
+	if err != nil {
+		t.Fatalf("Transpile failed: %v", err)
+	}
+
+	foundParent := false
+	foundNegatedFilter := false
+	for _, cond := range r3Rule.Conditions {
+		if cond.Field == "data.process.parent.name" {
+			foundParent = true
+			if cond.Operator != "endsWith" || cond.Value != "winword.exe" {
+				t.Errorf("unexpected parent condition: %+v", cond)
+			}
+		}
+		if cond.Field == "data.process.cmdline" {
+			if cond.Operator == "not_contains" && cond.Value == "benign_addon" {
+				foundNegatedFilter = true
+			}
+		}
+	}
+
+	if !foundParent {
+		t.Errorf("expected mapped field data.process.parent.name not found in conditions: %+v", r3Rule.Conditions)
+	}
+	if !foundNegatedFilter {
+		t.Errorf("expected negated filter condition (not_contains) not found: %+v", r3Rule.Conditions)
+	}
+}

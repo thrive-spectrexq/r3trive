@@ -41,15 +41,16 @@ func NewRetentionManager(store Store, archiveDir string, retention time.Duration
 func (m *RetentionManager) ExecutePurgeCycle(ctx context.Context) (PurgeStats, error) {
 	cutoff := time.Now().Add(-m.retention)
 
-	events, err := m.store.QueryEvents(ctx, EventQuery{
+	// Check if any events exist before creating files
+	initial, err := m.store.QueryEvents(ctx, EventQuery{
 		Until: cutoff,
-		Limit: 1000,
+		Limit: 1,
 	})
 	if err != nil {
 		return PurgeStats{}, fmt.Errorf("failed to query aged events: %w", err)
 	}
 
-	if len(events) == 0 {
+	if len(initial) == 0 {
 		return PurgeStats{CutoffTime: cutoff}, nil
 	}
 
@@ -69,14 +70,42 @@ func (m *RetentionManager) ExecutePurgeCycle(ctx context.Context) (PurgeStats, e
 	gz := gzip.NewWriter(f)
 	defer gz.Close()
 
-	for _, evt := range events {
-		line, err := json.Marshal(evt)
+	totalArchived := 0
+	offset := 0
+	chunkSize := 1000
+
+	for {
+		events, err := m.store.QueryEvents(ctx, EventQuery{
+			Until:  cutoff,
+			Limit:  chunkSize,
+			Offset: offset,
+		})
 		if err != nil {
-			continue
+			return PurgeStats{}, fmt.Errorf("failed to query aged events chunk: %w", err)
 		}
-		if _, err := gz.Write(append(line, '\n')); err != nil {
-			return PurgeStats{}, fmt.Errorf("failed to write gzip archive: %w", err)
+		if len(events) == 0 {
+			break
 		}
+
+		for _, evt := range events {
+			line, err := json.Marshal(evt)
+			if err != nil {
+				continue
+			}
+			if _, err := gz.Write(append(line, '\n')); err != nil {
+				return PurgeStats{}, fmt.Errorf("failed to write gzip archive: %w", err)
+			}
+			totalArchived++
+		}
+
+		if len(events) < chunkSize {
+			break
+		}
+		offset += len(events)
+	}
+
+	if err := gz.Flush(); err != nil {
+		return PurgeStats{}, fmt.Errorf("failed to flush gzip archive: %w", err)
 	}
 
 	purged, err := m.store.PruneEvents(ctx, cutoff)
@@ -85,9 +114,41 @@ func (m *RetentionManager) ExecutePurgeCycle(ctx context.Context) (PurgeStats, e
 	}
 
 	return PurgeStats{
-		EventsArchived: len(events),
+		EventsArchived: totalArchived,
 		EventsPurged:   purged,
 		ArchiveFile:    archivePath,
 		CutoffTime:     cutoff,
 	}, nil
+}
+
+// StartBackgroundWorker runs retention purge cycles periodically until context cancellation.
+func (m *RetentionManager) StartBackgroundWorker(ctx context.Context, interval time.Duration) <-chan PurgeStats {
+	statsChan := make(chan PurgeStats, 10)
+	if interval <= 0 {
+		interval = 24 * time.Hour
+	}
+
+	go func() {
+		defer close(statsChan)
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				stats, err := m.ExecutePurgeCycle(ctx)
+				if err == nil && stats.EventsArchived > 0 {
+					select {
+					case statsChan <- stats:
+					case <-ctx.Done():
+						return
+					}
+				}
+			}
+		}
+	}()
+
+	return statsChan
 }

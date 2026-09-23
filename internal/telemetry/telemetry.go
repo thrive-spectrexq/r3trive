@@ -8,6 +8,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
+	"sync/atomic"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -39,7 +41,114 @@ var (
 	CorrelationLat   metric.Float64Histogram
 	AIRequestDur     metric.Float64Histogram
 	SensorHealth     metric.Int64Gauge
+
+	// Internal atomic metrics for Prometheus scraping & resilient fallback
+	promEventsTotal       atomic.Int64
+	promAlertsTotal       atomic.Int64
+	promIncidentsActive   atomic.Int64
+	promSensorHealth      atomic.Int64
+	promDetectionLatSum   atomic.Int64
+	promDetectionLatCount atomic.Int64
+	promCorrelationLatSum atomic.Int64
+	promCorrelationCount  atomic.Int64
 )
+
+func init() {
+	promSensorHealth.Store(1) // Default healthy
+}
+
+// RecordEvent safely records processed events count.
+func RecordEvent(ctx context.Context, count int64) {
+	promEventsTotal.Add(count)
+	if EventsTotal != nil {
+		EventsTotal.Add(ctx, count)
+	}
+}
+
+// RecordAlert safely records generated alerts count.
+func RecordAlert(ctx context.Context, count int64) {
+	promAlertsTotal.Add(count)
+	if AlertsTotal != nil {
+		AlertsTotal.Add(ctx, count)
+	}
+}
+
+// RecordIncident safely updates active incident gauge.
+func RecordIncident(ctx context.Context, active int64) {
+	promIncidentsActive.Store(active)
+	if IncidentsActive != nil {
+		IncidentsActive.Record(ctx, active)
+	}
+}
+
+// RecordDetectionLatency safely records detection pipeline duration in ms.
+func RecordDetectionLatency(ctx context.Context, ms float64) {
+	promDetectionLatSum.Add(int64(ms))
+	promDetectionLatCount.Add(1)
+	if DetectionLatency != nil {
+		DetectionLatency.Record(ctx, ms)
+	}
+}
+
+// RecordCorrelationLatency safely records correlation engine duration in ms.
+func RecordCorrelationLatency(ctx context.Context, ms float64) {
+	promCorrelationLatSum.Add(int64(ms))
+	promCorrelationCount.Add(1)
+	if CorrelationLat != nil {
+		CorrelationLat.Record(ctx, ms)
+	}
+}
+
+// RecordAIRequestDuration safely records AI request duration in ms.
+func RecordAIRequestDuration(ctx context.Context, ms float64) {
+	if AIRequestDur != nil {
+		AIRequestDur.Record(ctx, ms)
+	}
+}
+
+// RecordSensorHealth safely updates sensor health status.
+func RecordSensorHealth(ctx context.Context, healthy bool) {
+	var val int64
+	if healthy {
+		val = 1
+	}
+	promSensorHealth.Store(val)
+	if SensorHealth != nil {
+		SensorHealth.Record(ctx, val)
+	}
+}
+
+// PrometheusHandler returns an HTTP handler that exposes metrics in Prometheus text exposition format.
+func PrometheusHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+		fmt.Fprintf(w, "# HELP r3trive_events_total Total events processed\n")
+		fmt.Fprintf(w, "# TYPE r3trive_events_total counter\n")
+		fmt.Fprintf(w, "r3trive_events_total %d\n", promEventsTotal.Load())
+
+		fmt.Fprintf(w, "# HELP r3trive_alerts_total Total alerts generated\n")
+		fmt.Fprintf(w, "# TYPE r3trive_alerts_total counter\n")
+		fmt.Fprintf(w, "r3trive_alerts_total %d\n", promAlertsTotal.Load())
+
+		fmt.Fprintf(w, "# HELP r3trive_incidents_active Currently active incidents\n")
+		fmt.Fprintf(w, "# TYPE r3trive_incidents_active gauge\n")
+		fmt.Fprintf(w, "r3trive_incidents_active %d\n", promIncidentsActive.Load())
+
+		fmt.Fprintf(w, "# HELP r3trive_sensor_health Health status of sensors (1=ok, 0=error)\n")
+		fmt.Fprintf(w, "# TYPE r3trive_sensor_health gauge\n")
+		fmt.Fprintf(w, "r3trive_sensor_health %d\n", promSensorHealth.Load())
+
+		fmt.Fprintf(w, "# HELP r3trive_detection_latency_ms Detection pipeline latency in milliseconds\n")
+		fmt.Fprintf(w, "# TYPE r3trive_detection_latency_ms summary\n")
+		fmt.Fprintf(w, "r3trive_detection_latency_ms_sum %d\n", promDetectionLatSum.Load())
+		fmt.Fprintf(w, "r3trive_detection_latency_ms_count %d\n", promDetectionLatCount.Load())
+
+		fmt.Fprintf(w, "# HELP r3trive_correlation_latency_ms Correlation engine latency in milliseconds\n")
+		fmt.Fprintf(w, "# TYPE r3trive_correlation_latency_ms summary\n")
+		fmt.Fprintf(w, "r3trive_correlation_latency_ms_sum %d\n", promCorrelationLatSum.Load())
+		fmt.Fprintf(w, "r3trive_correlation_latency_ms_count %d\n", promCorrelationCount.Load())
+	}
+}
 
 // Init initializes OpenTelemetry exporters and instruments.
 // If telemetry is disabled, this is a no-op.

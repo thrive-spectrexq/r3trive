@@ -56,3 +56,50 @@ func TestExtractConfidenceScore(t *testing.T) {
 		t.Errorf("expected 0.90, got %f", score2)
 	}
 }
+
+func TestParseActionRecommendations(t *testing.T) {
+	// 1. Valid JSON recommendations
+	jsonInput := `Here are the proposed defensive responses:
+[
+	{
+		"action": "kill_process",
+		"target": "4567",
+		"reason": "Malicious credential dumping",
+		"risk": "medium"
+	},
+	{
+		"action": "block_ip",
+		"target": "198.51.100.42",
+		"reason": "C2 communication",
+		"risk": "low"
+	}
+]`
+	actions, err := ParseActionRecommendations(jsonInput)
+	if err != nil {
+		t.Fatalf("expected successful parsing of JSON recommendations, got: %v", err)
+	}
+	if len(actions) != 2 {
+		t.Fatalf("expected 2 actions, got %d", len(actions))
+	}
+	if actions[0].Action != "kill_process" || actions[0].Target != "4567" {
+		t.Errorf("unexpected action 0: %+v", actions[0])
+	}
+
+	// 2. Reject malicious PID 1 in kill_process
+	badPIDInput := `[{"action":"kill_process","target":"1"}]`
+	if _, err := ParseActionRecommendations(badPIDInput); err == nil {
+		t.Error("expected error when attempting to kill PID 1")
+	}
+
+	// 3. Reject loopback IP in block_ip
+	badIPInput := `[{"action":"block_ip","target":"127.0.0.1"}]`
+	if _, err := ParseActionRecommendations(badIPInput); err == nil {
+		t.Error("expected error when attempting to block loopback IP")
+	}
+
+	// 4. Reject critical system paths in quarantine
+	badPathInput := `[{"action":"quarantine_file","target":"C:\\Windows"}]`
+	if _, err := ParseActionRecommendations(badPathInput); err == nil {
+		t.Error("expected error when attempting to quarantine C:\\Windows")
+	}
+}

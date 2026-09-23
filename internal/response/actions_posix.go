@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func sysKillProcess(ctx context.Context, pid int) error {
@@ -30,10 +31,25 @@ func sysBlockIP(ctx context.Context, ip string) error {
 		return fmt.Errorf("invalid IP address: %q", ip)
 	}
 	slog.Info("executing iptables block", "ip", ip)
-	cmd := exec.CommandContext(ctx, "iptables", "-A", "INPUT", "-s", ip, "-j", "DROP") // #nosec G204
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("iptables block failed: %w, output: %s", err, string(out))
+	// Block both inbound traffic and outbound beacons
+	cmdIn := exec.CommandContext(ctx, "iptables", "-A", "INPUT", "-s", ip, "-j", "DROP") // #nosec G204
+	if out, err := cmdIn.CombinedOutput(); err != nil {
+		return fmt.Errorf("iptables block inbound failed: %w, output: %s", err, string(out))
 	}
+	cmdOut := exec.CommandContext(ctx, "iptables", "-A", "OUTPUT", "-d", ip, "-j", "DROP") // #nosec G204
+	if out, err := cmdOut.CombinedOutput(); err != nil {
+		return fmt.Errorf("iptables block outbound failed: %w, output: %s", err, string(out))
+	}
+	return nil
+}
+
+func sysUnblockIP(ctx context.Context, ip string) error {
+	if net.ParseIP(ip) == nil {
+		return fmt.Errorf("invalid IP address: %q", ip)
+	}
+	slog.Info("executing iptables unblock", "ip", ip)
+	_ = exec.CommandContext(ctx, "iptables", "-D", "INPUT", "-s", ip, "-j", "DROP").Run()  // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-D", "OUTPUT", "-d", ip, "-j", "DROP").Run() // #nosec G204
 	return nil
 }
 
@@ -59,6 +75,40 @@ func sysQuarantineFile(ctx context.Context, path string) error {
 		slog.Warn("failed to secure quarantined file permissions", "error", err, "output", string(out))
 	}
 
+	return nil
+}
+
+func sysUnquarantineFile(ctx context.Context, originalPath string) error {
+	slog.Info("restoring quarantined file", "path", originalPath)
+	quarantineDir := "/var/opt/r3trive/quarantine"
+	base := filepath.Base(originalPath)
+
+	entries, err := os.ReadDir(quarantineDir)
+	if err != nil {
+		return fmt.Errorf("reading quarantine directory: %w", err)
+	}
+
+	var foundPath string
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), base+".") && strings.HasSuffix(entry.Name(), ".quarantined") {
+			foundPath = filepath.Join(quarantineDir, entry.Name())
+			break
+		}
+	}
+
+	if foundPath == "" {
+		return fmt.Errorf("quarantined file for %s not found", originalPath)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(originalPath), 0750); err != nil {
+		return fmt.Errorf("creating restore directory: %w", err)
+	}
+
+	if err := moveFileByCopy(foundPath, originalPath); err != nil {
+		return fmt.Errorf("restoring quarantined file: %w", err)
+	}
+
+	_ = exec.CommandContext(ctx, "chmod", "0640", originalPath).Run() // #nosec G204
 	return nil
 }
 
@@ -89,6 +139,24 @@ func moveFileByCopy(src, dst string) error {
 }
 
 func sysIsolateHost(ctx context.Context) error {
-	slog.Warn("Host isolation requested but disabled for safety")
-	return fmt.Errorf("host isolation is disabled by default for safety")
+	slog.Info("activating POSIX host isolation with pinhole rules")
+	// Flush and isolate via dedicated chain
+	_ = exec.CommandContext(ctx, "iptables", "-N", "R3TRIVE_ISO").Run()                          // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-F", "R3TRIVE_ISO").Run()                          // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-i", "lo", "-j", "ACCEPT").Run() // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-p", "udp", "--dport", "53", "-j", "ACCEPT").Run() // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-m", "conntrack", "--ctstate", "ESTABLISHED,RELATED", "-j", "ACCEPT").Run() // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-j", "DROP").Run()            // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-I", "INPUT", "1", "-j", "R3TRIVE_ISO").Run()      // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-I", "OUTPUT", "1", "-j", "R3TRIVE_ISO").Run()     // #nosec G204
+	return nil
+}
+
+func sysUnisolateHost(ctx context.Context) error {
+	slog.Info("deactivating POSIX host isolation")
+	_ = exec.CommandContext(ctx, "iptables", "-D", "INPUT", "-j", "R3TRIVE_ISO").Run()  // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-D", "OUTPUT", "-j", "R3TRIVE_ISO").Run() // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-F", "R3TRIVE_ISO").Run()                  // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-X", "R3TRIVE_ISO").Run()                  // #nosec G204
+	return nil
 }

@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS ioc_entries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_ts ON events(timestamp);
+CREATE INDEX IF NOT EXISTS idx_events_host_ts ON events(host_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_events_severity_ts ON events(severity, timestamp);
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(type);
 CREATE INDEX IF NOT EXISTS idx_alerts_ts ON alerts(timestamp);
 CREATE INDEX IF NOT EXISTS idx_incidents_status ON incidents(status);

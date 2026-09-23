@@ -321,3 +321,38 @@ steps:
 		t.Errorf("expected PB-DIR-001, got %s", pbs[0].ID)
 	}
 }
+
+func TestExecuteRollback(t *testing.T) {
+	engine := NewEngine(false)
+	mockExec := &MockExecutor{}
+
+	compensationSteps := []CompensationStep{
+		{
+			Name:   "unblock_step",
+			Action: response.ActionUnblockIP,
+			Params: map[string]any{"ip": "1.2.3.4"},
+		},
+		{
+			Name:   "unisolate_step",
+			Action: response.ActionUnisolateHost,
+			Params: nil,
+		},
+	}
+
+	results, err := engine.ExecuteRollback(context.Background(), mockExec, compensationSteps)
+	if err != nil {
+		t.Fatalf("ExecuteRollback failed: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Fatalf("expected 2 rollback results, got %d", len(results))
+	}
+
+	// Should execute in reverse order (unisolate first, then unblock)
+	if results[0].StepName != "unisolate_step" {
+		t.Errorf("expected first rolled back step to be unisolate_step, got %s", results[0].StepName)
+	}
+	if results[1].StepName != "unblock_step" {
+		t.Errorf("expected second rolled back step to be unblock_step, got %s", results[1].StepName)
+	}
+}

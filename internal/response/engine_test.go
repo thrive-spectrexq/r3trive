@@ -102,3 +102,41 @@ func TestEngine_RespondToIncident_BelowThreshold(t *testing.T) {
 		t.Errorf("Expected 0 results, got %d", len(results))
 	}
 }
+
+func TestKillProcess_ProtectedProcessProhibited(t *testing.T) {
+	engine := New(true)
+
+	// Attempting to kill lsass.exe or csrss.exe must be blocked by defensive guardrails
+	protectedProcesses := []string{"lsass.exe", "csrss.exe", "services.exe", "systemd", "sshd"}
+	for _, proc := range protectedProcesses {
+		_, err := engine.Execute(context.Background(), ActionKillProcess, map[string]any{
+			"pid":          500,
+			"process_name": proc,
+		})
+		if err == nil {
+			t.Errorf("expected guardrail error when trying to kill protected process %s, got nil", proc)
+		}
+	}
+}
+
+func TestRollbackActions_Validation(t *testing.T) {
+	engine := New(true)
+
+	// Test unblock_ip validation
+	_, err := engine.Execute(context.Background(), ActionUnblockIP, map[string]any{"ip": "198.51.100.1"})
+	if err != nil {
+		t.Errorf("expected dry-run unblock_ip to succeed, got %v", err)
+	}
+
+	// Test unquarantine_file validation
+	_, err = engine.Execute(context.Background(), ActionUnquarantine, map[string]any{"path": "C:\\temp\\file.txt"})
+	if err != nil {
+		t.Errorf("expected dry-run unquarantine_file to succeed, got %v", err)
+	}
+
+	// Test unisolate_host validation
+	_, err = engine.Execute(context.Background(), ActionUnisolateHost, nil)
+	if err != nil {
+		t.Errorf("expected dry-run unisolate_host to succeed, got %v", err)
+	}
+}

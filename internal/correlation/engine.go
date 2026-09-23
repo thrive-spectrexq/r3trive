@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/thrive-spectrexq/r3trive/internal/telemetry"
 	"github.com/thrive-spectrexq/r3trive/pkg/event"
 )
 
@@ -88,8 +89,12 @@ func (e *Engine) LoadRules(rules []Rule) {
 
 // Evaluate checks an event against all loaded rules and returns any alerts.
 func (e *Engine) Evaluate(ctx context.Context, evt event.Event) []event.Alert {
+	start := time.Now()
 	e.mu.Lock()
-	defer e.mu.Unlock()
+	defer func() {
+		e.mu.Unlock()
+		telemetry.RecordCorrelationLatency(ctx, float64(time.Since(start).Milliseconds()))
+	}()
 
 	var alerts []event.Alert
 
@@ -98,29 +103,34 @@ func (e *Engine) Evaluate(ctx context.Context, evt event.Event) []event.Alert {
 			trigger := false
 
 			if rule.Threshold > 1 && rule.Timeframe != "" {
-				// Temporal logic
+				// Temporal logic partitioned by entity to prevent cross-host alert contamination
+				stateKey := rule.ID
+				if evt.Host.ID != "" {
+					stateKey = rule.ID + ":" + evt.Host.ID
+				}
+
 				duration, err := time.ParseDuration(rule.Timeframe)
 				if err != nil {
 					slog.Warn("invalid timeframe in rule", "rule", rule.ID, "timeframe", rule.Timeframe)
 					duration = 5 * time.Minute
 				}
 
-				e.state[rule.ID] = append(e.state[rule.ID], evt)
+				e.state[stateKey] = append(e.state[stateKey], evt)
 
 				// Prune old events
 				cutoff := evt.Timestamp.Add(-duration)
 				var valid []event.Event
-				for _, stored := range e.state[rule.ID] {
+				for _, stored := range e.state[stateKey] {
 					if stored.Timestamp.After(cutoff) || stored.Timestamp.Equal(cutoff) {
 						valid = append(valid, stored)
 					}
 				}
-				e.state[rule.ID] = valid
+				e.state[stateKey] = valid
 
-				if len(e.state[rule.ID]) >= rule.Threshold {
+				if len(e.state[stateKey]) >= rule.Threshold {
 					trigger = true
 					// Reset state after triggering
-					e.state[rule.ID] = nil
+					e.state[stateKey] = nil
 				}
 			} else {
 				// Immediate trigger
@@ -153,6 +163,10 @@ func (e *Engine) Evaluate(ctx context.Context, evt event.Event) []event.Alert {
 		}
 	}
 
+	if len(alerts) > 0 {
+		telemetry.RecordAlert(ctx, int64(len(alerts)))
+	}
+
 	return alerts
 }
 
@@ -176,8 +190,16 @@ func (e *Engine) matchCondition(cond Condition, evt event.Event) bool {
 	switch cond.Operator {
 	case "eq":
 		return value == cond.Value
+	case "ne":
+		return value != cond.Value
 	case "contains":
 		return containsStr(value, cond.Value)
+	case "not_contains":
+		return !containsStr(value, cond.Value)
+	case "startsWith", "startswith":
+		return strings.HasPrefix(value, cond.Value)
+	case "endsWith", "endswith":
+		return strings.HasSuffix(value, cond.Value)
 	case "oneOf":
 		for _, v := range cond.Values {
 			if value == v {
@@ -204,8 +226,13 @@ func (e *Engine) matchCondition(cond Condition, evt event.Event) bool {
 }
 
 // extractField resolves a dotted field path (e.g. "data.process.name")
-// by walking the Event struct tree via reflection.
+// using an optimized zero-reflection fast path for common fields,
+// falling back to reflection only for dynamic custom fields.
 func extractField(field string, evt event.Event) string {
+	if val, ok := fastExtractField(field, &evt); ok {
+		return val
+	}
+
 	parts := strings.Split(field, ".")
 	v := reflect.ValueOf(evt)
 
@@ -228,6 +255,102 @@ func extractField(field string, evt event.Event) string {
 	}
 
 	return fmt.Sprintf("%v", v.Interface())
+}
+
+// fastExtractField provides a fast, zero-reflection accessor for standard schema fields.
+func fastExtractField(field string, evt *event.Event) (string, bool) {
+	switch strings.ToLower(field) {
+	case "type", "event.type":
+		return string(evt.Type), true
+	case "severity", "event.severity":
+		return string(evt.Severity), true
+	case "sensor", "event.sensor":
+		return evt.Sensor, true
+	case "host.id":
+		return evt.Host.ID, true
+	case "host.hostname":
+		return evt.Host.Hostname, true
+	case "host.os":
+		return evt.Host.OS, true
+	case "host.os_version":
+		return evt.Host.OSVersion, true
+	case "data.process.name", "process.name":
+		if evt.Data.Process != nil {
+			return evt.Data.Process.Name, true
+		}
+		return "", true
+	case "data.process.path", "process.path":
+		if evt.Data.Process != nil {
+			return evt.Data.Process.Path, true
+		}
+		return "", true
+	case "data.process.pid", "process.pid":
+		if evt.Data.Process != nil {
+			return fmt.Sprintf("%d", evt.Data.Process.PID), true
+		}
+		return "", true
+	case "data.process.cmdline", "process.cmdline":
+		if evt.Data.Process != nil {
+			return evt.Data.Process.CmdLine, true
+		}
+		return "", true
+	case "data.process.user", "process.user":
+		if evt.Data.Process != nil {
+			return evt.Data.Process.User, true
+		}
+		return "", true
+	case "data.process.parent.name", "data.process.parent_name", "process.parent.name":
+		if evt.Data.Process != nil && evt.Data.Process.Parent != nil {
+			return evt.Data.Process.Parent.Name, true
+		}
+		return "", true
+	case "data.file.path", "file.path":
+		if evt.Data.File != nil {
+			return evt.Data.File.Path, true
+		}
+		return "", true
+	case "data.file.name", "file.name":
+		if evt.Data.File != nil {
+			return evt.Data.File.Name, true
+		}
+		return "", true
+	case "data.file.extension", "file.extension":
+		if evt.Data.File != nil {
+			return evt.Data.File.Extension, true
+		}
+		return "", true
+	case "data.network.dst_ip", "network.dst_ip":
+		if evt.Data.Network != nil {
+			return evt.Data.Network.DstIP, true
+		}
+		return "", true
+	case "data.network.src_ip", "network.src_ip":
+		if evt.Data.Network != nil {
+			return evt.Data.Network.SrcIP, true
+		}
+		return "", true
+	case "data.network.dst_port", "network.dst_port":
+		if evt.Data.Network != nil {
+			return fmt.Sprintf("%d", evt.Data.Network.DstPort), true
+		}
+		return "", true
+	case "data.network.protocol", "network.protocol":
+		if evt.Data.Network != nil {
+			return evt.Data.Network.Protocol, true
+		}
+		return "", true
+	case "data.registry.key", "registry.key":
+		if evt.Data.Registry != nil {
+			return evt.Data.Registry.Key, true
+		}
+		return "", true
+	case "data.registry.value_name", "registry.value_name":
+		if evt.Data.Registry != nil {
+			return evt.Data.Registry.ValueName, true
+		}
+		return "", true
+	}
+	return "", false
 }
 
 // resolveStructField finds a struct field by its JSON tag or Go field name (case-insensitive).
