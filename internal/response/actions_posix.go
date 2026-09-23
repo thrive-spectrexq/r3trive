@@ -141,14 +141,14 @@ func moveFileByCopy(src, dst string) error {
 func sysIsolateHost(ctx context.Context) error {
 	slog.Info("activating POSIX host isolation with pinhole rules")
 	// Flush and isolate via dedicated chain
-	_ = exec.CommandContext(ctx, "iptables", "-N", "R3TRIVE_ISO").Run()                          // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-F", "R3TRIVE_ISO").Run()                          // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-i", "lo", "-j", "ACCEPT").Run() // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-p", "udp", "--dport", "53", "-j", "ACCEPT").Run() // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-N", "R3TRIVE_ISO").Run()                                                                        // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-F", "R3TRIVE_ISO").Run()                                                                        // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-i", "lo", "-j", "ACCEPT").Run()                                            // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-p", "udp", "--dport", "53", "-j", "ACCEPT").Run()                          // #nosec G204
 	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-m", "conntrack", "--ctstate", "ESTABLISHED,RELATED", "-j", "ACCEPT").Run() // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-j", "DROP").Run()            // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-I", "INPUT", "1", "-j", "R3TRIVE_ISO").Run()      // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-I", "OUTPUT", "1", "-j", "R3TRIVE_ISO").Run()     // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-A", "R3TRIVE_ISO", "-j", "DROP").Run()                                                          // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-I", "INPUT", "1", "-j", "R3TRIVE_ISO").Run()                                                    // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-I", "OUTPUT", "1", "-j", "R3TRIVE_ISO").Run()                                                   // #nosec G204
 	return nil
 }
 
@@ -156,7 +156,7 @@ func sysUnisolateHost(ctx context.Context) error {
 	slog.Info("deactivating POSIX host isolation")
 	_ = exec.CommandContext(ctx, "iptables", "-D", "INPUT", "-j", "R3TRIVE_ISO").Run()  // #nosec G204
 	_ = exec.CommandContext(ctx, "iptables", "-D", "OUTPUT", "-j", "R3TRIVE_ISO").Run() // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-F", "R3TRIVE_ISO").Run()                  // #nosec G204
-	_ = exec.CommandContext(ctx, "iptables", "-X", "R3TRIVE_ISO").Run()                  // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-F", "R3TRIVE_ISO").Run()                 // #nosec G204
+	_ = exec.CommandContext(ctx, "iptables", "-X", "R3TRIVE_ISO").Run()                 // #nosec G204
 	return nil
 }
