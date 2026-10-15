@@ -82,7 +82,7 @@ jobs:
     - name: Install libyara-dev
       run: sudo apt-get update && sudo apt-get install -y libyara-dev pkg-config
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v6
+      uses: golangci/golangci-lint-action@v9
       with:
         version: v1.64.8
         install-mode: "goinstall"
