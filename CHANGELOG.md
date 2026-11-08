@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.12] - 2026-11-08
+
+### Added
+- **Scalable Event Retrieval**: Added deterministic cursor pagination for SQLite and PostgreSQL event queries, with URL-safe cursors, next-page response headers, strict parameter validation, and OpenAPI documentation.
+- **Persistent Alert Operations**: Added storage-backed alert listing, severity/incident/acknowledgement filters, bounded pagination, and durable alert acknowledgement across SQLite and PostgreSQL.
+- **Build Portability**: Made native libyara support opt-in through the `libyara` build tag while retaining the pure-Go fallback for development and test environments.
+
+### Tests
+- Expanded API and storage coverage for cursor pagination, malformed query rejection, alert filtering, and acknowledgement workflows.
+
 ## [0.1.11] - 2026-09-23
 
 ### Added & Architectural Hardening
