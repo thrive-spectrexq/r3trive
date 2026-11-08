@@ -157,6 +157,18 @@ r3trive defend
 r3trive defend --mode active --threshold 80
 ```
 
+### YARA engine options
+
+The default build uses the repository's pure-Go YARA-compatible fallback, so development
+and test environments do not need a system YARA installation. To enable the native
+libyara scanner, install libyara and pkg-config, then build or test with the `libyara`
+build tag:
+
+```bash
+make build YARA_TAGS=libyara
+make test YARA_TAGS=libyara
+```
+
 ### Security Auditing
 Host security baseline assessment.
 

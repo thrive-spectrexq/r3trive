@@ -15,6 +15,7 @@ LDFLAGS := -s -w \
 GO       := go
 GOFLAGS  := -trimpath
 DIST_DIR := dist
+YARA_TAGS ?=
 
 # ─────────────────────────────────────────────────────────────
 # Build
@@ -22,7 +23,7 @@ DIST_DIR := dist
 
 .PHONY: build
 build: ## Build for current platform
-	$(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(DIST_DIR)/$(BINARY) ./cmd/r3trive
+	$(GO) build $(GOFLAGS) $(if $(YARA_TAGS),-tags "$(YARA_TAGS)") -ldflags "$(LDFLAGS)" -o $(DIST_DIR)/$(BINARY) ./cmd/r3trive
 
 .PHONY: install
 install: build ## Install binary to /usr/local/bin
@@ -43,7 +44,7 @@ build-all: ## Cross-compile for all platforms
 
 .PHONY: test
 test: ## Run unit tests
-	$(GO) test -race -count=1 ./...
+	$(GO) test -race -count=1 $(if $(YARA_TAGS),-tags "$(YARA_TAGS)") ./...
 
 .PHONY: test-integration
 test-integration: ## Run integration tests
