@@ -268,6 +268,82 @@ func (s *Store) SaveAlert(ctx context.Context, alert event.Alert) error {
 	return nil
 }
 
+func (s *Store) QueryAlerts(ctx context.Context, q storage.AlertQuery) ([]event.Alert, error) {
+	query := `SELECT id, timestamp, event_id, rule_id, rule_name, severity, confidence, risk_score, message, attack_tactic, attack_technique, acknowledged, incident_id FROM alerts WHERE 1=1`
+	args := []any{}
+	if q.Severity != "" {
+		query += " AND severity = ?"
+		args = append(args, q.Severity)
+	}
+	if q.IncidentID != "" {
+		query += " AND incident_id = ?"
+		args = append(args, q.IncidentID)
+	}
+	if q.Acknowledged != nil {
+		query += " AND acknowledged = ?"
+		value := 0
+		if *q.Acknowledged {
+			value = 1
+		}
+		args = append(args, value)
+	}
+	query += " ORDER BY timestamp DESC, id DESC LIMIT ? OFFSET ?"
+	limit := q.Limit
+	if limit <= 0 {
+		limit = 100
+	} else if limit > 1000 {
+		limit = 1000
+	}
+	offset := q.Offset
+	if offset < 0 {
+		offset = 0
+	}
+	args = append(args, limit, offset)
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("sqlite: query alerts: %w", err)
+	}
+	defer rows.Close()
+	var alerts []event.Alert
+	for rows.Next() {
+		var alert event.Alert
+		var severity string
+		var tactic, technique, incidentID sql.NullString
+		var acknowledged int
+		if err := rows.Scan(&alert.ID, &alert.Timestamp, &alert.Event.ID, &alert.RuleID, &alert.RuleName,
+			&severity, &alert.Confidence, &alert.RiskScore, &alert.Message, &tactic, &technique,
+			&acknowledged, &incidentID); err != nil {
+			return nil, fmt.Errorf("sqlite: scanning alert: %w", err)
+		}
+		alert.Severity = event.Severity(severity)
+		alert.Acknowledged = acknowledged != 0
+		if tactic.Valid {
+			alert.ATTACKTactic = tactic.String
+		}
+		if technique.Valid {
+			alert.ATTACKTechnique = technique.String
+		}
+		if incidentID.Valid {
+			alert.IncidentID = incidentID.String
+		}
+		alerts = append(alerts, alert)
+	}
+	return alerts, rows.Err()
+}
+
+func (s *Store) AcknowledgeAlert(ctx context.Context, id string) error {
+	result, err := s.db.ExecContext(ctx, `UPDATE alerts SET acknowledged = 1 WHERE id = ?`, id)
+	if err != nil {
+		return fmt.Errorf("sqlite: acknowledging alert: %w", err)
+	}
+	affected, _ := result.RowsAffected()
+	if affected == 0 {
+		return fmt.Errorf("sqlite: alert not found: %s", id)
+	}
+	return nil
+}
+
 // SaveIncident persists an incident record.
 func (s *Store) SaveIncident(ctx context.Context, incident event.Incident) error {
 	hostIDsJSON, _ := json.Marshal(incident.HostIDs)

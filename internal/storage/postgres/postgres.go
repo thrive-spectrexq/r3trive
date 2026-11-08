@@ -422,6 +422,90 @@ func (s *Store) SaveAlert(ctx context.Context, alert event.Alert) error {
 	return err
 }
 
+func (s *Store) QueryAlerts(ctx context.Context, q storage.AlertQuery) ([]event.Alert, error) {
+	if s.db == nil {
+		return nil, fmt.Errorf("postgres database connection not active")
+	}
+	clauses := []string{}
+	args := []any{}
+	argID := 1
+	if q.Severity != "" {
+		clauses = append(clauses, fmt.Sprintf("severity = $%d", argID))
+		args = append(args, q.Severity)
+		argID++
+	}
+	if q.IncidentID != "" {
+		clauses = append(clauses, fmt.Sprintf("incident_id = $%d", argID))
+		args = append(args, q.IncidentID)
+		argID++
+	}
+	if q.Acknowledged != nil {
+		clauses = append(clauses, fmt.Sprintf("acknowledged = $%d", argID))
+		args = append(args, *q.Acknowledged)
+		argID++
+	}
+	where := ""
+	if len(clauses) > 0 {
+		where = "WHERE " + strings.Join(clauses, " AND ")
+	}
+	limit := q.Limit
+	if limit <= 0 {
+		limit = 100
+	} else if limit > 1000 {
+		limit = 1000
+	}
+	offset := q.Offset
+	if offset < 0 {
+		offset = 0
+	}
+	query := fmt.Sprintf(`SELECT id, timestamp, event_id, rule_id, rule_name, severity, confidence, risk_score, message, attack_tactic, attack_technique, acknowledged, incident_id
+		FROM alerts %s ORDER BY timestamp DESC, id DESC LIMIT $%d OFFSET $%d`, where, argID, argID+1)
+	args = append(args, limit, offset)
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("querying alerts: %w", err)
+	}
+	defer rows.Close()
+	var alerts []event.Alert
+	for rows.Next() {
+		var alert event.Alert
+		var severity string
+		var tactic, technique, incidentID sql.NullString
+		if err := rows.Scan(&alert.ID, &alert.Timestamp, &alert.Event.ID, &alert.RuleID, &alert.RuleName,
+			&severity, &alert.Confidence, &alert.RiskScore, &alert.Message, &tactic, &technique,
+			&alert.Acknowledged, &incidentID); err != nil {
+			return nil, fmt.Errorf("scanning alert: %w", err)
+		}
+		alert.Severity = event.Severity(severity)
+		if tactic.Valid {
+			alert.ATTACKTactic = tactic.String
+		}
+		if technique.Valid {
+			alert.ATTACKTechnique = technique.String
+		}
+		if incidentID.Valid {
+			alert.IncidentID = incidentID.String
+		}
+		alerts = append(alerts, alert)
+	}
+	return alerts, rows.Err()
+}
+
+func (s *Store) AcknowledgeAlert(ctx context.Context, id string) error {
+	if s.db == nil {
+		return fmt.Errorf("postgres database connection not active")
+	}
+	result, err := s.db.ExecContext(ctx, `UPDATE alerts SET acknowledged = TRUE WHERE id = $1`, id)
+	if err != nil {
+		return fmt.Errorf("acknowledging alert: %w", err)
+	}
+	affected, _ := result.RowsAffected()
+	if affected == 0 {
+		return fmt.Errorf("alert not found: %s", id)
+	}
+	return nil
+}
+
 // SaveIncident persists an incident object.
 func (s *Store) SaveIncident(ctx context.Context, incident event.Incident) error {
 	if s.db == nil {

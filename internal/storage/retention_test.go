@@ -30,6 +30,10 @@ func (m *mockRetentionStore) QueryEvents(ctx context.Context, query EventQuery) 
 	return m.events[query.Offset:end], nil
 }
 func (m *mockRetentionStore) SaveAlert(ctx context.Context, alert event.Alert) error { return nil }
+func (m *mockRetentionStore) QueryAlerts(ctx context.Context, query AlertQuery) ([]event.Alert, error) {
+	return nil, nil
+}
+func (m *mockRetentionStore) AcknowledgeAlert(ctx context.Context, id string) error { return nil }
 func (m *mockRetentionStore) SaveIncident(ctx context.Context, incident event.Incident) error {
 	return nil
 }

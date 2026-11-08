@@ -29,6 +29,15 @@ type EventQuery struct {
 	Cursor string
 }
 
+// AlertQuery specifies filters and bounds for alert retrieval.
+type AlertQuery struct {
+	Severity     string
+	IncidentID   string
+	Acknowledged *bool
+	Limit        int
+	Offset       int
+}
+
 // Host represents a managed endpoint.
 type Host struct {
 	ID        string    `json:"id"`
@@ -87,6 +96,10 @@ type Store interface {
 
 	// SaveAlert persists an alert record.
 	SaveAlert(ctx context.Context, alert event.Alert) error
+	// QueryAlerts retrieves alerts matching the query filters.
+	QueryAlerts(ctx context.Context, query AlertQuery) ([]event.Alert, error)
+	// AcknowledgeAlert marks an alert as acknowledged.
+	AcknowledgeAlert(ctx context.Context, id string) error
 
 	// SaveIncident persists an incident record.
 	SaveIncident(ctx context.Context, incident event.Incident) error

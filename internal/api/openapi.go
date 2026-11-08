@@ -74,6 +74,13 @@ const OpenAPISpecJSON = `{
     "/alerts": {
       "get": {
         "summary": "List generated security alerts",
+        "parameters": [
+          { "name": "severity", "in": "query", "schema": { "type": "string" } },
+          { "name": "incident_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "acknowledged", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 100 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0 } }
+        ],
         "responses": {
           "200": { "description": "Array of alerts" }
         }

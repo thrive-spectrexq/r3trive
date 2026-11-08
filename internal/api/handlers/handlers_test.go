@@ -49,6 +49,10 @@ func (m *mockStore) QueryEvents(ctx context.Context, query storage.EventQuery) (
 	return m.events, nil
 }
 func (m *mockStore) SaveAlert(ctx context.Context, alert event.Alert) error { return m.saveErr }
+func (m *mockStore) QueryAlerts(ctx context.Context, query storage.AlertQuery) ([]event.Alert, error) {
+	return nil, m.saveErr
+}
+func (m *mockStore) AcknowledgeAlert(ctx context.Context, id string) error { return m.saveErr }
 func (m *mockStore) SaveIncident(ctx context.Context, incident event.Incident) error {
 	return m.saveErr
 }
@@ -309,6 +313,20 @@ func TestAlertsHandlers(t *testing.T) {
 	hAck(recAck, reqAck)
 	if recAck.Code != http.StatusOK {
 		t.Errorf("AcknowledgeAlert status = %d, want 200", recAck.Code)
+	}
+
+	reqListFiltered := httptest.NewRequest(http.MethodGet, "/api/v1/alerts?limit=10&acknowledged=true", nil)
+	recListFiltered := httptest.NewRecorder()
+	hList(recListFiltered, reqListFiltered)
+	if recListFiltered.Code != http.StatusOK {
+		t.Errorf("filtered ListAlerts status = %d, want 200", recListFiltered.Code)
+	}
+
+	reqListBad := httptest.NewRequest(http.MethodGet, "/api/v1/alerts?acknowledged=maybe", nil)
+	recListBad := httptest.NewRecorder()
+	hList(recListBad, reqListBad)
+	if recListBad.Code != http.StatusBadRequest {
+		t.Errorf("invalid ListAlerts status = %d, want 400", recListBad.Code)
 	}
 }
 

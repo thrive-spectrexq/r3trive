@@ -22,7 +22,11 @@ func (d *dummyStore) SaveEvents(ctx context.Context, events []event.Event) error
 func (d *dummyStore) QueryEvents(ctx context.Context, query storage.EventQuery) ([]event.Event, error) {
 	return nil, nil
 }
-func (d *dummyStore) SaveAlert(ctx context.Context, alert event.Alert) error          { return nil }
+func (d *dummyStore) SaveAlert(ctx context.Context, alert event.Alert) error { return nil }
+func (d *dummyStore) QueryAlerts(ctx context.Context, query storage.AlertQuery) ([]event.Alert, error) {
+	return nil, nil
+}
+func (d *dummyStore) AcknowledgeAlert(ctx context.Context, id string) error           { return nil }
 func (d *dummyStore) SaveIncident(ctx context.Context, incident event.Incident) error { return nil }
 func (d *dummyStore) GetIncident(ctx context.Context, id string) (event.Incident, error) {
 	return event.Incident{}, nil

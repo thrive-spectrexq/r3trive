@@ -224,3 +224,37 @@ func TestSQLiteQueryEventsCursor(t *testing.T) {
 		t.Fatalf("second page = %#v, want evt-1", second)
 	}
 }
+
+func TestSQLiteAlertsQueryAndAcknowledge(t *testing.T) {
+	store, err := New(filepath.Join(t.TempDir(), "alerts_test.db"))
+	if err != nil {
+		t.Fatalf("failed to create sqlite store: %v", err)
+	}
+	defer store.Close()
+
+	ctx := context.Background()
+	evt := event.Event{ID: "evt-alert", Timestamp: time.Now().UTC(), Type: event.ProcessCreate}
+	if err := store.SaveEvent(ctx, evt); err != nil {
+		t.Fatalf("SaveEvent() error = %v", err)
+	}
+	alert := event.Alert{
+		ID: "alert-1", Timestamp: evt.Timestamp, Event: evt, RuleID: "rule-1",
+		RuleName: "Test", Severity: event.SeverityHigh, Message: "test alert",
+	}
+	if err := store.SaveAlert(ctx, alert); err != nil {
+		t.Fatalf("SaveAlert() error = %v", err)
+	}
+	acknowledged := false
+	alerts, err := store.QueryAlerts(ctx, storage.AlertQuery{Acknowledged: &acknowledged})
+	if err != nil || len(alerts) != 1 || alerts[0].ID != alert.ID {
+		t.Fatalf("QueryAlerts() = %#v, error = %v", alerts, err)
+	}
+	if err := store.AcknowledgeAlert(ctx, alert.ID); err != nil {
+		t.Fatalf("AcknowledgeAlert() error = %v", err)
+	}
+	acknowledged = true
+	alerts, err = store.QueryAlerts(ctx, storage.AlertQuery{Acknowledged: &acknowledged})
+	if err != nil || len(alerts) != 1 || !alerts[0].Acknowledged {
+		t.Fatalf("acknowledged QueryAlerts() = %#v, error = %v", alerts, err)
+	}
+}
