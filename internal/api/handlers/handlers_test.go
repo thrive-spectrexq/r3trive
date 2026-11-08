@@ -247,6 +247,48 @@ func TestEventsHandlers(t *testing.T) {
 	}
 }
 
+func TestQueryEventsPaginationValidation(t *testing.T) {
+	handler := QueryEvents(&mockStore{events: []event.Event{
+		{ID: "evt-1", Timestamp: time.Now().UTC()},
+	}})
+
+	for _, test := range []struct {
+		name string
+		url  string
+		code int
+	}{
+		{"limit too large", "/api/v1/events?limit=1001", http.StatusBadRequest},
+		{"limit not numeric", "/api/v1/events?limit=many", http.StatusBadRequest},
+		{"negative offset", "/api/v1/events?offset=-1", http.StatusBadRequest},
+		{"offset not numeric", "/api/v1/events?offset=many", http.StatusBadRequest},
+		{"invalid since", "/api/v1/events?since=yesterday", http.StatusBadRequest},
+		{"invalid cursor", "/api/v1/events?cursor=invalid", http.StatusBadRequest},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			handler(rec, httptest.NewRequest(http.MethodGet, test.url, nil))
+			if rec.Code != test.code {
+				t.Fatalf("status = %d, want %d", rec.Code, test.code)
+			}
+		})
+	}
+}
+
+func TestQueryEventsNextCursorHeader(t *testing.T) {
+	events := []event.Event{
+		{ID: "evt-1", Timestamp: time.Now().UTC()},
+	}
+	rec := httptest.NewRecorder()
+	QueryEvents(&mockStore{events: events})(rec, httptest.NewRequest(http.MethodGet, "/api/v1/events?limit=1", nil))
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	if rec.Header().Get("X-Next-Cursor") == "" || rec.Header().Get("Link") == "" {
+		t.Fatalf("expected pagination headers, got %v", rec.Header())
+	}
+}
+
 func TestAlertsHandlers(t *testing.T) {
 	store := &mockStore{}
 

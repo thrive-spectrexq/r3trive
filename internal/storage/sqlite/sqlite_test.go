@@ -156,6 +156,7 @@ func TestSQLiteQueryEventsBounds(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create sqlite store: %v", err)
 	}
+
 	defer store.Close()
 
 	ctx := context.Background()
@@ -190,5 +191,36 @@ func TestSQLiteQueryEventsBounds(t *testing.T) {
 	}
 	if len(results120) != 120 {
 		t.Errorf("expected 120 events, got %d", len(results120))
+	}
+}
+
+func TestSQLiteQueryEventsCursor(t *testing.T) {
+	store, err := New(filepath.Join(t.TempDir(), "cursor_test.db"))
+	if err != nil {
+		t.Fatalf("failed to create sqlite store: %v", err)
+	}
+	defer store.Close()
+
+	now := time.Now().UTC().Truncate(time.Microsecond)
+	events := []event.Event{
+		{ID: "evt-3", Timestamp: now.Add(2 * time.Minute), Type: event.ProcessCreate},
+		{ID: "evt-2", Timestamp: now.Add(time.Minute), Type: event.ProcessCreate},
+		{ID: "evt-1", Timestamp: now, Type: event.ProcessCreate},
+	}
+	if err := store.SaveEvents(context.Background(), events); err != nil {
+		t.Fatalf("SaveEvents() error = %v", err)
+	}
+
+	first, err := store.QueryEvents(context.Background(), storage.EventQuery{Limit: 2})
+	if err != nil || len(first) != 2 {
+		t.Fatalf("first page = %#v, error = %v", first, err)
+	}
+	cursor := storage.EncodeEventCursor(first[len(first)-1].Timestamp, first[len(first)-1].ID)
+	second, err := store.QueryEvents(context.Background(), storage.EventQuery{Limit: 2, Cursor: cursor})
+	if err != nil {
+		t.Fatalf("second page error = %v", err)
+	}
+	if len(second) != 1 || second[0].ID != "evt-1" {
+		t.Fatalf("second page = %#v, want evt-1", second)
 	}
 }

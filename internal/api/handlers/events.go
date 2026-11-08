@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -21,18 +22,63 @@ func QueryEvents(store storage.Store) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 
-		limit, _ := strconv.Atoi(q.Get("limit"))
+		limit := 50
+		if rawLimit := q.Get("limit"); rawLimit != "" {
+			var err error
+			limit, err = strconv.Atoi(rawLimit)
+			if err != nil {
+				WriteError(w, http.StatusBadRequest, "invalid_limit", "limit must be an integer")
+				return
+			}
+		}
+		offset := 0
+		if rawOffset := q.Get("offset"); rawOffset != "" {
+			var err error
+			offset, err = strconv.Atoi(rawOffset)
+			if err != nil {
+				WriteError(w, http.StatusBadRequest, "invalid_offset", "offset must be an integer")
+				return
+			}
+		}
 		if limit == 0 {
 			limit = 50
 		}
-		offset, _ := strconv.Atoi(q.Get("offset"))
+		if limit < 1 || limit > 1000 {
+			WriteError(w, http.StatusBadRequest, "invalid_limit", "limit must be between 1 and 1000")
+			return
+		}
+		if offset < 0 {
+			WriteError(w, http.StatusBadRequest, "invalid_offset", "offset must be non-negative")
+			return
+		}
+		cursor := q.Get("cursor")
+		if cursor != "" {
+			if _, _, err := storage.DecodeEventCursor(cursor); err != nil {
+				WriteError(w, http.StatusBadRequest, "invalid_cursor", "cursor is invalid")
+				return
+			}
+			if offset != 0 {
+				WriteError(w, http.StatusBadRequest, "invalid_pagination", "cursor and offset cannot be used together")
+				return
+			}
+		}
 
 		var since, until time.Time
 		if s := q.Get("since"); s != "" {
-			since, _ = time.Parse(time.RFC3339, s)
+			var err error
+			since, err = time.Parse(time.RFC3339, s)
+			if err != nil {
+				WriteError(w, http.StatusBadRequest, "invalid_since", "since must be an RFC3339 timestamp")
+				return
+			}
 		}
 		if u := q.Get("until"); u != "" {
-			until, _ = time.Parse(time.RFC3339, u)
+			var err error
+			until, err = time.Parse(time.RFC3339, u)
+			if err != nil {
+				WriteError(w, http.StatusBadRequest, "invalid_until", "until must be an RFC3339 timestamp")
+				return
+			}
 		}
 
 		query := storage.EventQuery{
@@ -43,6 +89,7 @@ func QueryEvents(store storage.Store) http.HandlerFunc {
 			Until:    until,
 			Limit:    limit,
 			Offset:   offset,
+			Cursor:   cursor,
 		}
 
 		events, err := store.QueryEvents(r.Context(), query)
@@ -61,6 +108,12 @@ func QueryEvents(store storage.Store) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		if len(events) == limit {
+			last := events[len(events)-1]
+			nextCursor := storage.EncodeEventCursor(last.Timestamp, last.ID)
+			w.Header().Set("X-Next-Cursor", nextCursor)
+			w.Header().Set("Link", fmt.Sprintf(`</api/v1/events?limit=%d&cursor=%s>; rel="next"`, limit, url.QueryEscape(nextCursor)))
+		}
 		if err := json.NewEncoder(w).Encode(events); err != nil {
 			slog.Error("failed to encode response", "error", err)
 		}

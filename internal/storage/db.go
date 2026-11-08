@@ -25,6 +25,8 @@ type EventQuery struct {
 	Limit int
 	// Offset for pagination.
 	Offset int
+	// Cursor continues a previous descending timestamp/id page.
+	Cursor string
 }
 
 // Host represents a managed endpoint.

@@ -171,8 +171,16 @@ func (s *Store) QueryEvents(ctx context.Context, q storage.EventQuery) ([]event.
 		query += " AND timestamp <= ?"
 		args = append(args, q.Until)
 	}
+	if q.Cursor != "" {
+		cursorTimestamp, cursorID, err := storage.DecodeEventCursor(q.Cursor)
+		if err != nil {
+			return nil, fmt.Errorf("sqlite: %w", err)
+		}
+		query += " AND (timestamp < ? OR (timestamp = ? AND id < ?))"
+		args = append(args, cursorTimestamp, cursorTimestamp, cursorID)
+	}
 
-	query += " ORDER BY timestamp DESC"
+	query += " ORDER BY timestamp DESC, id DESC"
 
 	limit := q.Limit
 	if limit <= 0 {

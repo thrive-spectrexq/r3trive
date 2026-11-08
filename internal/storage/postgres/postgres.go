@@ -328,6 +328,15 @@ func (s *Store) QueryEvents(ctx context.Context, query storage.EventQuery) ([]ev
 		args = append(args, query.Until.UTC())
 		argID++
 	}
+	if query.Cursor != "" {
+		cursorTimestamp, cursorID, err := storage.DecodeEventCursor(query.Cursor)
+		if err != nil {
+			return nil, fmt.Errorf("postgres: %w", err)
+		}
+		clauses = append(clauses, fmt.Sprintf("(timestamp < $%d OR (timestamp = $%d AND id < $%d))", argID, argID, argID+1))
+		args = append(args, cursorTimestamp, cursorID)
+		argID += 2
+	}
 
 	whereClause := ""
 	if len(clauses) > 0 {
@@ -343,7 +352,7 @@ func (s *Store) QueryEvents(ctx context.Context, query storage.EventQuery) ([]ev
 
 	sqlStr := fmt.Sprintf(`
 		SELECT id, timestamp, host_id, hostname, type, severity, sensor, data, enrichments, chain_hash
-		FROM events %s ORDER BY timestamp DESC LIMIT $%d
+		FROM events %s ORDER BY timestamp DESC, id DESC LIMIT $%d
 	`, whereClause, argID)
 	args = append(args, limit)
 

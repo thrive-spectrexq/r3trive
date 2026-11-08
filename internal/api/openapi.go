@@ -58,7 +58,13 @@ const OpenAPISpecJSON = `{
         "summary": "Query observable telemetry events",
         "parameters": [
           { "name": "type", "in": "query", "schema": { "type": "string" } },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 100 } }
+          { "name": "severity", "in": "query", "schema": { "type": "string" } },
+          { "name": "host_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "until", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 50 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "minimum": 0 } },
+          { "name": "cursor", "in": "query", "description": "Opaque cursor returned in X-Next-Cursor; mutually exclusive with offset.", "schema": { "type": "string" } }
         ],
         "responses": {
           "200": { "description": "List of matched events" }
